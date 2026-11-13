@@ -51,3 +51,23 @@ In accordance with Section 9 of Prompt 02, an analysis of potential conflicts, a
 | **Ambiguity Analysis** | "Counterfactual Optimization" producing biologically impossible advice. | Unconstrained optimization can recommend reducing age or dropping blood pressure to lethal levels. | **Strictly Resolved:** Enforced in `REQ-CF-01` that Age, Sex, and Anatomy are strictly immutable ($\delta=0$) and modifiable markers are bounded by safe clinical floors. |
 | **Missing Gap Analysis** | Model Integrity & Tamper Detection. | Original proposal lacked mechanisms to detect if model files were altered or swapped. | **Strictly Resolved:** Added `REQ-MLM-01` verifying model SHA-256 checksum at boot and logging exact model version in every inference record. |
 | **Missing Gap Analysis** | Right to Erasure / GDPR Compliance. | Original proposal lacked account deletion and data portability mechanisms. | **Strictly Resolved:** Added `REQ-PRIV-02` providing complete cryptographic account deletion and JSON health data export. |
+
+---
+
+## 4. Review-II Presentation UML & Architecture Traceability Mapping
+
+This section explicitly maps every class, component, and workflow from the official ANITS Review-II presentation (`HXAI-REF-001`) to the production-grade HeartXAI 2.0 architectural entities and functional requirements:
+
+| Review-II Class / Diagram Entity | Review-II Responsibilities | HeartXAI 2.0 Architectural Mapping | Corresponding Functional Req IDs |
+| :--- | :--- | :--- | :--- |
+| **`Patient` Class** | `patientId`, `name`, `age`, `email`, `password`; `register()`, `login()`, `enterHealthData()`, `viewResults()` | Mapped to `User` entity (`role="PATIENT"`) + `PatientProfile` (demographic baseline) | **REQ-AUTH-01**, **REQ-AUTH-02**, **REQ-PROF-01**, **REQ-ASSESS-01** |
+| **`MLModel` Class** | `modelName`, `algorithm`, `version`; `preprocessData()`, `predictRisk()` | Mapped to `model_registry` entity, `StandardScaler` pipeline, and calibrated XGBoost / HistGradientBoosting engine | **REQ-ML-01**, **REQ-ML-02**, **REQ-MLM-01** |
+| **`Prediction` Class** | `predictionId`, `riskLevel`, `probability`, `date`; `getRiskLevel()`, `getProbability()` | Mapped to `inference_results` entity, featuring dual-target separation (CAD presence vs 10-Yr ASCVD) | **REQ-ML-01**, **REQ-ML-02**, **REQ-UNCERT-01** |
+| **`Explanation` Class** | `explanationId`, `importantFactors`, `shapValues`; `generateSHAPExplanation()`, `getInsights()` | Mapped to `shap_explanations` entity, exact TreeSHAP C++ engine, and deterministic plain-language translation | **REQ-SHAP-01**, **REQ-SHAP-02** |
+| **`CounterfactualAnalysis` Class**| `analysisId`, `originalRisk`, `suggestedChanges`, `newRisk`; `generateCounterfactual()`, `compareRisk()` | Mapped to `counterfactual_profiles` entity and constrained L1-norm optimization engine locking immutable traits | **REQ-CF-01**, **REQ-CF-02** |
+| **`MedicalAssistance` Class** | `assistanceId`, `dietPlan`, `exerciseTips`, `lifestyleGuidance`; `getDietPlan()`, `getExerciseTips()` | Mapped to `educational_resources` entity with curated, guideline-traceable cardiovascular advice | **REQ-EDU-01** |
+| **`DoctorConsultation` Class** | `doctorId`, `doctorName`, `specialization`, `hospitalName`, `contactNumber`, `location`; CRUD methods | Mapped to `doctors` directory entity, patient consent gates (`patient_doctor_grants`), and clinical review notes | **REQ-DOC-01**, **REQ-PRIV-01**, **REQ-REP-01** |
+| **`HealthInsurance` Class** | `insuranceId`, `providerName`, `policyName`, `coverage`, `premium`, `waitingPeriod`, `exclusions`; CRUD methods | Mapped to `insurance_guides` entity, ACA preventative coverage rules, and diagnostic cost estimator | **REQ-INS-01**, **REQ-DIR-01** |
+| **`AssessmentHistory` Class** | `historyId`, `predictionDate`, `riskLevel`, `notes`; `saveRecord()`, `getHistory()` | Mapped to `assessments` entity, longitudinal time-series analytics, and delta comparison engine | **REQ-HIST-01** |
+| **`Admin` Class** | `adminId`, `name`, `email`, `password`; `login()`, `accessDashboard()`, `manageDoctors()`, `manageInsurance()` | Mapped to `User` entity (`role="ADMIN"`), system governance center, and directory CRUD router | **REQ-ADMIN-01**, **REQ-ADMIN-02**, **REQ-DIR-01**, **REQ-AUD-01** |
+
