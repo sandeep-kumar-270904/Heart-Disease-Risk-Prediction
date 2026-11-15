@@ -1,0 +1,36 @@
+@startuml uml_sequence_admin_management
+autonumber
+skinparam responseMessageBelowArrow true
+
+actor "Admin (Elena)" as Admin
+participant "SPA Client (React/TS)" as SPA
+participant "API Gateway (FastAPI)" as API
+participant "Admin Controller" as Ctrl
+participant "PostgreSQL DB" as DB
+participant "Audit Logger" as Audit
+
+== Part 1: Clinician Credential Approval ==
+Admin -> SPA: Navigates to "/admin/clinicians/pending"\nReviews Dr. Sarah Lin (License #A142981)\nClicks "Approve Clinician"
+SPA -> API: POST /api/v1/admin/clinicians/{id}/verify (decision="APPROVED")
+
+API -> Ctrl: Verify role == "ADMIN"
+Ctrl -> DB: UPDATE users SET clinician_status = 'VERIFIED' WHERE id = :id
+DB -->> Ctrl: Updated
+Ctrl -> Audit: Log CLINICIAN_APPROVED (admin_id, doctor_id)
+Audit -> DB: INSERT INTO audit_logs
+
+Ctrl -->> API: HTTP 200 OK (Verification Success)
+API -->> SPA: Toast: "Clinician successfully verified"
+
+== Part 2: Audit Trail Exploration ==
+Admin -> SPA: Navigates to "/admin/audit"\nFilters by action_type="CLINICIAN_RECORD_ACCESSED"
+SPA -> API: GET /api/v1/admin/audit/logs?action_type=CLINICIAN_RECORD_ACCESSED&limit=50
+
+API -> Ctrl: Verify role == "ADMIN"
+Ctrl -> DB: SELECT * FROM audit_logs WHERE action_type = 'CLINICIAN_RECORD_ACCESSED' ORDER BY timestamp DESC LIMIT 50
+DB -->> Ctrl: List of immutable log records
+
+Ctrl -->> API: HTTP 200 OK (Audit Records Array)
+API -->> SPA: Renders paginated audit log table with timestamps, IP addresses, and user IDs
+
+@enduml

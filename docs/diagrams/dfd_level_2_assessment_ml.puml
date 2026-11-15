@@ -1,0 +1,50 @@
+@startuml dfd_level_2_assessment_ml
+title Level 2 Data Flow Diagram: Assessment & Explainability Subsystem (Process 3.0 & 4.0)
+
+skinparam monochrome false
+
+actor "Patient" as Patient
+rectangle "3.1 Range & Enum Validator" as P31
+rectangle "3.2 Out-of-Distribution (OOD) Detector" as P32
+rectangle "3.3 Feature Standardizer (StandardScaler)" as P33
+rectangle "3.4 Calibrated XGBoost Inference" as P34
+rectangle "3.5 ACC/AHA 10-Yr ASCVD Calculator" as P35
+rectangle "4.1 TreeSHAP Local Attributor" as P41
+rectangle "4.2 Mathematical Invariance Asserter" as P42
+rectangle "4.3 Plain-Language Generator" as P43
+rectangle "4.4 Constrained Counterfactual Solver" as P44
+
+database "D2: Assessments" as D2
+database "D3: Inferences & Explanations" as D3
+file "Model Artifact File" as ModelFile
+
+Patient --> P31 : 13 Raw Biomarkers
+P31 --> D2 : Persist Validated Intake Vector
+P31 --> P32 : Pass Validated Vector
+
+P32 --> P33 : Verified Within Clinical Bounds
+P32 --> D3 : Record OOD Flag & Uncertainty CI
+
+P33 <-- ModelFile : Training Scaler Mean & Scale (mu, sigma)
+P33 --> P34 : Normalized Feature Vector z
+
+P34 <-- ModelFile : Trained & Calibrated XGBoost Pipeline
+P34 --> D3 : Record CAD Probability P(CAD >= 50%) & Risk Tier
+P34 --> P41 : Raw Decision Margin f(x)
+
+P31 --> P35 : Demographics & Hemodynamics (Age, Sex, BP, Chol, FBS)
+P35 --> D3 : Record 10-Year ASCVD Risk % & ACC/AHA Tier
+
+P41 <-- ModelFile : Tree Ensemble Structure
+P41 --> P42 : Local Shapley Values phi_1 ... phi_13 & E[f(x)]
+P42 --> P42 : Assert |f(x) - (E + sum(phi))| <= 10^-5
+P42 --> D3 : Persist 13 Ranked SHAP Attributions
+P42 --> P43 : Ranked Features
+P43 --> Patient : Deliver Plain-Language Summary Bullets
+
+Patient --> P44 : Interactive What-If Adjustments & Target Threshold
+P44 --> P34 : Evaluate Candidate Perturbed Vector P(x + delta)
+P44 --> D3 : Record Counterfactual Profile & Lifestyle Targets
+P44 --> Patient : Deliver Projected Risk Reduction
+
+@enduml

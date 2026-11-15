@@ -1,0 +1,66 @@
+@startuml uml_activity_patient
+title Patient Assessment & Explainability Activity Diagram
+
+|Patient|
+start
+:Open HeartXAI Application;
+if (Registered?) then (no)
+    :Complete Registration Form;
+    :Accept Non-Diagnostic Disclaimer;
+    :Account Created;
+else (yes)
+endif
+
+:Enter Email & Password;
+:Login & Obtain Session;
+
+:Navigate to "New Health Assessment";
+:Enter Demographics (Age, Sex, Chest Pain);
+:Enter Vitals (Resting BP, Max HR, Angina);
+:Enter Diagnostics (Chol, FBS, ECG, Fluoroscopy, Thal);
+:Submit 13 Biomarkers;
+
+|System Backend|
+:Validate Biomarker Ranges & Enums;
+if (Valid?) then (no)
+    :Return HTTP 422 with Field Errors;
+    |Patient|
+    :Correct Out-of-Bounds Values;
+    |System Backend|
+else (yes)
+endif
+
+:Preprocess Features via StandardScaler;
+:Execute Calibrated XGBoost Model -> CAD Probability;
+:Execute ACC/AHA Equations -> 10-Yr ASCVD Risk;
+:Compute Exact TreeSHAP Local Attributions;
+:Assert Additivity Invariance (|f(x) - (E + sum(phi))| <= 10^-5);
+:Persist Assessment, Inference & SHAP Records in DB;
+:Log Assessment Event in Audit Trail;
+
+|Patient|
+:View Results Dashboard;
+:Inspect Dual Risk Dials (CAD % & ASCVD 10-Yr %);
+:Inspect TreeSHAP Waterfall Chart & Plain-Language Insights;
+
+fork
+    :Open Counterfactual Simulator;
+    :Drag Modifiable Sliders (BP, Chol);
+    |System Backend|
+    :Execute Constrained L1 Solver (Lock Age/Sex);
+    :Return Projected Risk Reduction;
+    |Patient|
+    :Review Feasible Lifestyle Targets;
+fork again
+    :Explore Personalized Health Guidance;
+    :Read Accredited ACC/AHA Guidelines;
+fork again
+    :Search Local Cardiologists & Hospitals;
+    :Grant Time-Bounded Doctor Access;
+fork again
+    :Download 1-Page Clinical Briefing (PDF/JSON);
+end fork
+
+:Save Assessment to Longitudinal History;
+stop
+@enduml

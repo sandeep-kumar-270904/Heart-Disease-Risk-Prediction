@@ -1,0 +1,26 @@
+@startuml uml_sequence_history
+autonumber
+skinparam responseMessageBelowArrow true
+
+actor "Patient (Marcus)" as Patient
+participant "SPA Client (React/TS)" as SPA
+participant "API Gateway (FastAPI)" as API
+participant "Assessment Controller" as Ctrl
+participant "PostgreSQL DB" as DB
+
+Patient -> SPA: Navigates to "/history" tab
+SPA -> API: GET /api/v1/assessments/history (HttpOnly JWT cookie)
+
+API -> Ctrl: Verify session (current_user.id)
+Ctrl -> DB: SELECT a.*, ir.cad_probability, ir.ascvd_10yr_risk \nFROM assessments a \nJOIN inference_results ir ON a.id = ir.assessment_id \nWHERE a.patient_id = :user_id \nORDER BY a.created_at ASC
+
+DB -->> Ctrl: Chronological list of assessment records + inference outputs
+Ctrl -> Ctrl: Compute sequential biomarker deltas between checkups\n(e.g. BP delta: 158 -> 132 = -26 mmHg)
+
+Ctrl -->> API: Formatted time-series payload
+API -->> SPA: HTTP 200 OK (Array of chronological assessment telemetry & deltas)
+
+SPA -> SPA: Renders multi-series time-series chart (CAD Risk, Systolic BP, Cholesterol)
+SPA -->> Patient: Displays visual trend trajectory, delta badges, and milestone dots
+
+@enduml

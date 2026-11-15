@@ -1,0 +1,66 @@
+@startuml uml_sequence_registration_login
+autonumber
+skinparam responseMessageBelowArrow true
+
+actor "User" as User
+participant "SPA Client (React/TS)" as SPA
+participant "API Gateway (FastAPI)" as API
+participant "Auth Service" as Auth
+participant "Bcrypt Engine" as Bcrypt
+participant "JWT Signer" as JWT
+participant "PostgreSQL DB" as DB
+participant "Audit Logger" as Audit
+
+== Part 1: Registration ==
+User -> SPA: Fills registration form (email, password, role, consent)\nClicks "Create Account"
+SPA -> API: POST /api/v1/auth/register (email, password, full_name, role)
+
+API -> Auth: register_user(payload)
+Auth -> DB: SELECT * FROM users WHERE email = :email
+alt Email Already Exists
+    DB -->> Auth: User record found
+    Auth -->> API: Raise DuplicateEmailException (409)
+    API -->> SPA: HTTP 409 Conflict ("Email already registered")
+else Email Unique
+    DB -->> Auth: None found
+    Auth -> Bcrypt: hash_password(password, rounds=12)
+    Bcrypt -->> Auth: Hashed string ($2b$12$...)
+    Auth -> DB: INSERT INTO users (email, hashed_password, role, clinician_status)
+    DB -->> Auth: User record created
+    Auth -> Audit: Log USER_REGISTERED (user_id, role)
+    Auth -->> API: User summary object
+    API -->> SPA: HTTP 201 Created (User Profile)
+    SPA -->> User: Registration successful; prompts to log in or auto-redirects
+end
+
+== Part 2: Login & HttpOnly Session Issuance ==
+User -> SPA: Enters email and password\nClicks "Log In"
+SPA -> API: POST /api/v1/auth/login (email, password)
+
+API -> Auth: authenticate_user(email, password)
+Auth -> DB: SELECT * FROM users WHERE email = :email
+alt User Not Found or Inactive
+    DB -->> Auth: None
+    Auth -> Bcrypt: hash_password("dummy") (prevents timing attacks)
+    Auth -->> API: Raise InvalidCredentialsException (401)
+    API -->> SPA: HTTP 401 Unauthorized ("Invalid email or password")
+else User Found
+    DB -->> Auth: User record with stored hash
+    Auth -> Bcrypt: verify_password(plain, stored_hash)
+    alt Password Invalid
+        Bcrypt -->> Auth: False
+        Auth -->> API: Raise InvalidCredentialsException (401)
+        API -->> SPA: HTTP 401 Unauthorized
+    else Password Valid
+        Bcrypt -->> Auth: True
+        Auth -> JWT: create_access_token(sub=user.id, role=user.role, exp=60m)
+        JWT -->> Auth: Signed JWT string
+        Auth -> DB: UPDATE users SET last_login_at = NOW()
+        Auth -> Audit: Log LOGIN_SUCCESS (user_id, ip_address)
+        Auth -->> API: User profile object + JWT
+        API -->> SPA: HTTP 200 OK + Set-Cookie: access_token=...; HttpOnly; Secure; SameSite=Strict
+        SPA -->> User: Sets client auth context; routes to role-specific dashboard
+    end
+end
+
+@enduml

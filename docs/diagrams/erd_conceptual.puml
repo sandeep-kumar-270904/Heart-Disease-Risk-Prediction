@@ -1,0 +1,225 @@
+@startuml erd_conceptual
+title Conceptual Entity-Relationship Diagram (HeartXAI 2.0)
+
+skinparam linetype ortho
+skinparam monochrome false
+
+entity "users" as users {
+    * id : VARCHAR(36) [PK]
+    --
+    * email : VARCHAR(255) [UK, IDX]
+    * hashed_password : VARCHAR(255)
+    * full_name : VARCHAR(255)
+    * role : VARCHAR(32) [IDX]
+    * clinician_status : VARCHAR(32)
+    * is_active : BOOLEAN
+    last_login_at : TIMESTAMP
+    * created_at : TIMESTAMP
+    * updated_at : TIMESTAMP
+}
+
+entity "patient_profiles" as patient_profiles {
+    * id : VARCHAR(36) [PK]
+    --
+    * patient_id : VARCHAR(36) [FK, UK, IDX]
+    date_of_birth : DATE
+    biological_sex : VARCHAR(16)
+    * preferred_units : VARCHAR(16)
+    emergency_contact_name : VARCHAR(255)
+    emergency_contact_phone : VARCHAR(64)
+    * created_at : TIMESTAMP
+    * updated_at : TIMESTAMP
+}
+
+entity "assessments" as assessments {
+    * id : VARCHAR(36) [PK]
+    --
+    * patient_id : VARCHAR(36) [FK, IDX]
+    clinician_id : VARCHAR(36) [FK, IDX]
+    * status : VARCHAR(32)
+    * age : INTEGER
+    * sex : INTEGER
+    * cp : INTEGER
+    * trestbps : INTEGER
+    * chol : INTEGER
+    * fbs : INTEGER
+    * restecg : INTEGER
+    * thalach : INTEGER
+    * exang : INTEGER
+    * oldpeak : FLOAT
+    * slope : INTEGER
+    * ca : INTEGER
+    * thal : INTEGER
+    * created_at : TIMESTAMP [IDX]
+    * updated_at : TIMESTAMP
+}
+
+entity "inference_results" as inference_results {
+    * id : VARCHAR(36) [PK]
+    --
+    * assessment_id : VARCHAR(36) [FK, UK, IDX]
+    * model_version : VARCHAR(32)
+    * cad_probability : FLOAT
+    * cad_risk_tier : VARCHAR(32)
+    * confidence_interval_low : FLOAT
+    * confidence_interval_high : FLOAT
+    * ascvd_10yr_risk : FLOAT
+    * ascvd_risk_tier : VARCHAR(32)
+    * base_expected_value : FLOAT
+    * raw_decision_margin : FLOAT
+    * is_out_of_distribution : BOOLEAN
+    * computed_at : TIMESTAMP
+}
+
+entity "shap_explanations" as shap_explanations {
+    * id : VARCHAR(36) [PK]
+    --
+    * inference_id : VARCHAR(36) [FK, IDX]
+    * feature_name : VARCHAR(32)
+    * feature_value : FLOAT
+    * shap_value : FLOAT
+    * rank_importance : INTEGER [IDX]
+    * directional_impact : VARCHAR(32)
+    * clinical_interpretation : VARCHAR(512)
+}
+
+entity "counterfactual_profiles" as counterfactual_profiles {
+    * id : VARCHAR(36) [PK]
+    --
+    * inference_id : VARCHAR(36) [FK, IDX]
+    * target_risk_threshold : FLOAT
+    * achieved_risk_probability : FLOAT
+    * modified_biomarkers : JSON
+    * immutable_biomarkers : JSON
+    * l1_normalized_distance : FLOAT
+    * feasibility_rating : VARCHAR(32)
+    * created_at : TIMESTAMP
+}
+
+entity "patient_doctor_grants" as patient_doctor_grants {
+    * id : VARCHAR(36) [PK]
+    --
+    * patient_id : VARCHAR(36) [FK, IDX]
+    * doctor_id : VARCHAR(36) [FK, IDX]
+    access_code : VARCHAR(64)
+    * status : VARCHAR(32) [IDX]
+    * granted_at : TIMESTAMP
+    * expires_at : TIMESTAMP
+    revoked_at : TIMESTAMP
+    * created_at : TIMESTAMP
+    * updated_at : TIMESTAMP
+}
+
+entity "clinical_notes" as clinical_notes {
+    * id : VARCHAR(36) [PK]
+    --
+    * assessment_id : VARCHAR(36) [FK, IDX]
+    * author_id : VARCHAR(36) [FK, IDX]
+    * note_content : TEXT
+    * signoff_status : VARCHAR(32)
+    signed_at : TIMESTAMP
+    * created_at : TIMESTAMP
+    * updated_at : TIMESTAMP
+}
+
+entity "doctors" as doctors {
+    * id : VARCHAR(36) [PK]
+    --
+    * doctor_name : VARCHAR(255)
+    * specialization : VARCHAR(128) [IDX]
+    * hospital_name : VARCHAR(255)
+    * contact_number : VARCHAR(64)
+    * location : VARCHAR(255) [IDX]
+    email : VARCHAR(255)
+    * telehealth_available : BOOLEAN
+    * is_active : BOOLEAN
+    * created_at : TIMESTAMP
+    * updated_at : TIMESTAMP
+}
+
+entity "hospitals" as hospitals {
+    * id : VARCHAR(36) [PK]
+    --
+    * hospital_name : VARCHAR(255)
+    * facility_type : VARCHAR(128) [IDX]
+    * emergency_phone : VARCHAR(64)
+    * address : VARCHAR(255)
+    * city : VARCHAR(128) [IDX]
+    * state : VARCHAR(64)
+    * accreditation_details : VARCHAR(255)
+    * has_247_cath_lab : BOOLEAN
+    * is_active : BOOLEAN
+    * created_at : TIMESTAMP
+    * updated_at : TIMESTAMP
+}
+
+entity "insurance_policies" as insurance_policies {
+    * id : VARCHAR(36) [PK]
+    --
+    * provider_name : VARCHAR(255)
+    * policy_name : VARCHAR(255)
+    * coverage_summary : TEXT
+    monthly_premium_est : FLOAT
+    * waiting_period_days : INTEGER
+    * exclusions_summary : TEXT
+    * is_active : BOOLEAN
+    * created_at : TIMESTAMP
+    * updated_at : TIMESTAMP
+}
+
+entity "educational_resources" as educational_resources {
+    * id : VARCHAR(36) [PK]
+    --
+    * title : VARCHAR(255)
+    * biomarker_code : VARCHAR(32) [IDX]
+    * summary : VARCHAR(512)
+    * guideline_source : VARCHAR(255)
+    * diet_plan_summary : TEXT
+    * exercise_tips_summary : TEXT
+    * lifestyle_guidance : TEXT
+    * is_active : BOOLEAN
+    * created_at : TIMESTAMP
+    * updated_at : TIMESTAMP
+}
+
+entity "audit_logs" as audit_logs {
+    * id : VARCHAR(36) [PK]
+    --
+    * timestamp : TIMESTAMP [IDX]
+    user_id : VARCHAR(36) [IDX]
+    * role : VARCHAR(32)
+    * action_type : VARCHAR(64) [IDX]
+    resource_id : VARCHAR(64)
+    * endpoint : VARCHAR(255)
+    * method : VARCHAR(16)
+    * ip_address : VARCHAR(64)
+    * status_code : INTEGER
+    * duration_ms : FLOAT
+}
+
+entity "model_registry" as model_registry {
+    * id : VARCHAR(36) [PK]
+    --
+    * version : VARCHAR(32) [UK, IDX]
+    * algorithm : VARCHAR(128)
+    * training_cohort : VARCHAR(255)
+    * test_auroc : FLOAT
+    * brier_score : FLOAT
+    * sha256_hash : VARCHAR(64)
+    * deployed_at : TIMESTAMP
+    * is_active : INTEGER
+}
+
+' Relationships
+users ||--o| patient_profiles : "1 owns 0..1"
+users ||--o{ assessments : "1 creates 0..*"
+users ||--o{ patient_doctor_grants : "1 grants 0..*"
+users ||--o{ patient_doctor_grants : "1 receives 0..*"
+users ||--o{ clinical_notes : "1 writes 0..*"
+
+assessments ||--|| inference_results : "1 has 1"
+assessments ||--o{ clinical_notes : "1 receives 0..*"
+inference_results ||--|{ shap_explanations : "1 has 13"
+inference_results ||--o{ counterfactual_profiles : "1 derives 0..*"
+
+@enduml

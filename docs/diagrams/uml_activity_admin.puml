@@ -1,0 +1,59 @@
+@startuml uml_activity_admin
+title Administrator Governance & Management Activity Diagram
+
+|Administrator|
+start
+:Access Administrator Portal;
+:Enter Admin Email & Password;
+
+|System Backend|
+:Verify Credentials & Role == 'ADMIN';
+if (Authorized?) then (no)
+    :Return HTTP 403 Forbidden;
+    |Administrator|
+    :Access Denied;
+    stop
+else (yes)
+endif
+
+|Administrator|
+:View System Operations & Telemetry Dashboard;
+:Review p95 Latency & Model Calibration Metrics;
+
+switch (Select Admin Action?)
+case ( Clinician Verification )
+    :Open Clinician Verification Queue;
+    :Review Submitted Medical License;
+    if (Credentials Valid?) then (yes)
+        :Click "Approve Clinician";
+        |System Backend|
+        :UPDATE users SET clinician_status = 'VERIFIED';
+        :Log CLINICIAN_APPROVED in Audit Trail;
+    else (no)
+        |Administrator|
+        :Click "Reject" with Reason;
+        |System Backend|
+        :UPDATE users SET clinician_status = 'REJECTED';
+    endif
+case ( Audit Trail Review )
+    |Administrator|
+    :Open Immutable Audit Log Explorer;
+    :Apply Filter (Date, Action Type, User ID);
+    |System Backend|
+    :Query Indexed Audit Logs;
+    |Administrator|
+    :Inspect Access Logs for Cross-Tenant Compliance;
+case ( Directory Management )
+    |Administrator|
+    :Open Doctor / Hospital / Insurance Editor;
+    :Add, Update, or Archive Directory Record;
+    |System Backend|
+    :Validate Required Fields & Sanitize Inputs;
+    :Commit Transaction to Database;
+    :Log DIRECTORY_MUTATION in Audit Trail;
+endswitch
+
+|Administrator|
+:Review Updated System State;
+stop
+@enduml

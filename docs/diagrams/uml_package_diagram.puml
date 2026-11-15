@@ -1,0 +1,81 @@
+@startuml uml_package_diagram
+title HeartXAI 2.0 Architectural Package Structure
+
+package "Frontend Client (React/TypeScript)" {
+    package "views" {
+        [PublicPages]
+        [PatientDashboard]
+        [IntakeWizard]
+        [ResultsView]
+        [LongitudinalHistory]
+        [CareConnect]
+        [AdminPortal]
+    }
+    package "components" {
+        [UIPrimitives]
+        [ClinicalGauges]
+        [ShapWaterfallChart]
+        [CounterfactualSliders]
+        [TelemetryTable]
+    }
+    package "state_and_api" {
+        [AuthContext]
+        [ApiClient]
+        [QueryHooks]
+    }
+}
+
+package "Backend Core (FastAPI)" {
+    package "api_layer" {
+        [AuthRouter]
+        [AssessmentRouter]
+        [InferenceRouter]
+        [PrivacyRouter]
+        [ClinicianRouter]
+        [DirectoryRouter]
+        [AdminRouter]
+        [HealthRouter]
+    }
+    package "domain_services" {
+        [AuthService]
+        [AssessmentService]
+        [PrivacyService]
+        [ReportService]
+        [AuditService]
+    }
+    package "core_infrastructure" {
+        [ConfigSettings]
+        [SecurityCrypto]
+        [DatabaseEngine]
+        [StructuredLogging]
+    }
+}
+
+package "ML & Explainability Subsystem" {
+    [PreprocessingPipeline]
+    [CalibratedXGBoost]
+    [TreeSHAPExplainer]
+    [ConstrainedCFSolver]
+    [ASCVDCalculator]
+}
+
+package "Persistence Layer (SQLAlchemy / PostgreSQL)" {
+    [UserModels]
+    [AssessmentModels]
+    [InferenceModels]
+    [ConsentModels]
+    [DirectoryModels]
+    [AuditModels]
+}
+
+' Inter-package dependencies
+views ..> components : renders
+views ..> state_and_api : consumes
+state_and_api ..> api_layer : HTTP/JSON
+
+api_layer ..> domain_services : dispatches
+domain_services ..> "ML & Explainability Subsystem" : executes
+domain_services ..> "Persistence Layer (SQLAlchemy / PostgreSQL)" : queries/persists
+domain_services ..> core_infrastructure : utilizes
+
+@enduml

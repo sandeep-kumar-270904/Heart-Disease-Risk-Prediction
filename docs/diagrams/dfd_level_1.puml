@@ -1,0 +1,52 @@
+@startuml dfd_level_1
+title Level 1 Data Flow Diagram (DFD Level 1)
+
+skinparam monochrome false
+
+actor "User (Patient / Doctor / Admin)" as User
+actor "Clinician" as Doctor
+
+rectangle "1.0 Authentication & Session Management" as P1
+rectangle "2.0 Clinical Intake & Validation" as P2
+rectangle "3.0 ML Inference & Risk Stratification" as P3
+rectangle "4.0 Explainability & Counterfactual Solver" as P4
+rectangle "5.0 Care Collaboration & Consent Engine" as P5
+rectangle "6.0 Governance & Audit Logging" as P6
+
+database "D1: Users & Profiles" as D1
+database "D2: Assessments & Biomarkers" as D2
+database "D3: Inferences & Explanations" as D3
+database "D4: Doctor Grants & Notes" as D4
+database "D5: Immutable Audit Logs" as D5
+
+User --> P1 : Credentials & Registration Data
+P1 --> D1 : Store User Hash & Baseline Profile
+P1 --> User : HttpOnly JWT Session Cookie
+P1 --> P6 : Emit Auth Event Logs
+
+User --> P2 : 13 Clinical Biomarkers
+P2 --> D2 : Write Validated Assessment
+P2 --> P3 : Trigger Prediction Vector
+P2 --> P6 : Emit Assessment Intake Event
+
+P3 --> D3 : Store Calibrated CAD Probability & ASCVD 10-Yr Risk
+P3 --> P4 : Pass Raw Decision Margins & Ensemble Structure
+P4 --> D3 : Store 13 Shapley Values & Counterfactual Deltas
+P3 --> User : Deliver Dual Risk Dials
+P4 --> User : Deliver Interactive Waterfall & What-If Sliders
+
+User --> P5 : Create / Revoke Doctor Grant
+P5 --> D4 : Store Time-Bounded Consent Grant
+Doctor --> P5 : Request Patient Assessment Chart
+P5 --> D4 : Check Active Grant Validity
+P5 --> D2 : Retrieve Granted Clinical Telemetry
+P5 --> Doctor : Deliver Authorized Patient History
+Doctor --> P5 : Submit Signed Clinical Review Note
+P5 --> D4 : Store Clinical Consultation Note
+
+P1 --> P6 : Auth Events
+P2 --> P6 : Assessment Events
+P5 --> P6 : Consent & Access Events
+P6 --> D5 : Write Append-Only Audit Trail
+
+@enduml

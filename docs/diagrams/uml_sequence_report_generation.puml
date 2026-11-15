@@ -1,0 +1,35 @@
+@startuml uml_sequence_report_generation
+autonumber
+skinparam responseMessageBelowArrow true
+
+actor "Patient / Doctor" as Actor
+participant "SPA Client (React/TS)" as SPA
+participant "API Gateway (FastAPI)" as API
+participant "Reports Controller" as Ctrl
+participant "PostgreSQL DB" as DB
+participant "Audit Logger" as Audit
+
+Actor -> SPA: Clicks "Download Clinical Visit Briefing"
+SPA -> API: GET /api/v1/assessments/{id}/report (Format: JSON or Print PDF)
+
+API -> Ctrl: Verify authorization:\n(patient_id == current_user.id OR active doctor grant exists)
+alt Unauthorized Access
+    Ctrl -->> API: Raise ForbiddenException (403)
+    API -->> SPA: HTTP 403 Forbidden ("Not authorized to access clinical report")
+else Authorized
+    Ctrl -> DB: Query assessment, inference_results, shap_explanations, counterfactual_profiles, clinical_notes
+    DB -->> Ctrl: Consolidated clinical telemetry record
+    
+    Ctrl -> Ctrl: Format 1-page clinical summary payload:\n- Patient demographics & intake date\n- 13 biomarkers vs normal reference intervals\n- Dual-target risk dials & ACC/AHA tiers\n- Top 5 ranked TreeSHAP risk factors\n- Feasible counterfactual targets\n- Physician notes section & non-diagnostic disclaimer
+    
+    Ctrl -> Audit: Log REPORT_GENERATED (user_id, assessment_id)
+    Audit -> DB: INSERT INTO audit_logs
+    
+    Ctrl -->> API: Formatted report structure
+    API -->> SPA: HTTP 200 OK (Report Payload)
+    
+    SPA -> SPA: Renders high-density print view or triggers browser print PDF dialog
+    SPA -->> Actor: 1-Page Clinical Briefing Document ready for physician consultation
+end
+
+@enduml

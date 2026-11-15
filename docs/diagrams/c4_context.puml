@@ -1,0 +1,26 @@
+@startuml c4_system_context
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+LAYOUT_WITH_LEGEND()
+
+title System Context Diagram for HeartXAI 2.0
+
+Person(guest, "Public Visitor (Guest)", "Explores educational materials, tests sandbox with synthetic benchmark data.")
+Person(patient, "Patient (Registered User)", "Submits clinical biomarkers, views dual risk scores, inspects SHAP explanations, explores counterfactuals.")
+Person(doctor, "Healthcare Professional (Doctor)", "Reviews authorized patient charts, inspects feature attributions, appends clinical review notes.")
+Person(admin, "System Administrator / ML Auditor", "Monitors system health, manages model registry, reviews audit logs, verifies clinician credentials.")
+
+System(heartxai, "HeartXAI 2.0 Platform", "Explainable AI-based cardiovascular risk awareness, dual-target clinical prediction, TreeSHAP feature attribution, and counterfactual simulation platform.")
+
+System_Ext(cms_registry, "NPI / Medical Registry", "Public clinician licensing and NPI directory for credential verification.")
+System_Ext(email_service, "Transactional Email Service", "Delivers password resets and security notices (Optional/Phase 2).")
+
+Rel(guest, heartxai, "Views educational content, runs anonymous sandbox simulations", "HTTPS")
+Rel(patient, heartxai, "Submits assessments, explores counterfactuals, manages doctor consent", "HTTPS")
+Rel(doctor, heartxai, "Reviews granted patient assessments, signs clinical notes", "HTTPS")
+Rel(admin, heartxai, "Audits system access, monitors ML telemetry, verifies clinicians", "HTTPS")
+
+Rel(heartxai, cms_registry, "Verifies physician medical licenses and credentials", "HTTPS/REST")
+Rel(heartxai, email_service, "Transmits transactional security alerts", "SMTP/REST")
+
+@enduml

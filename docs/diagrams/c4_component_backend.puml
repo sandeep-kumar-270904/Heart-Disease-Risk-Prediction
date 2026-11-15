@@ -1,0 +1,56 @@
+@startuml c4_component_backend
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Component Diagram for HeartXAI 2.0 API Application
+
+Container(spa, "Single-Page Application", "React, TypeScript", "Frontend user interface")
+ContainerDb(db, "Database", "PostgreSQL", "Relational persistent store")
+Container(model_file, "Model Artifact", ".joblib", "Pre-trained pipeline file")
+
+Container_Boundary(api_app, "FastAPI Backend Application") {
+    Component(security_middleware, "Security & Auth Middleware", "FastAPI Middleware", "Validates HttpOnly JWT tokens, enforces RBAC, checks IP rate limits, and sanitizes headers.")
+    
+    Component(auth_controller, "Authentication Controller", "APIRouter (/api/v1/auth)", "Handles user registration, login, session termination, and password hashing.")
+    Component(assessment_controller, "Assessment Controller", "APIRouter (/api/v1/assessments)", "Accepts 13-biomarker intake payloads, validates ranges, coordinates inference, and retrieves history.")
+    Component(xai_controller, "Explainability Controller", "APIRouter (/api/v1/inference)", "Serves local TreeSHAP attributions and executes dynamic counterfactual what-if simulations.")
+    Component(privacy_controller, "Privacy & Consent Controller", "APIRouter (/api/v1/privacy)", "Manages patient doctor grants, consent revocations, GDPR data exports, and account erasure.")
+    Component(clinician_controller, "Clinician Review Controller", "APIRouter (/api/v1/clinician)", "Allows doctors to review granted patient charts and append countersigned clinical notes.")
+    Component(admin_controller, "Governance Controller", "APIRouter (/api/v1/admin)", "Provides model telemetry, clinician approval queues, and immutable audit log exploration.")
+
+    Component(assessment_service, "Assessment Domain Service", "Python Service", "Orchestrates assessment lifecycle, enforces clinical rules, and calculates longitudinal deltas.")
+    Component(ml_engine, "Machine Learning Engine", "Scikit-Learn / XGBoost", "Executes calibrated CAD inference and 2013 ACC/AHA 10-year prospective ASCVD equations.")
+    Component(shap_engine, "TreeSHAP Engine", "SHAP C++", "Computes exact Shapley attributions, asserts additivity error <= 10^-5, and ranks features.")
+    Component(cf_solver, "Counterfactual Solver", "SciPy / Optimization", "Performs constrained L1-norm minimization under clinical immutability and physiological bounds.")
+    Component(audit_service, "Audit Logging Service", "Python Service", "Captures immutable audit trail for security, auth, and data access events.")
+    Component(repo_layer, "Data Access & ORM Layer", "SQLAlchemy 2.0", "Executes parameterized SQL queries, manages ACID transactions, and enforces foreign key cascades.")
+}
+
+Rel(spa, security_middleware, "Transmits API requests with session cookie", "JSON/HTTPS")
+Rel(security_middleware, auth_controller, "Routes unauthenticated / auth requests", "")
+Rel(security_middleware, assessment_controller, "Routes verified patient requests", "")
+Rel(security_middleware, xai_controller, "Routes verified XAI requests", "")
+Rel(security_middleware, privacy_controller, "Routes verified privacy requests", "")
+Rel(security_middleware, clinician_controller, "Routes verified clinician requests", "")
+Rel(security_middleware, admin_controller, "Routes verified admin requests", "")
+
+Rel(assessment_controller, assessment_service, "Invokes", "")
+Rel(assessment_service, ml_engine, "Calls calibrated inference & ASCVD calculation", "")
+Rel(assessment_service, shap_engine, "Calls TreeSHAP attribution", "")
+Rel(xai_controller, cf_solver, "Calls constrained optimization", "")
+Rel(assessment_service, repo_layer, "Persists assessment, inference, and SHAP records", "")
+Rel(auth_controller, repo_layer, "Persists user accounts and credentials", "")
+Rel(privacy_controller, repo_layer, "Persists and revokes doctor grants", "")
+Rel(clinician_controller, repo_layer, "Persists clinical review notes", "")
+Rel(admin_controller, repo_layer, "Queries audit logs and model registry", "")
+
+Rel(assessment_service, audit_service, "Emits audit events", "")
+Rel(auth_controller, audit_service, "Emits audit events", "")
+Rel(clinician_controller, audit_service, "Emits audit events", "")
+Rel(audit_service, repo_layer, "Writes immutable append-only logs", "")
+
+Rel(ml_engine, model_file, "Loads pipeline artifact", "Joblib load")
+Rel(repo_layer, db, "Executes SQL over connection pool", "SQL/asyncpg")
+
+@enduml
