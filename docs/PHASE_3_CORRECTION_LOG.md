@@ -42,7 +42,30 @@ JUSTIFICATION:    Target geography was prematurely assumed to be US. Project ori
                   ABDM requires formal partner accreditation. Architecture must be geographically
                   configurable via an Adapter pattern without hardcoded national assumptions.
 ====================================================================================================
-CORRECTION ID:    CORR-GEO-002
+CORRECTION ID:    DEC-GEO-APPROVED
+AFFECTED DOCS:    GLOBAL_COUNTRY_CONFIGURATION_ARCHITECTURE.md (New Specification)
+                  ARCHITECTURE_DECISION_RECORDS.md (ADR-011)
+                  INTEGRATION_ARCHITECTURE.md (Sec 2, 3, 5)
+                  PHASE_3_FINAL_OPEN_DECISIONS.md (DEC-GEO-01 Approved)
+                  SYSTEM_ARCHITECTURE_DOCUMENT.md, BACKEND_ARCHITECTURE.md, FRONTEND_ARCHITECTURE.md
+ORIGINAL TEXT:    "Target geography undecided / pending regional policy approval."
+CORRECTED TEXT:   "APPROVED PRODUCT DIRECTION: GLOBAL — CONFIGURABLE BY COUNTRY.
+                  The architecture does not hard-code the US, India, or any single country as the
+                  only supported market. Decomposed across 8 country-configurable modules:
+                  1. Doctor directories (postal code formats, verified national clinician rosters).
+                  2. Hospital directories (national spatial boundaries, PMJAY, CMS, OSM).
+                  3. Physician verification (NMC document queue for India; CMS NPPES API for US;
+                     document upload queue for non-launch jurisdictions).
+                  4. Health insurance guides (PMJAY/IRDAI, ACA/Medicare, universal).
+                  5. Clinical guidelines (CSI/ICMR, ACC/AHA, ESC, WHO charts).
+                  6. Privacy & regulations (India DPDP Act 2023, US HIPAA, EU GDPR).
+                  7. Languages, dates & currencies (i18next strings, ISO 4217, IANA timezones, UTC).
+                  8. Measurement units & localization (BiomarkerUnitConverter for mg/dL <-> mmol/L
+                     and metric/imperial anthropometrics while maintaining model invariance).
+                  Every external data source verified before inclusion; no fabricated global databases;
+                  first launch countries remain a separate product decision."
+JUSTIFICATION:    Approved official product requirement from stakeholder governance.
+====================================================================================================
 AFFECTED DOCS:    ARCHITECTURE_DECISION_RECORDS.md (ADR-008, New ADR-011)
 ORIGINAL TEXT:    "HIPAA § 164.508 consent protocol solely referenced for data governance."
 CORRECTED TEXT:   "Multi-jurisdictional healthcare compliance: India Digital Personal Data

@@ -3,18 +3,19 @@
 
 LAYOUT_WITH_LEGEND()
 
-title System Context Diagram for HeartXAI 2.0 (Audited Baseline)
+title System Context Diagram for HeartXAI 2.0 (Global Configurable Architecture)
 
 Person(guest, "Public Visitor (Guest)", "Explores educational materials, tests sandbox with synthetic benchmark data.")
-Person(patient, "Patient (Registered User)", "Submits clinical biomarkers, views CAD likelihood, inspects SHAP explanations, explores counterfactuals.")
+Person(patient, "Patient (Registered User)", "Submits clinical biomarkers in localized units, views CAD likelihood, inspects SHAP explanations, explores counterfactuals.")
 Person(doctor, "Healthcare Professional (Doctor)", "Reviews authorized patient charts, inspects feature attributions, appends clinical review notes.")
 Person(admin, "System Administrator / ML Auditor", "Monitors system health, manages model registry, reviews audit logs, verifies clinician credentials.")
 
-System(heartxai, "HeartXAI 2.0 Platform", "Explainable AI-based cardiovascular health-awareness, retrospective CAD association classification, TreeSHAP feature attribution, and counterfactual simulation platform.")
+System(heartxai, "HeartXAI 2.0 Platform", "Global country-configurable explainable AI platform for cardiovascular health awareness, retrospective CAD association classification, TreeSHAP feature attribution, and counterfactual simulation.")
 
-System_Ext(medical_registry, "Physician Verification Registry", "Regional medical council / licensing registry (India NMC document queue / ABDM or US CMS NPPES) via Geographic Adapter.")
+System_Ext(medical_registry, "Country Physician Registry", "National medical council or licensing authority via IPhysicianVerificationAdapter (e.g. India NMC, US CMS NPPES).")
 System_Ext(email_service, "Transactional Email Service", "Delivers password resets and security notices via persistent outbox.")
-System_Ext(geo_service, "Geospatial Facility Service", "Regional hospital and emergency facility directory via OpenStreetMap / PostGIS.")
+System_Ext(geo_service, "Country Facility Service", "National cardiac center and emergency facility directory via IDirectoryProviderAdapter (e.g. PMJAY, CMS, OSM).")
+System_Ext(insurance_service, "Country Insurance Guide", "National health insurance policies and preventative mandates via IInsuranceGuideAdapter.")
 
 Rel(guest, heartxai, "Views educational content, runs anonymous sandbox simulations", "HTTPS")
 Rel(patient, heartxai, "Submits assessments, explores counterfactuals, manages doctor consent", "HTTPS")
@@ -23,6 +24,7 @@ Rel(admin, heartxai, "Audits system access, monitors ML telemetry, verifies clin
 
 Rel(heartxai, medical_registry, "Verifies physician credentials via adapter", "HTTPS/REST/Queue")
 Rel(heartxai, email_service, "Transmits transactional security alerts", "HTTPS/SMTP")
-Rel(heartxai, geo_service, "Queries nearest cardiac facilities", "HTTPS/REST")
+Rel(heartxai, geo_service, "Queries nearest cardiac facilities via country adapter", "HTTPS/REST")
+Rel(heartxai, insurance_service, "Retrieves localized coverage guidelines", "Static / Internal Engine")
 
 @enduml

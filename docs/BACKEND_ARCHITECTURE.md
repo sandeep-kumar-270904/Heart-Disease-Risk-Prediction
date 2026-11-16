@@ -59,12 +59,14 @@ backend/
 │   │           └── health.py       # /health/live, /health/ready probes
 │   ├── core/                   # Cross-Cutting Infrastructure
 │   │   ├── config.py           # Pydantic Settings & environment variables
+│   │   ├── country_profile.py  # Global Country Profile Registry (IN, US, GB, DEFAULT)
+│   │   ├── unit_converter.py   # Deterministic BiomarkerUnitConverter (mg/dL <-> mmol/L)
 │   │   ├── database.py         # SQLAlchemy engine, SessionLocal, get_db
-│   │   ├── security.py         # Bcrypt password hashing, JWT generation & verification
+│   │   ├── security.py         # Argon2id password hashing, JWT generation & verification
 │   │   └── logging.py          # Structured JSON logging configuration
 │   ├── models/                 # Data Access Layer (SQLAlchemy 2.0 Declarative Models)
 │   │   ├── base.py             # UUID primary key & timestamp mixins
-│   │   ├── user.py             # User, PatientProfile
+│   │   ├── user.py             # User (with country_code), PatientProfile (with preferred_units)
 │   │   ├── assessment.py       # Assessment, InferenceResult, ShapExplanation, CounterfactualProfile
 │   │   ├── consent.py          # DoctorGrant, ClinicalNote
 │   │   ├── directory.py        # Doctor, Hospital, InsurancePolicy, EducationalResource
@@ -78,10 +80,15 @@ backend/
 │   │   └── directory.py        # DoctorResponse, HospitalResponse, InsuranceResponse
 │   ├── services/               # Domain Business Logic Layer
 │   │   ├── auth_service.py     # Authentication, password verification, registration
-│   │   ├── assessment_service.py # Intake orchestration, delta calculations
+│   │   ├── assessment_service.py # Intake orchestration, unit normalization, delta calculations
 │   │   ├── privacy_service.py  # Consent verification, doctor grant lifecycle
-│   │   ├── report_service.py   # Clinical visit briefing compilation
-│   │   └── audit_service.py    # Immutable append-only audit log writer
+│   │   ├── report_service.py   # Clinical visit briefing compilation (WeasyPrint)
+│   │   ├── audit_service.py    # Immutable append-only audit log writer
+│   │   └── adapters/           # Country-Configurable Integration Adapters (ADR-011)
+│   │       ├── base.py             # IDoctorDirectoryAdapter, IPhysicianVerificationAdapter
+│   │       ├── india_adapter.py    # India PIN codes, PMJAY open data, NMC document queue
+│   │       ├── us_adapter.py       # US ZIP codes, CMS hospital data, CMS NPPES API
+│   │       └── global_adapter.py   # OSM Overpass, universal document upload queue
 │   ├── ml/                     # Machine Learning & Explainability Engine
 │   │   ├── artifacts/          # Serialized pipelines (heartxai_model_v2.0.0.joblib)
 │   │   ├── preprocessor.py     # Feature scaling & OOD bounds checking

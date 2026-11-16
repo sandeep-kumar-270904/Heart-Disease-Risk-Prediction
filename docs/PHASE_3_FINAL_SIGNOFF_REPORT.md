@@ -36,9 +36,10 @@ Every architectural document, technical specification, and decision record has b
 +----+-----------------------------+----------------------------------+------------------------------+
 | No.| Architecture Focus Area     | Pre-Audit State                  | Corrected Baseline State     |
 +----+-----------------------------+----------------------------------+------------------------------+
-| 1  | Geographic Target           | Assumed US market exclusively;   | Geographic Strategy Adapter  |
-|    |                             | hardcoded CMS NPPES & US ZIPs    | Pattern (ADR-011); India PIN |
-|    |                             |                                  | codes + NMC/ABDM supported   |
+| 1  | Geographic Target           | Assumed US market exclusively;   | APPROVED PRODUCT DIRECTION:  |
+|    |                             | hardcoded CMS NPPES & US ZIPs    | GLOBAL — CONFIGURABLE BY     |
+|    |                             |                                  | COUNTRY (ADR-011); 8 country |
+|    |                             |                                  | modules; verified sources    |
 +----+-----------------------------+----------------------------------+------------------------------+
 | 2  | Clinical Framing & XAI      | Conflated retrospective CAD ML   | Retrospective Angiographic   |
 |    |                             | with prospective 10-yr ASCVD;    | CAD Classifier; SHAP = model |
@@ -76,7 +77,7 @@ The architectural baseline is codified across **12 Architecture Decision Records
 8. **ADR-008 (Multi-Jurisdictional Security, Argon2id & Consent RBAC):** OWASP 2024 compliance; compliance mapping to India DPDP Act 2023, US HIPAA, and EU GDPR. Strict patient sovereignty over doctor chart access (`patient_doctor_grants`).
 9. **ADR-009 (Dual-Target Clinical Metric Disentanglement):** Rigorous separation of retrospective CAD angiographic likelihood from prospective 10-year ASCVD population risk.
 10. **ADR-010 (External Integration Resilience & Outbox Pattern):** Circuit breakers and persistent PostgreSQL outbox pattern preventing third-party API outages from impacting core workflows.
-11. **ADR-011 (Geographic Strategy / Adapter Pattern):** Decoupled architecture supporting India (`IN`), United States (`US`), or Multi-Region deployment via pluggable directory and provider verification adapters.
+11. **ADR-011 (Global Geographic Architecture — Configurable by Country):** APPROVED PRODUCT REQUIREMENT. Zero national hardcoding; country profile registry and adapter SPI across 8 dimensions (directories, verification, insurance, guidelines, compliance, localization, units).
 12. **ADR-012 (Authenticated Backup Encryption & Immutable Off-Site WORM Storage):** AES-256-GCM AEAD encryption, automated key rotation, S3 Object Lock compliance storage, and mandatory monthly restoration testing drills.
 
 ---
@@ -84,6 +85,7 @@ The architectural baseline is codified across **12 Architecture Decision Records
 ## 4. Complete Architecture Artifact & Document Inventory
 
 ### 4.1 Master Architecture Specifications (`docs/`)
+- [GLOBAL_COUNTRY_CONFIGURATION_ARCHITECTURE.md](file:///c:/Users/edhub/Desktop/Anti%20Gravity%20Projects/heartxai-2.0/docs/GLOBAL_COUNTRY_CONFIGURATION_ARCHITECTURE.md): Master country configuration specification across 8 modules.
 - [SYSTEM_ARCHITECTURE_DOCUMENT.md](file:///c:/Users/edhub/Desktop/Anti%20Gravity%20Projects/heartxai-2.0/docs/SYSTEM_ARCHITECTURE_DOCUMENT.md): Master technical blueprint.
 - [ARCHITECTURE_DECISION_RECORDS.md](file:///c:/Users/edhub/Desktop/Anti%20Gravity%20Projects/heartxai-2.0/docs/ARCHITECTURE_DECISION_RECORDS.md): Catalog of ADRs 001 through 012.
 - [FRONTEND_ARCHITECTURE.md](file:///c:/Users/edhub/Desktop/Anti%20Gravity%20Projects/heartxai-2.0/docs/FRONTEND_ARCHITECTURE.md): React 18, Vite, routing, state, WCAG 2.1 AA tokens.
@@ -156,12 +158,12 @@ tests/test_security.py::test_tampered_jwt_token PASSED                   [100%]
 
 ---
 
-## 6. Open Strategic Decisions Awaiting Stakeholder Sign-Off
+## 6. Strategic Decisions Status & Governance Sign-Off
 
-The following six decisions are documented in detail in [PHASE_3_FINAL_OPEN_DECISIONS.md](file:///c:/Users/edhub/Desktop/Anti%20Gravity%20Projects/heartxai-2.0/docs/PHASE_3_FINAL_OPEN_DECISIONS.md) and await stakeholder determination:
+The status of the strategic decisions documented in [PHASE_3_FINAL_OPEN_DECISIONS.md](file:///c:/Users/edhub/Desktop/Anti%20Gravity%20Projects/heartxai-2.0/docs/PHASE_3_FINAL_OPEN_DECISIONS.md):
 
-1. **DEC-GEO-01: Target Geography & Legal Regime**
-   - *Recommendation:* Multi-Region Configurable Core (`HEARTXAI_GEOGRAPHY=IN|US|GLOBAL`) with **India (`IN`) as default base**, using pluggable adapters.
+1. **DEC-GEO-01: Target Geography (APPROVED PRODUCT REQUIREMENT)**
+   - *Status:* **APPROVED**. Target market is **GLOBAL — CONFIGURABLE BY COUNTRY**. The architecture does not hardcode any single country and encapsulates all 8 dimensions behind country profiles and verified adapters.
 2. **DEC-VERIF-02: Physician Identity Verification Protocol**
    - *Recommendation:* Two-Tier verification: **Administrative Document Upload Queue** (universal baseline) + pluggable API adapters (ABDM HPR for India future, CMS NPPES for US).
 3. **DEC-CLIN-03: Scope of Clinical Risk Communication**

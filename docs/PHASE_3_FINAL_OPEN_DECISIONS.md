@@ -22,35 +22,26 @@ In accordance with modern software architecture principles:
 
 ---
 
-## 2. Catalog of Unresolved Strategic Decisions
+## 2. Approved Strategic Product Direction
 
-### Decision DEC-GEO-01: Target Operational Geography & Legal Jurisdiction
+### Decision DEC-GEO-01: Target Market — Global Configurable by Country (APPROVED REQUIREMENT)
 
-- **Status:** **UNRESOLVED — ARCHITECTED VIA GEOGRAPHIC ADAPTER PATTERN**
-- **Context:** The project originated in India (Anil Neerukonda Institute of Technology and Sciences, Visakhapatnam, Andhra Pradesh), but healthcare software may target Indian domestic deployment, US clinical research markets, or multi-jurisdictional research pilots. Hardcoding either geography creates regulatory and technical incompatibilities.
-- **Evaluated Options:**
-  - **Option 1: India Domestic Focus (`HEARTXAI_GEOGRAPHY=IN`)**
-    - *Legal Framework:* Digital Personal Data Protection Act, 2023 (DPDP Act 2023), IT (SPDI) Rules 2011, National Digital Health Blueprint.
-    - *Geographic Data:* 6-digit Indian PIN codes (e.g. 530001 Visakhapatnam, 560001 Bengaluru); open PIN code centroids dataset from Data.gov.in.
-    - *Facility Data:* PMJAY empanelled hospital list, ROHINI registry, OpenStreetMap India.
-    - *Physician Data:* National Medical Commission (NMC) National Medical Register (NMR) State Council numbers via administrative upload queue.
-  - **Option 2: United States Focus (`HEARTXAI_GEOGRAPHY=US`)**
-    - *Legal Framework:* HIPAA (45 CFR Part 160/164), HITECH Act.
-    - *Geographic Data:* 5-digit US ZIP codes; US Census centroids.
-    - *Facility Data:* CMS hospital datasets, OpenStreetMap US.
-    - *Physician Data:* CMS NPPES NPI Registry API (`EXT-01`).
-  - **Option 3 (Recommended Architectural Strategy): Multi-Region Configurable Core**
-    - Platform core is jurisdiction-agnostic.
-    - Uses `IDirectoryProviderAdapter` and `IPhysicianVerificationAdapter` implementations selected at runtime via configuration:
-      ```python
-      # app/core/config.py
-      GEOGRAPHY: Literal["IN", "US", "GLOBAL"] = "IN"
-      ```
-- **Architect's Recommendation:** **Option 3 (Multi-Region Configurable Core)**, with **India (`IN`) configured as the default development profile** reflecting project provenance.
+- **Status:** **APPROVED & RATIFIED PRODUCT REQUIREMENT**
+- **Approved Decision:** The primary target market for HeartXAI 2.0 is **GLOBAL — CONFIGURABLE BY COUNTRY**.
+- **Governance Mandate:** The architecture must not hard-code the United States, India, or any other country as the only supported market. The system is architected for expansion without claiming worldwide operational coverage. Launch countries represent a separate product decision.
+- **Architectural Solution:** Encapsulated across eight (8) country-configurable modules via the **Country Profile Registry** and **Strategy / Adapter Pattern** (detailed in [`GLOBAL_COUNTRY_CONFIGURATION_ARCHITECTURE.md`](./GLOBAL_COUNTRY_CONFIGURATION_ARCHITECTURE.md)):
+  1. *Doctor Directories:* Postal code format, verified national practitioner directory.
+  2. *Hospital Directories:* National boundary queries, emergency cardiac facility datasets (PMJAY, CMS, OSM).
+  3. *Physician Verification:* National licensing workflows (NMC document queue for India; CMS NPPES API for US; document upload for default).
+  4. *Insurance Information:* National public/private healthcare policy navigation (India PMJAY/IRDAI, US ACA/Medicare, universal).
+  5. *Clinical Guidelines:* National cardiology authorities (India CSI/ICMR, US ACC/AHA, Europe ESC, WHO charts).
+  6. *Privacy & Compliance:* National data protection statutes (India DPDP Act 2023, US HIPAA, EU GDPR).
+  7. *Languages & Localization:* Unicode UTF-8, i18next strings, ISO 4217 currencies, IANA timezones, UTC storage.
+  8. *Measurement Units:* Dynamic bidirectional conversion engine (`BiomarkerUnitConverter`) for $\text{mg/dL} \leftrightarrow \text{mmol/L}$ (cholesterol and glucose) and metric/imperial anthropometrics.
 
 ---
 
-### Decision DEC-VERIF-02: Physician Identity Verification Protocol
+## 3. Catalog of Remaining Open Technical Decisions
 
 - **Status:** **UNRESOLVED — PENDING REGIONAL POLICY APPROVAL**
 - **Context:** `FR-11` requires verifying medical credentials when a user registers with the role `doctor`.
@@ -142,16 +133,16 @@ In accordance with modern software architecture principles:
 
 ---
 
-## 3. Summary of Recommendations Submitted for Approval
+## 4. Summary of Strategic Decisions Status
 
-| Decision ID | Area | Architect's Recommended Choice | Fallback / Alternative | Impact |
+| Decision ID | Area | Status | Adopted Architecture / Recommendation | Impact |
 | :--- | :--- | :--- | :--- | :--- |
-| **DEC-GEO-01** | Geography | **Multi-Region Configurable Adapter (Default: India)** | Hardcoded India or US | Enables worldwide deployment without refactoring |
-| **DEC-VERIF-02** | Provider Verification | **Two-Tier: Admin Document Queue + Optional API** | Strict Synchronous API | Eliminates blocking on unaccredited external APIs |
-| **DEC-CLIN-03** | Clinical Framing | **Dual-Display: Retrospective CAD + Separate ASCVD** | Retrospective CAD Only | Scientifically honest; non-diagnostic education |
-| **DEC-DB-04** | DB Testing | **Staged: SQLite Local Unit + PostgreSQL 16 CI** | Mandatory Local Postgres | Blends developer speed with production parity |
-| **DEC-BACKUP-05** | Backup Crypto | **AES-256-GCM + S3-Compatible WORM Off-Site** | Local-Only Encrypted Snapshots | Guarantees ransomware and tamper immunity |
-| **DEC-HOST-06** | Hosting | **Single-Node Docker Compose (Nginx 1.26 + Postgres 16)**| Managed PaaS + RDS | Minimizes operational complexity and infrastructure costs |
+| **DEC-GEO-01** | Geography | **APPROVED** | **GLOBAL — CONFIGURABLE BY COUNTRY** via Country Profile Registry & Adapters | Zero national hardcoding; 8 country modules; expansion runbook |
+| **DEC-VERIF-02** | Provider Verification | PENDING CONFIRMATION | **Two-Tier: Admin Document Queue + Regional API Adapters** | Eliminates blocking on unaccredited external registries |
+| **DEC-CLIN-03** | Clinical Framing | PENDING CONFIRMATION | **Dual-Display: Retrospective CAD + Separate ASCVD** | Scientifically honest; educational non-diagnostic disclaimers |
+| **DEC-DB-04** | DB Testing | PENDING CONFIRMATION | **Staged: SQLite Local Unit + PostgreSQL 16 CI** | Blends developer speed with production parity |
+| **DEC-BACKUP-05** | Backup Crypto | PENDING CONFIRMATION | **AES-256-GCM + S3-Compatible WORM Off-Site** | Guarantees ransomware and tamper immunity |
+| **DEC-HOST-06** | Hosting | PENDING CONFIRMATION | **Single-Node Docker Compose (Nginx 1.26 + Postgres 16)**| Minimizes operational complexity and infrastructure costs |
 
 ---
 

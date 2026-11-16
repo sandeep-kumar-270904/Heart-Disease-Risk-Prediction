@@ -54,12 +54,15 @@ Furthermore, following the Phase 3 External Review, HeartXAI explicitly avoids h
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **EXT-01A** | **India Physician Verification Adapter** | State Medical Councils / NMC Document Upload + Admin Queue | Validates medical licenses for Indian doctors via registration certificate review (`FR-11`). | Non-PHI (Public Credential) | Low (Degradable) | Pre-seeded verified physician directory + administrative review queue in `PENDING_VERIF` state. |
 | **EXT-01B** | **US CMS NPPES Registry API** | US Dept of Health & Human Services (REST JSON / HTTPS) | Programmatic NPI lookup for US healthcare providers (`FR-11`). | Non-PHI (Public Registry) | Low (Degradable) | Pre-seeded directory + administrative review queue fallback. |
+| **EXT-01C** | **Generic / Global Verification Adapter**| Document Upload Verification + Admin Queue | Standardized license verification for non-launch jurisdictions (`FR-11`). | Non-PHI (Public Credential) | Low (Degradable) | Administrative verification queue in `PENDING_ADMIN_REVIEW` state. |
 | **EXT-02A** | **India Facility Directory Adapter** | OpenStreetMap India + PMJAY Open Datasets (Overpass QL / JSON) | Proximity discovery of cardiac centers, cath labs, and hospitals in India (`FR-12`). | Tier 1 (Anonymous Coords) | Medium (Degradable) | Local spatial SQLite/PostGIS database pre-seeded with verified Indian cardiac centers and district hospitals. |
 | **EXT-02B** | **US Facility Directory Adapter** | OpenStreetMap US + CMS Open Data (Overpass QL / REST JSON) | Proximity discovery of cardiac facilities in the US (`FR-12`). | Tier 1 (Anonymous Coords) | Medium (Degradable) | Local spatial SQLite/PostGIS database pre-seeded with US cardiac facilities. |
-| **EXT-03** | **Nominatim Geocoding API** | OpenStreetMap Foundation (REST JSON / HTTPS) | Forward geocoding of patient-entered postal codes (6-digit Indian PIN or 5-digit US ZIP) or city names. | Tier 1 (Locality Only) | Medium (Degradable) | Local offline postal code centroids lookup tables (`assets/geodata/in_pin_codes.json` or `us_postal_codes.json`). |
+| **EXT-02C** | **Global Facility Directory Adapter** | OpenStreetMap Overpass API (Bounded by Country Polygon) | Proximity discovery of cardiac hospitals worldwide (`FR-12`). | Tier 1 (Anonymous Coords) | Medium (Degradable) | Local spatial cache + Overpass OSM query with ODbL license & 1 req/sec limit. |
+| **EXT-03** | **Nominatim Geocoding API** | OpenStreetMap Foundation (REST JSON / HTTPS) | Forward geocoding of patient-entered postal codes (PIN / ZIP / Postcode) or city names. | Tier 1 (Locality Only) | Medium (Degradable) | Local offline postal code centroids lookup tables (`in_pin_codes.json`, `us_postal_codes.json`, etc.). |
 | **EXT-04** | **Transactional Email Service** | Resend API / SendGrid / SMTP (REST HTTPS / TLS) | Verification tokens, password resets, critical alert notifications, and appointment updates. | Tier 2 (Pseudonymous Email) | High (Async Retry) | Persistent transactional outbox table in PostgreSQL (`outbox_emails`) + Exponential backoff worker. |
 | **EXT-05** | **S3-Compatible Object Store** | MinIO (Self-hosted) / AWS S3 / Cloudflare R2 | Immutable archive of compiled clinical assessment PDF reports (`FR-14`) with Object Lock (WORM). | Tier 4 (PHI - AES-256-GCM) | High (Degradable) | Local encrypted spool directory fallback (`/var/data/heartxai/reports/`) with pre-signed URLs. |
 | **EXT-06** | **Upstream ML Benchmark Repos** | UCI Machine Learning Repository, Zenodo | Historical benchmark training datasets (Cleveland 1988, Statlog). | De-identified Open Data | Offline Only (Dev/Build) | Cached, immutable, SHA-256 verified local parquet files in `ml/data/processed/`. |
+| **EXT-07** | **Country Profile & Guidelines Adapters**| National Cardiology Guidelines (CSI, ACC/AHA, ESC, WHO)| Country-specific dyslipidemia guidance, hypertension thresholds, and insurance guides. | Non-PHI (Public Education) | Low (Static) | Pre-compiled JSON knowledge bases indexed by ISO country code (`GLOBAL_COUNTRY_CONFIGURATION_ARCHITECTURE.md`). |
 
 ---
 
@@ -101,6 +104,10 @@ class IPhysicianVerificationAdapter(ABC):
 - **Query:** `?number={npi_10_digits}&enumeration_type=NPI-1&version=2.1`.
 - **Validation:** Verifies active status (`"A"`), primary cardiology/internal medicine taxonomy codes (`207RC0000X`), and Levenshtein name distance $\ge 0.85$.
 
+#### 3.1.4 EXT-01C: Generic / Non-Launch Document Upload Strategy (`DocumentUploadVerificationAdapter`)
+- **Applicability:** Used for non-launch jurisdictions or countries lacking public open verification APIs.
+- **Workflow:** Doctor uploads country-issued medical practitioner license / credential; platform places account in `PENDING_ADMIN_REVIEW` state; admin confirms credential and grants access.
+
 ---
 
 ### 3.2 EXT-02 & EXT-03: Geospatial & Facility Directory Strategies
@@ -139,6 +146,12 @@ class IDirectoryProviderAdapter(ABC):
 - **Postal Code System:** 5-digit US ZIP codes (e.g. `94143`, `02115`).
 - **Centroid Resolution:** Offline US Census ZIP centroids.
 - **Facility Discovery:** Pre-seeded US cardiac centers + Overpass OSM live fallback.
+
+#### 3.2.4 Global / Generic Facility Strategy (`GlobalOSMDirectoryAdapter`)
+- **Postal Code System:** Alphanumeric variable format (3–10 chars).
+- **Centroid Resolution:** Nominatim forward geocoder with client rate limiting (max 1 req/sec).
+- **Facility Discovery:** Overpass API querying `amenity=hospital` with `emergency=yes` or `healthcare=cardiology` within 25km radius.
+- **Full 8-Module Country Specification:** Detailed in [`GLOBAL_COUNTRY_CONFIGURATION_ARCHITECTURE.md`](./GLOBAL_COUNTRY_CONFIGURATION_ARCHITECTURE.md).
 
 ---
 

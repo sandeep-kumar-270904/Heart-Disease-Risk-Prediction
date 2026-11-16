@@ -10,6 +10,7 @@ package "Identity & Authorization" {
         +String fullName
         +String role
         +String clinicianStatus
+        +String countryCode
         +Boolean isActive
         +DateTime createdAt
         +DateTime lastLoginAt

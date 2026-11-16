@@ -33,11 +33,12 @@ frontend/
 │   ├── components/             # Reusable UI component library
 │   │   ├── ui/                 # Atomic design primitives (Button, Input, Card, Modal, Badge)
 │   │   ├── feedback/           # AlertBanner, SkeletonLoader, Toast, EmptyState
-│   │   ├── layout/             # Navbar, Sidebar, Footer, Breadcrumbs, PageContainer
-│   │   └── clinical/           # Domain widgets (DualRiskGauge, ShapWaterfall, CounterfactualSlider)
-│   ├── context/                # React Contexts (AuthContext, ThemeContext)
-│   ├── hooks/                  # Custom React hooks (useAuth, useAssessments, useDebounce)
+│   │   ├── layout/             # Navbar, Sidebar, Footer, Breadcrumbs, CountrySelector
+│   │   └── clinical/           # Domain widgets (DualRiskGauge, ShapWaterfall, CounterfactualSlider, UnitToggle)
+│   ├── context/                # React Contexts (AuthContext, ThemeContext, LocalizationContext)
+│   ├── hooks/                  # Custom React hooks (useAuth, useAssessments, useDebounce, useUnits)
 │   ├── layouts/                # Route layouts (PublicLayout, PatientLayout, ClinicianLayout, AdminLayout)
+│   ├── locales/                # Multi-language translation catalogs (en.json, hi.json, etc.)
 │   ├── pages/                  # Route view containers
 │   │   ├── public/             # LandingPage, AboutPage, SandboxPage, TermsPage
 │   │   ├── auth/               # LoginPage, RegisterPage, ResetPasswordPage
@@ -48,7 +49,7 @@ frontend/
 │   ├── routes/                 # React Router configuration & RoleGuard components
 │   ├── services/               # Centralized HTTP API client (Axios/fetch with interceptors)
 │   ├── types/                  # Shared TypeScript interfaces & API response contracts
-│   ├── utils/                  # Formatting helpers, unit converters, accessibility utilities
+│   ├── utils/                  # Formatting helpers, unit converters (mg/dL <-> mmol/L), Intl formatters
 │   ├── App.tsx                 # Root application component with QueryClientProvider & Router
 │   ├── main.tsx                # Application bootstrap & DOM mount
 │   └── index.css               # Tailwind CSS imports & Aethelgard Clinical design tokens

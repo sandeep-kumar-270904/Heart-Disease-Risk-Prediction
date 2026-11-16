@@ -42,9 +42,12 @@ package "Backend Core (FastAPI)" {
         [PrivacyService]
         [ReportService]
         [AuditService]
+        [CountryAdapters]
     }
     package "core_infrastructure" {
         [ConfigSettings]
+        [CountryRegistry]
+        [BiomarkerUnitConverter]
         [SecurityCrypto]
         [DatabaseEngine]
         [StructuredLogging]

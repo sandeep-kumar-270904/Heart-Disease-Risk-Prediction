@@ -36,6 +36,7 @@ This matrix ensures that:
 | **OBJ-4: Enterprise Reliability** | Audit all system, security, and clinical access events immutably. | **REQ-AUD-01** | NFR-OBS-01, NFR-DAT-01 | Module 20 (Audit) | All mutations and views generate immutable append-only rows. | `test_immutable_audit_logging_pipeline` |
 | **OBJ-5: Inclusive Usability** | Accessible intake form with real-time range validation. | **REQ-ASSESS-01** | NFR-ACC-01, NFR-ACC-02 | Module 4 (Intake) | Wizard validates 13 biomarkers; full keyboard navigation. | `test_biomarker_intake_validation_and_keyboard` |
 | **OBJ-5: Inclusive Usability** | Public educational portal and anonymous explainability sandbox. | **REQ-PUB-01**, **REQ-PUB-02** | NFR-PERF-01, NFR-ACC-01 | Module 1 (Public) | Zero tracking; synthetic sandbox operates without registration. | `test_public_sandbox_stateless_execution_e2e` |
+| **OBJ-6: Global Adaptability** | Access directories, verification, units, and guidelines by country. | **REQ-GEO-01**, **REQ-GEO-02** | NFR-USE-01, NFR-DAT-01 | Modules 11, 12, 13 (Global) | Zero national hardcoding; unit converter ($\text{mg/dL} \leftrightarrow \text{mmol/L}$) accurate. | `test_country_profile_unit_conversion_and_adapters` |
 
 ---
 

@@ -65,6 +65,7 @@ HeartXAI 2.0 adopts a **Modular Monolith** backend paired with a **Single-Page A
 - **Persistence:** PostgreSQL 16 sole production relational database with Alembic bidirectional migrations; qualified SQLite unit-testing harness.
 - **Perimeter Proxy:** Nginx 1.26 Stable Alpine terminating TLS 1.3 with automated rate limiting and security headers.
 - **ML Subsystem:** Pre-warmed, in-process Scikit-learn, XGBoost, and C++ TreeSHAP runtime.
+- **Global Country Configuration:** Country Profile Registry and SPI adapters driving 8 country-configurable modules (directories, verification, insurance, guidelines, compliance, localization, units) without national hardcoding (ADR-011).
 
 ---
 
@@ -73,7 +74,7 @@ HeartXAI 2.0 adopts a **Modular Monolith** backend paired with a **Single-Page A
 ```mermaid
 graph TB
     subgraph ClientTier ["Client Tier (Browser / Mobile)"]
-        SPA["React 18 / TypeScript SPA\n(Tailwind CSS, SVG Charting, Zod Validation)"]
+        SPA["React 18 / TypeScript SPA\n(Tailwind CSS, SVG Charting, Zod Validation, Unit Toggle)"]
     end
 
     subgraph IngressTier ["Perimeter & Ingress Tier"]
@@ -99,7 +100,7 @@ graph TB
             S_Privacy["Privacy & Consent Service"]
             S_Report["Report Generator Service (WeasyPrint)"]
             S_Audit["Audit Logging Service"]
-            S_Adapters["Geographic Adapters (India/US)"]
+            S_Country["Country Profile Registry & Adapters (8 Modules)"]
         end
 
         subgraph MLSubsystem ["ML & Explainability Subsystem (In-Process)"]

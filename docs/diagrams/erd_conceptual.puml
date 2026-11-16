@@ -12,6 +12,7 @@ entity "users" as users {
     * full_name : VARCHAR(255)
     * role : VARCHAR(32) [IDX]
     * clinician_status : VARCHAR(32)
+    * country_code : VARCHAR(8)
     * is_active : BOOLEAN
     last_login_at : TIMESTAMP
     * created_at : TIMESTAMP

@@ -24,7 +24,7 @@
 | **ADR-008** | Multi-Jurisdictional Authorization: Explicit Consent Grants vs Open Browsing | **APPROVED** | 2026-11-16 | India DPDP Act 2023, US HIPAA, EU GDPR; patient sovereignty |
 | **ADR-009** | Counterfactual Analysis: Constrained Mathematical Perturbation vs Treatment Prescribing | **APPROVED** | 2026-11-16 | Exploratory 'what-if' model perturbations; not medical advice |
 | **ADR-010** | Deployment & Infrastructure: Docker Compose with Pinned Nginx 1.26 Stable Alpine | **APPROVED** | 2026-11-16 | Pinned supported Stable release series; weekly vulnerability scan |
-| **ADR-011** | Geographic Target Strategy: Multi-Region Configurable Core via Adapter Pattern | **APPROVED** | 2026-11-16 | Pluggable adapters for India (NMC/PIN) and US (CMS/ZIP) |
+| **ADR-011** | Global Geographic Architecture: Configurable by Country via Adapter Pattern | **APPROVED REQUIREMENT** | 2026-11-16 | Zero national hardcoding; 8 country modules; verified sources |
 | **ADR-012** | Backup Cryptography: Authenticated AEAD Encryption with Off-Site WORM Storage | **APPROVED** | 2026-11-16 | AES-256-GCM, S3 Object Lock, empirical restoration test mandate |
 
 ---
@@ -179,18 +179,27 @@
 
 ---
 
-### ADR-011: Geographic Target Strategy — Multi-Region Configurable Core via Adapter Pattern
-- **Context:** HeartXAI originates in India (ANITS, Visakhapatnam), but may operate in India, the US, or international research environments. Hardcoding any single national infrastructure creates technical debt.
-- **Problem:** How should the platform architecture accommodate varying national registries, postal codes, and health directory sources?
+### ADR-011: Global Geographic Architecture — Configurable by Country via Adapter Pattern (APPROVED REQUIREMENT)
+- **Status:** **APPROVED PRODUCT REQUIREMENT** (Governing Product Direction).
+- **Context:** The approved target market for HeartXAI 2.0 is **GLOBAL — CONFIGURABLE BY COUNTRY**. The architecture must not hard-code the United States, India, or any other country as the only supported market. Furthermore, the architecture must avoid claiming worldwide operational coverage or fabricating non-existent global healthcare databases. Launch countries represent a separate product decision.
+- **Problem:** How should the platform architecture accommodate varying national registries, directories, insurance systems, clinical guidelines, privacy laws, and measurement units without embedding country-specific assumptions across the core application?
 - **Options Considered:**
-  1. *Option A:* Hardcode Indian healthcare infrastructure (NMC, PIN codes, ABDM).
-  2. *Option B:* Hardcode US healthcare infrastructure (CMS NPPES, ZIP codes).
-  3. *Option C:* Geographic Strategy / Adapter Pattern with runtime configuration (`HEARTXAI_GEOGRAPHY=IN|US|GLOBAL`).
-- **Decision:** **Option C: Geographic Strategy / Adapter Pattern**.
-- **Reasoning:** Healthcare directories, physician registries, and postal systems vary radically across borders. In India, NMC does not provide a public open REST API, requiring document upload queues or ABDM integration; the US provides CMS NPPES. An adapter architecture encapsulates regional details behind clean interfaces (`IDirectoryProviderAdapter`, `IPhysicianVerificationAdapter`).
-- **Consequences:** Single core codebase supports India, US, or multi-region deployment. Defaults to India (`IN`) during development, matching project provenance.
-- **Risks:** Regional adapters must be maintained against external format changes.
-- **Alternatives Rejected:** Options A and B rejected for lack of geographic flexibility.
+  1. *Option A:* Hardcode single-country assumptions (e.g. US CMS NPPES or India NMC) throughout services and schemas.
+  2. *Option B:* Global Country-Configurable Architecture via Country Profile Registry and Strategy/Adapter Pattern.
+  3. *Option C:* Multiple fork repositories for each target country.
+- **Decision:** **Option B: Global Country-Configurable Architecture via Country Profile Registry and Strategy/Adapter Pattern**.
+- **Reasoning:** Encapsulating all national variations behind strongly typed country profiles and pluggable adapter interfaces satisfies the approved requirement. Core clinical inference, TreeSHAP explanation, and counterfactual solvers remain universal, while 8 country-configurable modules handle regional specifics:
+  1. *Doctor Directories:* Local postal code regex (6-digit PIN, 5-digit ZIP), verified local clinician roster.
+  2. *Hospital Directories:* National boundary queries (PMJAY open data, CMS open data, OSM Overpass with ODbL licensing and rate boundaries).
+  3. *Physician Verification:* Regional licensing workflows (India State Council review queue; US CMS NPPES API; generic document upload queue).
+  4. *Health Insurance Guides:* Country policy navigation (India PMJAY & IRDAI; US ACA § 2713 & Medicare; universal reimbursement checklist).
+  5. *Healthcare Sources & Guidelines:* Authoritative national clinical bodies (India CSI/ICMR; US ACC/AHA; Europe ESC; WHO South Asia charts).
+  6. *Privacy & Regulations:* Jurisdictional data governance (India DPDP Act 2023; US HIPAA; EU GDPR; baseline zero-trust).
+  7. *Languages, Currencies & Dates:* Unicode UTF-8, i18next translation keys, ISO 4217 currencies, IANA timezones, and UTC database storage.
+  8. *Measurement Units & Biomarkers:* Bidirectional conversion engine (`BiomarkerUnitConverter`) supporting $\text{mg/dL} \leftrightarrow \text{mmol/L}$ for cholesterol and fasting glucose, and metric/imperial anthropometrics, while maintaining model-native normalization invariance.
+- **Consequences:** Zero national hardcoding. New countries are onboarded via configuration and adapter plugins without touching core ML or assessment code.
+- **Risks:** Each country profile requires verified external data sources with documented licensing, availability, and failure fallbacks. Full specification detailed in `docs/GLOBAL_COUNTRY_CONFIGURATION_ARCHITECTURE.md`.
+- **Alternatives Rejected:** Option A rejected for violating approved global direction; Option C rejected for creating an unmaintainable multi-codebase maintenance nightmare.
 
 ---
 

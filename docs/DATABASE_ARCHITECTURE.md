@@ -44,6 +44,7 @@ erDiagram
         string full_name
         string role
         string clinician_status
+        string country_code
         boolean is_active
         datetime last_login_at
         datetime created_at
