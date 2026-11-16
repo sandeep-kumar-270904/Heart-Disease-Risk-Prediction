@@ -1,10 +1,13 @@
 # HeartXAI 2.0 — Database Architecture & Conceptual Schema Design
 
-**Document ID:** HXAI-ARCH-010  
-**Version:** 3.0.0  
-**Phase:** Phase 3 — System Architecture & Technical Design  
-**Status:** Approved  
-**Diagram Source:** [`docs/diagrams/erd_conceptual.puml`](file:///c:/Users/edhub/Desktop/Anti%20Gravity%20Projects/heartxai-2.0/docs/diagrams/erd_conceptual.puml)  
+| Document Attribute | Details |
+| :--- | :--- |
+| **Document ID** | `HXAI-ARCH-010` |
+| **Version** | `3.1.0-REVISED` |
+| **Phase** | Phase 3 — System Architecture & Technical Design |
+| **Status** | Approved (Audited & Remediated Baseline) |
+| **Traceability** | `ARCHITECTURE_DECISION_RECORDS.md` (ADR-004, ADR-006), `erd_conceptual.puml` |
+| **Author** | Principal Software Architect, Lead Database Architect, Healthcare Security Reviewer |
 
 ---
 
@@ -14,7 +17,8 @@ HeartXAI 2.0 requires uncompromising data integrity, ACID transactional guarante
 1. **Relational Data Integrity:** Foreign keys enforce parent-child dependencies (`users` $\rightarrow$ `assessments` $\rightarrow$ `inference_results` $\rightarrow$ `shap_explanations`), preventing orphaned records.
 2. **Patient Data Sovereignty & Isolation:** Records are partitioned logically by `patient_id`. Multi-tenant security rules guarantee that no user can query another individual's clinical biomarkers without an active, explicit consent grant.
 3. **Auditability & Append-Only History:** All security, authentication, and clinical data access events are persisted in an immutable `audit_logs` table.
-4. **Dual-Engine Operational Resilience:** Standard SQL types allow seamless execution against PostgreSQL 15+ in production containers and SQLite in local developer/testing environments.
+4. **PostgreSQL 16 Sole Production Persister:** PostgreSQL 16 is the authoritative database engine for production and staging environments, utilizing native JSONB binary indexing, MVCC row-level locking, and strict static type constraints.
+5. **Qualified SQLite Testing Harness:** SQLite is used strictly as a fast, in-memory/file-based unit-testing harness for local development. Full compatibility with PostgreSQL is explicitly disclaimed.
 
 ---
 
@@ -59,37 +63,33 @@ erDiagram
     assessments {
         string id PK
         string patient_id FK
-        string clinician_id FK
-        string status
-        int age
+        float age
         int sex
-        int cp
-        int trestbps
-        int chol
-        int fbs
-        int restecg
-        int thalach
-        int exang
-        float oldpeak
-        int slope
-        int ca
-        int thal
+        int chest_pain_type
+        float resting_bp
+        float serum_cholesterol
+        int fasting_blood_sugar
+        int resting_ecg
+        float max_heart_rate
+        int exercise_angina
+        float st_depression
+        int st_slope
+        int fluoroscopy_vessels
+        int thallium_scan
+        string status
         datetime created_at
     }
 
     inference_results {
         string id PK
         string assessment_id FK, UK
-        string model_version
         float cad_probability
         string cad_risk_tier
-        float confidence_interval_low
-        float confidence_interval_high
         float ascvd_10yr_risk
         string ascvd_risk_tier
-        float base_expected_value
-        float raw_decision_margin
-        boolean is_out_of_distribution
+        string model_version
+        string model_checksum
+        float inference_latency_ms
         datetime computed_at
     }
 
@@ -99,29 +99,28 @@ erDiagram
         string feature_name
         float feature_value
         float shap_value
+        float base_value
         int rank_importance
-        string directional_impact
-        string clinical_interpretation
+        string clinical_direction
     }
 
     counterfactual_profiles {
         string id PK
         string inference_id FK
-        float target_risk_threshold
-        float achieved_risk_probability
-        json modified_biomarkers
-        json immutable_biomarkers
-        float l1_normalized_distance
-        string feasibility_rating
-        datetime created_at
+        string target_class
+        float target_probability
+        json modifications
+        float l1_distance
+        boolean is_feasible
+        datetime computed_at
     }
 
     patient_doctor_grants {
         string id PK
         string patient_id FK
         string doctor_id FK
-        string access_code
         string status
+        string access_scope
         datetime granted_at
         datetime expires_at
         datetime revoked_at
@@ -130,81 +129,22 @@ erDiagram
     clinical_notes {
         string id PK
         string assessment_id FK
-        string author_id FK
-        text note_content
-        string signoff_status
-        datetime signed_at
+        string doctor_id FK
+        string note_text
+        string clinical_impression
         datetime created_at
-    }
-
-    doctors {
-        string id PK
-        string doctor_name
-        string specialization
-        string hospital_name
-        string contact_number
-        string location
-        string email
-        boolean telehealth_available
-    }
-
-    hospitals {
-        string id PK
-        string hospital_name
-        string facility_type
-        string emergency_phone
-        string address
-        string city
-        string state
-        string accreditation_details
-        boolean has_247_cath_lab
-    }
-
-    insurance_policies {
-        string id PK
-        string provider_name
-        string policy_name
-        text coverage_summary
-        float monthly_premium_est
-        int waiting_period_days
-        text exclusions_summary
-    }
-
-    educational_resources {
-        string id PK
-        string title
-        string biomarker_code
-        string summary
-        string guideline_source
-        text diet_plan_summary
-        text exercise_tips_summary
-        text lifestyle_guidance
+        datetime updated_at
     }
 
     audit_logs {
         string id PK
-        datetime timestamp
-        string user_id
-        string role
+        string user_id FK
         string action_type
-        string resource_id
-        string endpoint
-        string method
+        string entity_name
+        string entity_id
         string ip_address
-        int status_code
-        float duration_ms
-    }
-
-    model_registry {
-        string id PK
-        string version UK
-        string algorithm
-        string training_cohort
-        float test_auroc
-        float brier_score
-        string sha256_hash
-        datetime deployed_at
-        int is_active
+        string user_agent
+        datetime timestamp
     }
 ```
 
@@ -214,18 +154,16 @@ erDiagram
 
 | Entity Name | Sensitivity Tier | Data Classification | Security & Privacy Controls |
 | :--- | :--- | :--- | :--- |
-| `users` | **Tier 3 (PII)** | Account Credentials | Bcrypt salted hashing (rounds=12); unique index on `email`. |
-| `patient_profiles` | **Tier 4 (PHI)** | Demographics | 1:1 foreign key; accessible strictly by owning patient. |
-| `assessments` | **Tier 4 (PHI)** | Clinical Biomarkers | Scoped strictly to `patient_id`; cascading deletion on user erasure. |
-| `inference_results` | **Tier 4 (PHI)** | Risk Probabilities | Derived from assessment; immutable once computed. |
-| `shap_explanations` | **Tier 4 (PHI)** | Local Feature Weights | Exactly 13 rows per inference; mathematical invariance verified. |
-| `counterfactual_profiles`| **Tier 4 (PHI)** | Lifestyle Targets | JSON parameter maps; immutable biological traits locked. |
-| `patient_doctor_grants` | **Tier 3 (PII)** | Consent Records | Time-bounded; checked by authorization middleware on every doctor request. |
+| `users` | **Tier 3 (PII)** | Account Credentials | Argon2id salted hashing ($m=65536, t=3, p=4$); unique index on `email`. |
+| `patient_profiles` | **Tier 4 (PHI)** | Demographics | 1:1 foreign key; accessible strictly by owning patient or authorized clinician. |
+| `assessments` | **Tier 4 (PHI)** | Clinical Biomarkers | Scoped strictly to `patient_id`; cascading deletion on user account erasure. |
+| `inference_results` | **Tier 4 (PHI)** | Model Risk Scores | Derived from assessment; immutable once computed. Retrospective CAD score separated from ASCVD. |
+| `shap_explanations` | **Tier 4 (PHI)** | Local Feature Weights | Exactly 13 rows per inference; mathematical invariance verified ($\|f(x) - \sum \phi\| \le 10^{-5}$). |
+| `counterfactual_profiles`| **Tier 4 (PHI)** | Exploratory Perturbations| JSON parameter maps; immutable biological traits locked. Framed as model what-ifs, not prescriptions. |
+| `patient_doctor_grants` | **Tier 3 (PII)** | Consent Records | Time-bounded; checked by authorization middleware on every doctor request. Multi-jurisdiction compliance. |
 | `clinical_notes` | **Tier 4 (PHI)** | Physician Notes | Attached to assessment; author validated as holding an active grant. |
-| `doctors`, `hospitals` | **Tier 1 (PUB)** | Public Directory | Public directory read access; modified only by `ADMIN`. |
-| `insurance_policies` | **Tier 1 (PUB)** | Insurance Guides | Public educational access; ACA preventative guidelines. |
-| `educational_resources` | **Tier 1 (PUB)** | Clinical Guides | Traceable ACC/AHA guidance; curated content. |
-| `audit_logs` | **Tier 2 (ADM)** | Security Forensics | Append-only; disallows SQL `UPDATE` and `DELETE`; retained 6 years. |
+| `doctor_profiles`, `facilities` | **Tier 1 (PUB)** | Public Directory | Public directory read access; modified only by `ADMIN`. Configurable for India and US. |
+| `audit_logs` | **Tier 2 (ADM)** | Security Forensics | Append-only database triggers; disallows SQL `UPDATE` and `DELETE`; retained 7 years. |
 | `model_registry` | **Tier 2 (ADM)** | MLOps Lineage | Cryptographic SHA-256 hash verified at boot. |
 
 ---
@@ -255,6 +193,47 @@ To completely eliminate Insecure Direct Object References (IDOR) and cross-tenan
 | `users` | `ix_users_role_status` | `role, clinician_status` | Fast retrieval of pending clinician approval queue. |
 | `assessments` | `ix_assessments_patient_created` | `patient_id, created_at` | Optimizes longitudinal historical time-series queries. |
 | `inference_results` | `ix_inference_assessment_id` | `assessment_id` (Unique) | Instant 1:1 join with parent assessment. |
-| `shap_explanations` | `ix_shap_inference_rank` | `inference_id, rank_importance` | Fast sorted retrieval of top 5 risk contributors. |
+| `shap_explanations` | `ix_shap_inference_rank` | `inference_id, rank_importance` | Fast sorted retrieval of top risk contributors. |
 | `patient_doctor_grants`| `ix_grants_patient_doctor_status` | `patient_id, doctor_id, status` | Sub-millisecond clinician access grant validation. |
 | `audit_logs` | `ix_audit_time_action` | `timestamp, action_type` | Fast chronological log filtering in admin audit portal. |
+
+---
+
+## 6. Database Engine Strategy, SQLite Limitations & Testing Boundaries
+
+### 6.1 Production vs. Testing Database Designation
+- **Production & Staging Engine:** **PostgreSQL 16 exclusively**.
+- **Local Unit Testing Engine:** **SQLite 3 in-memory / temporary file** (used strictly for developer agility and sub-second unit test runs).
+
+### 6.2 SQLite Limitations & Incompatibilities (Disclaimed Compatibility)
+The external architecture review demonstrated that PostgreSQL 16 and SQLite cannot be claimed as functionally equivalent. The following divergences exist:
+
+| Feature / Dimension | PostgreSQL 16 (Production) | SQLite 3 (Testing Harness) | Architectural Impact & Handling |
+| :--- | :--- | :--- | :--- |
+| **JSON Storage & Indexing** | Native binary `JSONB` with GIN indexing and containment operators (`@>`, `?|`). | `JSON1` extension storing JSON as unindexed plain text strings. | Production queries leveraging JSONB binary operators must be wrapped in dialect-specific queries or tested in Postgres CI. |
+| **Concurrency & Locking** | Multi-Version Concurrency Control (MVCC) with fine-grained row-level locks (`FOR UPDATE`). | Whole-database file lock. Concurrent async writes trigger `sqlite3.OperationalError: database is locked`. | Concurrent stress tests and multi-worker integrations must run on PostgreSQL, never SQLite. |
+| **Data Type Enforcement** | Strict static type enforcement; fails on type mismatches. | Loose dynamic type affinity (stores arbitrary text in integer columns). | Pydantic v2 schemas at the API layer enforce strict typing before data reaches ORM. |
+| **Foreign Key Enforcement**| Always enforced at database engine level. | Disabled by default unless `PRAGMA foreign_keys = ON;` is explicitly executed per connection. | SQLAlchemy SQLite connector fixture explicitly executes foreign keys pragma. |
+| **Timestamp & Timezone** | Native `TIMESTAMPTZ` with microsecond precision and timezone conversion. | Stored as ISO 8601 text strings or integers; lacks native timezone math. | Application standardizes on UTC datetime objects with explicit ISO serialization. |
+| **Schema Alterations** | Full ACID `ALTER TABLE`, alter column types, add/drop constraints online. | Limited `ALTER TABLE`; dropping or altering columns requires full table recreation. | Alembic migrations must be designed with standard SQLite-compatible syntax or guarded by dialect branches. |
+
+### 6.3 Mandatory PostgreSQL Integration Testing in CI/CD
+To guarantee production reliability:
+1. **Developer Unit Tests:** Developers run `pytest` locally against SQLite for sub-second feedback on model relationships, password hashing, and token lifecycles.
+2. **Mandatory CI/CD Pipeline:** The automated GitHub Actions release workflow spins up a containerized `postgres:16-alpine` service, executes `alembic upgrade head`, and runs the full integration test suite against actual PostgreSQL. No merge to `main` is permitted without passing PostgreSQL integration tests.
+
+### 6.4 Migration & Rollback Strategy (Alembic)
+1. **Bidirectional Migration Verification:** Every Alembic revision script must implement both `upgrade()` and `downgrade()` functions. During testing, every migration is verified via:
+   ```bash
+   alembic upgrade head
+   alembic downgrade base
+   alembic upgrade head
+   ```
+2. **Expand / Contract Pattern:** Schema modifications follow zero-downtime guidelines:
+   - *Phase 1 (Expand):* Add new nullable columns or tables; deploy backend code that writes to both old and new columns.
+   - *Phase 2 (Migrate):* Backfill existing rows via asynchronous background script.
+   - *Phase 3 (Contract):* Deploy backend code that reads exclusively from new columns; remove old columns in subsequent release.
+
+---
+
+*Certified and sealed by Principal Software Architect & Lead Database Architect.*

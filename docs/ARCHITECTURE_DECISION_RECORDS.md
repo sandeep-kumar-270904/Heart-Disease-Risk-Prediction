@@ -1,32 +1,36 @@
 # HeartXAI 2.0 — Architecture Decision Records (ADRs)
 
-**Document ID:** HXAI-ARCH-002  
-**Version:** 3.0.0  
-**Phase:** Phase 3 — System Architecture & Technical Design  
-**Status:** Approved / Core Architectural Baseline  
-**Author:** Principal Software Architect & Lead Systems Analyst  
+| Document Attribute | Details |
+| :--- | :--- |
+| **Document ID** | `HXAI-ARCH-002` |
+| **Version** | `3.1.0-REVISED` |
+| **Phase** | Phase 3 — System Architecture & Technical Design |
+| **Status** | Approved / Core Architectural Baseline (Audited & Remediated) |
+| **Author** | Principal Software Architect & Healthcare Security Reviewer |
 
 ---
 
 ## Index of Architecture Decision Records
 
-| ADR ID | Decision Title | Status | Date |
-| :--- | :--- | :--- | :--- |
-| **ADR-001** | Macro Architecture: Modular Monolith vs Microservices | **APPROVED** | 2026-11-16 |
-| **ADR-002** | Frontend Stack: React 18/19 SPA with Vite vs Next.js Fullstack | **APPROVED** | 2026-11-16 |
-| **ADR-003** | Backend Runtime: Python 3.11+ FastAPI vs Node.js / Go | **APPROVED** | 2026-11-16 |
-| **ADR-004** | Persistence Engine: PostgreSQL with Dual-Dialect SQLite Fallback | **APPROVED** | 2026-11-16 |
-| **ADR-005** | ML Serving Architecture: In-Process Serialized Pipeline vs Model Server | **APPROVED** | 2026-11-16 |
-| **ADR-006** | Explainable AI Technique: Exact C++ TreeSHAP vs Model-Agnostic LIME | **APPROVED** | 2026-11-16 |
-| **ADR-007** | Session & Security Model: HttpOnly SameSite=Strict Cookies vs LocalStorage | **APPROVED** | 2026-11-16 |
-| **ADR-008** | Doctor-Patient Authorization: Explicit Time-Bounded Grants vs Open Browsing | **APPROVED** | 2026-11-16 |
-| **ADR-009** | Counterfactual Optimization: Constrained Clinical L1 Step Search vs Unconstrained | **APPROVED** | 2026-11-16 |
-| **ADR-010** | Deployment Topology: Multi-Stage Docker Compose vs Distributed Kubernetes | **APPROVED** | 2026-11-16 |
+| ADR ID | Decision Title | Status | Date | Primary Governance Impact |
+| :--- | :--- | :--- | :--- | :--- |
+| **ADR-001** | Macro Architecture: Modular Monolith vs Microservices | **APPROVED** | 2026-11-16 | Single-process operational simplicity, sub-300ms ML latency |
+| **ADR-002** | Frontend Stack: React 18 SPA with Vite vs Next.js Fullstack | **APPROVED** | 2026-11-16 | Static edge distribution, zero Node.js server overhead |
+| **ADR-003** | Backend Runtime: Python 3.11+ FastAPI vs Node.js / Go | **APPROVED** | 2026-11-16 | Native async ASGI, native C++ ML/TreeSHAP interop |
+| **ADR-004** | Persistence Engine: PostgreSQL 16 Production with Qualified SQLite Unit-Test Harness | **APPROVED** | 2026-11-16 | PostgreSQL 16 mandatory for prod/CI; SQLite limitations disclaimed |
+| **ADR-005** | ML Serving & Clinical Scope: In-Process Retrospective CAD Classifier vs Prospective Risk | **APPROVED** | 2026-11-16 | Strict distinction: retrospective CAD classifier vs 10-yr ASCVD |
+| **ADR-006** | Explainable AI Technique: Exact C++ TreeSHAP Mathematical Attribution vs LIME | **APPROVED** | 2026-11-16 | Mathematical feature attribution; disclaimed as causal medical proof |
+| **ADR-007** | Session & Security Model: HttpOnly SameSite=Strict Cookies vs LocalStorage | **APPROVED** | 2026-11-16 | OWASP 2024 compliance, zero JavaScript XSS token exposure |
+| **ADR-008** | Multi-Jurisdictional Authorization: Explicit Consent Grants vs Open Browsing | **APPROVED** | 2026-11-16 | India DPDP Act 2023, US HIPAA, EU GDPR; patient sovereignty |
+| **ADR-009** | Counterfactual Analysis: Constrained Mathematical Perturbation vs Treatment Prescribing | **APPROVED** | 2026-11-16 | Exploratory 'what-if' model perturbations; not medical advice |
+| **ADR-010** | Deployment & Infrastructure: Docker Compose with Pinned Nginx 1.26 Stable Alpine | **APPROVED** | 2026-11-16 | Pinned supported Stable release series; weekly vulnerability scan |
+| **ADR-011** | Geographic Target Strategy: Multi-Region Configurable Core via Adapter Pattern | **APPROVED** | 2026-11-16 | Pluggable adapters for India (NMC/PIN) and US (CMS/ZIP) |
+| **ADR-012** | Backup Cryptography: Authenticated AEAD Encryption with Off-Site WORM Storage | **APPROVED** | 2026-11-16 | AES-256-GCM, S3 Object Lock, empirical restoration test mandate |
 
 ---
 
 ### ADR-001: Macro Architecture — Modular Monolith vs. Microservices
-- **Context:** HeartXAI 2.0 is being developed by a solo principal engineer. The platform requires high clinical data integrity, strict ACID transactions, and sub-300ms inference latency across multiple interconnected modules (auth, intake, inference, XAI, counterfactuals, audit).
+- **Context:** HeartXAI 2.0 is being developed by an individual engineer using Google Antigravity. The platform requires high clinical data integrity, strict ACID transactions, and sub-300ms inference latency across interconnected modules (auth, intake, inference, XAI, counterfactuals, audit).
 - **Problem:** What overarching architectural style best balances developer velocity, operational reliability, data consistency, and performance?
 - **Options Considered:**
   1. *Option A:* Microservices architecture with independent containerized services communicating over HTTP/gRPC or Kafka message broker.
@@ -40,13 +44,13 @@
 
 ---
 
-### ADR-002: Frontend Architecture — React 18/19 SPA with Vite vs. Next.js Fullstack
+### ADR-002: Frontend Architecture — React 18 SPA with Vite vs. Next.js Fullstack
 - **Context:** The frontend requires complex, interactive client-side widgets: SVG SHAP waterfall plots, real-time debounced what-if sliders, multi-step intake wizards, and responsive time-series charts.
 - **Problem:** Should the frontend be built as a decoupled Single-Page Application (SPA) or a Server-Side Rendered (SSR) full-stack framework like Next.js?
 - **Options Considered:**
-  1. *Option A:* React SPA with TypeScript, Vite, and Tailwind CSS.
+  1. *Option A:* React 18 SPA with TypeScript, Vite, and Tailwind CSS.
   2. *Option B:* Next.js 14/15 App Router with Node.js SSR.
-- **Decision:** **Option A: React 18/19 SPA with Vite and Tailwind CSS**.
+- **Decision:** **Option A: React 18 SPA with Vite and Tailwind CSS**.
 - **Reasoning:** HeartXAI 2.0 is a highly interactive, authenticated medical application. Core prediction and explanation logic runs on a Python FastAPI backend. Using Next.js would require running and deploying two separate backend runtimes (Node.js for SSR + Python for ML), doubling deployment complexity. A pure static SPA compiled by Vite can be served directly from Nginx with sub-50ms caching, letting the browser handle interactive rendering.
 - **Consequences:** Eliminates Node.js production runtime; lightning-fast Vite Hot Module Replacement (HMR); frontend builds to pure static HTML/JS/CSS assets.
 - **Risks:** Initial bundle load must be optimized with code-splitting (`React.lazy`) to prevent slow first contentful paint on mobile.
@@ -69,48 +73,49 @@
 
 ---
 
-### ADR-004: Persistence Engine — PostgreSQL with Dual-Dialect SQLite Fallback
-- **Context:** The application stores relational data with strict parent-child constraints (`users` $\rightarrow$ `assessments` $\rightarrow$ `inference_results` $\rightarrow$ `shap_explanations`).
-- **Problem:** What database engine ensures production reliability while permitting frictionless local developer agility?
+### ADR-004: Persistence Engine — PostgreSQL 16 Production with Qualified SQLite Unit-Test Harness
+- **Context:** The application stores relational data with parent-child cascades (`users` $\rightarrow$ `assessments` $\rightarrow$ `inference_results` $\rightarrow$ `shap_explanations`).
+- **Problem:** What database engine ensures production reliability, and how should testing environments be architected?
 - **Options Considered:**
-  1. *Option A:* PostgreSQL 15+ exclusively.
-  2. *Option B:* Dual-Dialect SQLAlchemy 2.0 architecture: PostgreSQL default for Docker/production, automated SQLite fallback for local developer testing.
-  3. *Option C:* MongoDB / Document Store.
-- **Decision:** **Option B: Dual-Dialect SQLAlchemy 2.0 with PostgreSQL production default and SQLite fallback**.
-- **Reasoning:** Standardizing on standard SQL datatypes via SQLAlchemy 2.0 and Alembic allows the system to target PostgreSQL 15+ for containerized deployments while executing unit tests and offline development on local SQLite with zero setup friction.
-- **Consequences:** Developers can run the entire backend and test suite offline without Docker running; production deployments leverage PostgreSQL's robust indexing and ACID concurrency.
-- **Risks:** Dialect-specific SQL features (e.g. Postgres-specific array types) must be avoided in favor of standard SQL and JSON columns.
-- **Alternatives Rejected:** MongoDB rejected due to absence of relational foreign key cascades, risking orphaned clinical records.
+  1. *Option A:* Claim full dual-dialect transparent compatibility between PostgreSQL 16 and SQLite.
+  2. *Option B:* Designate PostgreSQL 16 as the sole production and staging database; restrict SQLite strictly to lightweight local developer unit testing; mandate PostgreSQL 16 for CI/CD integration testing.
+  3. *Option C:* Mandatory local Dockerized PostgreSQL for all test tiers.
+- **Decision:** **Option B: PostgreSQL 16 as sole production/staging database; qualified SQLite for local unit testing; mandatory PostgreSQL 16 in CI/CD integration pipelines**.
+- **Reasoning:** Independent review demonstrated that SQLite lacks native binary JSONB indexing (GIN), lacks row-level locking (causing `database is locked` under concurrency), uses dynamic type affinity, ignores foreign keys without explicit pragma configuration, and lacks native `TIMESTAMPTZ` arithmetic. Transparent compatibility is mathematically and technically false.
+- **Consequences:** Production and staging environments run PostgreSQL 16 exclusively. Local developer unit tests run on SQLite for rapid sub-second feedback. All release pipelines execute integration tests against ephemeral PostgreSQL 16 containers.
+- **Risks:** Dialect-specific migrations must be verified bidirectionally (`upgrade head` $\rightarrow$ `downgrade base` $\rightarrow$ `upgrade head`).
+- **Alternatives Rejected:** Option A rejected as technically inaccurate; Option C rejected because it hinders offline developer velocity on machines without running Docker daemons.
 
 ---
 
-### ADR-005: ML Serving Architecture — In-Process Serialized Pipeline vs. External Model Server
-- **Context:** Models must return calibrated CAD probabilities, 10-year ASCVD risk, and exact TreeSHAP attributions in $< 300\text{ms}$.
-- **Problem:** Should ML models be served in-process within the FastAPI worker or via an external model serving infrastructure (e.g. Triton, TorchServe, TF Serving)?
+### ADR-005: ML Serving & Clinical Scope — In-Process Retrospective CAD Classifier vs. Prospective Risk
+- **Context:** The system incorporates machine learning for cardiovascular decision support.
+- **Problem:** How should the ML model be architecturally scoped, served, and clinically framed?
 - **Options Considered:**
-  1. *Option A:* In-process loading of serialized Scikit-learn/XGBoost pipelines via `joblib`.
-  2. *Option B:* External Model Server (Triton / Seldon Core).
-  3. *Option C:* Microservice executing FastAPI ML worker.
-- **Decision:** **Option A: In-process serialized pipeline loaded at startup**.
-- **Reasoning:** For tabular models with 13 features, XGBoost and TreeSHAP execute in $< 20\text{ms}$ in-process. Deploying an external model server adds network latency, serialization overhead, infrastructure cost, and container orchestration complexity with zero accuracy or throughput benefit.
-- **Consequences:** Model artifact (`heartxai_model_v2.0.0.joblib`) is verified via SHA-256 hash and pre-warmed in memory at startup. Stateless workers scale trivially.
-- **Risks:** Memory footprint increases slightly ($\sim 80\text{MB}$ per worker).
-- **Alternatives Rejected:** External model servers rejected as over-engineered for small-to-medium tabular ensemble models.
+  1. *Option A:* Claim that the ML model calculates a 10-year prospective ASCVD risk.
+  2. *Option B:* Formally define the ML model as a retrospective Angiographic Coronary Artery Disease (CAD) Association Classifier (predicting $\ge 50\%$ diameter stenosis based on historical Cleveland 1988 data), served in-process via C++ XGBoost; separate it strictly from deterministic prospective risk calculators (ACC/AHA 2013 / WHO chart).
+  3. *Option C:* External model serving cluster (Triton / TorchServe).
+- **Decision:** **Option B: In-process retrospective CAD association classifier strictly separated from prospective risk calculators**.
+- **Reasoning:** Conflating a historical angiographic classifier with a prospective 10-year risk estimator is scientifically false and clinically hazardous. Serving in-process yields sub-20ms inference with zero RPC hops.
+- **Consequences:** Model artifact (`heartxai_model_v2.0.0.joblib`) is verified via SHA-256 hash. Clear non-diagnostic educational framing enforced.
+- **Risks:** Users must be educated on the distinction between retrospective CAD classification and prospective longitudinal risk.
+- **Alternatives Rejected:** Option A rejected for scientific inaccuracy; Option C rejected as an unnecessary operational burden.
 
 ---
 
-### ADR-006: Explainable AI Technique — Exact C++ TreeSHAP vs. Model-Agnostic LIME
-- **Context:** Users and clinicians require feature attributions explaining which biomarkers drove the prediction away from the baseline expectation.
+### ADR-006: Explainable AI Technique — Exact C++ TreeSHAP Mathematical Attribution vs. LIME
+- **Context:** Users and clinicians require feature attributions explaining which biomarkers drove the model prediction away from the baseline expectation.
 - **Problem:** Which explainability algorithm provides mathematically rigorous, clinically reproducible explanations?
 - **Options Considered:**
   1. *Option A:* TreeSHAP (Lundberg et al., *Nature Machine Intelligence* 2020) using optimized C++ tree-traversal.
   2. *Option B:* LIME (Local Interpretable Model-agnostic Explanations).
   3. *Option C:* Permutation Feature Importance.
 - **Decision:** **Option A: Exact C++ TreeSHAP**.
-- **Reasoning:** TreeSHAP has proven game-theoretic properties: efficiency (additivity), symmetry, and dummy player nullity. The sum of Shapley values is guaranteed to equal $f(x) - \mathbb{E}[f(x)]$. LIME relies on random sampling perturbations and produces non-deterministic explanations that can vary between identical runs on the same patient, which is clinically unacceptable.
+- **Reasoning:** TreeSHAP has proven game-theoretic properties: efficiency (additivity), symmetry, and dummy player nullity. The sum of Shapley values is guaranteed to equal $f(x) - \mathbb{E}[f(x)]$. LIME relies on random sampling perturbations and produces non-deterministic explanations that can vary between identical runs on the same patient.
+- **Scientific Qualification:** SHAP values represent **mathematical feature attributions of the trained tree model**, NOT causal medical evidence or biological etiology.
 - **Consequences:** 100% deterministic explanations; guaranteed mathematical invariance ($\le 10^{-5}$); execution time $< 25\text{ms}$.
 - **Risks:** Requires tree-based ensemble models (XGBoost, Random Forest).
-- **Alternatives Rejected:** LIME rejected for non-determinism; Permutation Importance rejected because it provides only global, not local patient-specific explanations.
+- **Alternatives Rejected:** LIME rejected for non-determinism; Permutation Importance rejected because it provides only global explanations.
 
 ---
 
@@ -129,45 +134,79 @@
 
 ---
 
-### ADR-008: Doctor-Patient Authorization — Explicit Time-Bounded Grants vs. Open Browsing
+### ADR-008: Multi-Jurisdictional Authorization — Explicit Consent Grants vs. Open Browsing
 - **Context:** Doctors registered on HeartXAI 2.0 need to review patient assessments and append clinical notes.
-- **Problem:** What authorization model ensures doctors can access patient charts without violating HIPAA Privacy rules or patient sovereignty?
+- **Problem:** What authorization model ensures doctors can access patient charts without violating healthcare data protection laws?
 - **Options Considered:**
   1. *Option A:* Role-based open directory: any verified clinician can search and view all patient records.
   2. *Option B:* Patient-gated time-bounded consent grants (`patient_doctor_grants`).
   3. *Option C:* Static clinic organization assignment.
 - **Decision:** **Option B: Explicit, patient-gated time-bounded consent grants**.
-- **Reasoning:** The HIPAA Privacy Rule (45 CFR § 164.508) mandates explicit patient authorization for disclosing protected health information. Gating doctor access behind an explicit, time-bounded grant (with instant patient revocation rights) completely prevents unauthorized medical snooping and establishes clear legal compliance.
+- **Reasoning:** India's Digital Personal Data Protection Act, 2023 (DPDP Act) and the US HIPAA Privacy Rule mandate explicit, purpose-limited patient consent for sharing health information. Gating doctor access behind an explicit, time-bounded grant (with instant patient revocation rights) establishes multi-jurisdictional legal compliance and patient sovereignty.
 - **Consequences:** Backend authorization middleware verifies grant validity on every clinician request; clinicians only see patients who have explicitly granted them access.
 - **Risks:** If a patient's grant expires during a consultation, the doctor cannot view the chart until re-authorized.
-- **Alternatives Rejected:** Open browsing strictly rejected as an egregious HIPAA violation.
+- **Alternatives Rejected:** Open browsing strictly rejected as an egregious legal violation.
 
 ---
 
-### ADR-009: Counterfactual Optimization — Constrained Clinical L1 Step Search vs. Unconstrained
-- **Context:** The system must compute realistic lifestyle biomarker modifications that reduce predicted risk.
-- **Problem:** How should counterfactual optimization be formulated to guarantee medically plausible advice?
+### ADR-009: Counterfactual Analysis — Constrained Mathematical Perturbation vs. Treatment Prescribing
+- **Context:** The system evaluates hypothetical biomarker modifications that reduce model output scores.
+- **Problem:** How should counterfactual optimization be formulated and clinically framed?
 - **Options Considered:**
-  1. *Option A:* Unconstrained gradient or boundary descent.
-  2. *Option B:* Constrained discrete clinical step search with locked biological immutability (Age, Sex, Anatomy) and safe physiological boundaries.
-  3. *Option C:* External library (DiCE) with deep neural network backend.
-- **Decision:** **Option B: Constrained discrete clinical step search with locked biological immutability**.
-- **Reasoning:** Unconstrained optimization can produce absurd advice (e.g. "become 20 years younger" or "reduce systolic BP to 40 mmHg"). Constraining perturbations to modifiable features and evaluating discrete clinical steps (e.g. 5, 10, 15 mmHg BP reductions) guarantees that every recommendation represents actionable, safe lifestyle targets.
-- **Consequences:** 100% of counterfactual solutions are physiologically safe; runs in $< 15\text{ms}$.
-- **Risks:** In extreme cases (advanced age with multiple blocked vessels), target risk may be unreachable. The system must report this gracefully.
-- **Alternatives Rejected:** Unconstrained optimization rejected as clinically hazardous.
+  1. *Option A:* Frame counterfactuals as personalized medical treatment recommendations.
+  2. *Option B:* Constrained discrete L1 step search with locked biological immutability (Age, Sex, Anatomy) and safe physiological boundaries, framed strictly as exploratory model perturbations.
+  3. *Option C:* Unconstrained gradient descent.
+- **Decision:** **Option B: Constrained discrete clinical step search framed strictly as exploratory model perturbations**.
+- **Reasoning:** Unconstrained optimization produces absurd suggestions (e.g. "become 20 years younger"). Software cannot prescribe clinical treatment without medical device certification. Framing counterfactuals as hypothetical model "what-if" perturbations preserves scientific rigor and patient safety.
+- **Consequences:** 100% of counterfactual solutions are physiologically bounded; executes in $< 15\text{ms}$. Non-diagnostic medical disclaimer rendered prominently.
+- **Risks:** In severe anatomical disease, target scores may be mathematically unreachable; system gracefully communicates this boundary.
+- **Alternatives Rejected:** Option A rejected for regulatory liability; Option C rejected as physiologically impossible.
 
 ---
 
-### ADR-010: Deployment Topology — Multi-Stage Docker Compose vs. Kubernetes
+### ADR-010: Deployment & Infrastructure — Docker Compose with Pinned Nginx 1.26 Stable Alpine
 - **Context:** Packaging and orchestrating the frontend, backend, and PostgreSQL database for development, staging, and initial production.
-- **Problem:** What container orchestration framework matches the needs of a solo-developer project?
+- **Problem:** What container orchestration framework matches the needs of a solo-developer project, and how should edge proxy versions be maintained?
 - **Options Considered:**
-  1. *Option A:* Docker Compose with multi-stage Dockerfiles.
-  2. *Option B:* Kubernetes (K8s) with Helm charts and ingress controllers.
-  3. *Option C:* Bare metal / non-containerized virtual machine scripts.
-- **Decision:** **Option A: Multi-Stage Docker Compose**.
-- **Reasoning:** Docker Compose provides reproducible, zero-drift environments with a single command (`docker-compose up -d --build`). Kubernetes introduces immense operational complexity (etcd, kubelet, ingress, CNI) that requires dedicated DevOps staff and provides zero benefit for a modular monolith deployment.
-- **Consequences:** Lean, multi-stage Dockerfiles ($< 250\text{MB}$ frontend, $< 550\text{MB}$ backend); internal isolated network bridge; straightforward persistent volume backups.
-- **Risks:** Single-node deployment; failover requires automated VM snapshotting.
-- **Alternatives Rejected:** Kubernetes rejected as massive overkill and maintenance liability.
+  1. *Option A:* Docker Compose with floating or outdated mainline Nginx images (e.g. `nginx:1.25-alpine`).
+  2. *Option B:* Docker Compose pinning to active **Nginx Stable branch (`nginx:1.26-alpine`)** with documented vulnerability scanning and patching lifecycle.
+  3. *Option C:* Kubernetes (K8s) with Helm charts and ingress controllers.
+- **Decision:** **Option B: Multi-Stage Docker Compose with pinned Nginx 1.26 Stable Alpine**.
+- **Reasoning:** Nginx 1.25 was a mainline development release retired in April 2024. Production stability requires pinning to the supported Stable branch (`1.26.x`). Docker Compose provides reproducible environments with single-command boot (`docker-compose up -d --build`). Kubernetes introduces immense operational complexity with zero benefit for a modular monolith.
+- **Consequences:** Lean, multi-stage Dockerfiles; weekly Trivy vulnerability scanning; Dependabot automated container updates; zero-downtime hot reloading (`nginx -s reload`).
+- **Risks:** Single-node deployment; failover requires automated snapshot restore.
+- **Alternatives Rejected:** Option A rejected for unmaintained mainline risk; Option C rejected as excessive DevOps overhead.
+
+---
+
+### ADR-011: Geographic Target Strategy — Multi-Region Configurable Core via Adapter Pattern
+- **Context:** HeartXAI originates in India (ANITS, Visakhapatnam), but may operate in India, the US, or international research environments. Hardcoding any single national infrastructure creates technical debt.
+- **Problem:** How should the platform architecture accommodate varying national registries, postal codes, and health directory sources?
+- **Options Considered:**
+  1. *Option A:* Hardcode Indian healthcare infrastructure (NMC, PIN codes, ABDM).
+  2. *Option B:* Hardcode US healthcare infrastructure (CMS NPPES, ZIP codes).
+  3. *Option C:* Geographic Strategy / Adapter Pattern with runtime configuration (`HEARTXAI_GEOGRAPHY=IN|US|GLOBAL`).
+- **Decision:** **Option C: Geographic Strategy / Adapter Pattern**.
+- **Reasoning:** Healthcare directories, physician registries, and postal systems vary radically across borders. In India, NMC does not provide a public open REST API, requiring document upload queues or ABDM integration; the US provides CMS NPPES. An adapter architecture encapsulates regional details behind clean interfaces (`IDirectoryProviderAdapter`, `IPhysicianVerificationAdapter`).
+- **Consequences:** Single core codebase supports India, US, or multi-region deployment. Defaults to India (`IN`) during development, matching project provenance.
+- **Risks:** Regional adapters must be maintained against external format changes.
+- **Alternatives Rejected:** Options A and B rejected for lack of geographic flexibility.
+
+---
+
+### ADR-012: Backup Cryptography — Authenticated AEAD Encryption with Off-Site WORM Storage
+- **Context:** HeartXAI handles clinical and assessment data requiring disaster recovery protection.
+- **Problem:** What cryptographic cipher, key management, and replication strategy ensures backup integrity, confidentiality, and recoverability?
+- **Options Considered:**
+  1. *Option A:* Unauthenticated AES-256-CBC stored on local Docker volumes.
+  2. *Option B:* Authenticated Encryption with Associated Data (AEAD) via AES-256-GCM, automated key rotation, off-site S3 Object Lock (WORM) replication, and mandatory monthly restoration testing drills.
+  3. *Option C:* Unencrypted pg_dump scripts.
+- **Decision:** **Option B: Authenticated AES-256-GCM with off-site S3 WORM replication and empirical restoration test mandate**.
+- **Reasoning:** Independent review proved that unauthenticated AES-256-CBC is vulnerable to padding oracle and ciphertext tampering attacks. Storing backups solely on the host risks total loss during disk failure or ransomware. S3 Object Lock in Compliance Mode prevents backup deletion. Crucially, recoverability cannot be claimed without regular restoration testing.
+- **Consequences:** Backups carry 128-bit authentication tags; immutable off-site archive; dedicated backup IAM role with `PutObject` permission only; automated monthly restoration test script (`restore_verify.sh`).
+- **Risks:** Requires secure off-site credentials and KMS key management.
+- **Alternatives Rejected:** Option A rejected for cryptographic and disaster recovery vulnerabilities; Option C rejected as an egregious HIPAA/DPDP violation.
+
+---
+
+*Certified and sealed by Principal Software Architect & Healthcare Security Reviewer.*

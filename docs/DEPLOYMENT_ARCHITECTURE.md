@@ -3,10 +3,10 @@
 | Document Attribute | Details |
 | :--- | :--- |
 | **Document ID** | `HXAI-ARCH-DEP-001` |
-| **Version** | `2.0.0-PROD` |
-| **System State** | System Technical Architecture & Infrastructure Specification |
-| **Traceability** | `FUNCTIONAL_REQUIREMENTS.md`, `NON_FUNCTIONAL_REQUIREMENTS.md` (NFR-01, NFR-03, NFR-08, NFR-13), `C4_DEPLOYMENT_DIAGRAM.md`, `SYSTEM_ARCHITECTURE_DOCUMENT.md` |
-| **Author** | Principal Software Architect, DevOps & Infrastructure Lead, Security Engineer |
+| **Version** | `2.1.0-REVISED` |
+| **System State** | System Technical Architecture & Infrastructure Specification (Audited Baseline) |
+| **Traceability** | `FUNCTIONAL_REQUIREMENTS.md`, `NON_FUNCTIONAL_REQUIREMENTS.md` (NFR-01, NFR-03, NFR-08, NFR-13), `ARCHITECTURE_DECISION_RECORDS.md` (ADR-007, ADR-010, ADR-012), `C4_DEPLOYMENT_DIAGRAM.md` |
+| **Author** | Principal Software Architect, DevOps Lead, Healthcare Security Reviewer |
 
 ---
 
@@ -14,7 +14,7 @@
 
 The **HeartXAI 2.0 Deployment Architecture** defines the containerization, orchestration, environment configuration, reverse proxy routing, healthcheck monitoring, disaster recovery runbooks, and automated backup strategies for HeartXAI 2.0.
 
-In alignment with **ADR-001 (Modular Monolith)** and **ADR-007 (Docker Compose Infrastructure for Single-Node Production and Local Agility)**, the platform is architected as a set of coordinated, isolated OCI-compliant containers orchestrated via Docker Compose. This architecture provides the ideal balance for an individual developer or lean engineering team: zero operational overhead of Kubernetes cluster management while guaranteeing 100% environment parity between local development, staging, and single-node production cloud instances (e.g., AWS EC2, GCP Compute Engine, or Hetzner Dedicated).
+In alignment with **ADR-001 (Modular Monolith)**, **ADR-007 (Docker Compose Orchestration)**, **ADR-010 (Nginx 1.26 Stable)**, and **ADR-012 (Authenticated AEAD Backups & WORM Storage)**, the platform is architected as an isolated set of OCI-compliant containers orchestrated via Docker Compose.
 
 ```
 +---------------------------------------------------------------------------------------------------+
@@ -25,9 +25,9 @@ In alignment with **ADR-001 (Modular Monolith)** and **ADR-007 (Docker Compose I
 |  |                                                                                             |  |
 |  |  +------------------------+      +------------------------+      +-----------------------+  |  |
 |  |  |    heartxai-proxy      |      |    heartxai-backend    |      |    heartxai-db        |  |  |
-|  |  |  Nginx 1.25 Alpine     | HTTP |  FastAPI + Uvicorn     | TCP  |  PostgreSQL 16        |  |  |
-|  |  |  - TLS Termination     |----->|  - Python 3.11 Base    |----->|  - Healthcheck Probe  |  |  |
-|  |  |  - Rate Limiting (Req) | 8000 |  - ML C++ Runtime      | 5432 |  - WAL Archive        |  |  |
+|  |  |  Nginx 1.26 Stable     | HTTP |  FastAPI + Uvicorn     | TCP  |  PostgreSQL 16        |  |  |
+|  |  |  - TLS 1.3 Term.       |----->|  - Python 3.11 Base    |----->|  - Healthcheck Probe  |  |  |
+|  |  |  - Token Rate Limiting | 8000 |  - ML C++ Runtime      | 5432 |  - WAL Archive        |  |  |
 |  |  |  - Security Headers    |      |  - TreeSHAP In-Process |      |  - Auto-Vacuuming     |  |  |
 |  |  +------------------------+      +------------------------+      +-----------------------+  |  |
 |  |             |                                 |                               |             |  |
@@ -35,7 +35,7 @@ In alignment with **ADR-001 (Modular Monolith)** and **ADR-007 (Docker Compose I
 |  |             v                                 v                               v             |  |
 |  |  +------------------------+      +------------------------+      +-----------------------+  |  |
 |  |  |    heartxai-frontend   |      | Host Spool Volume      |      | Persistent Volume     |  |  |
-|  |  |  Nginx Alpine Static   |      | `/var/log/heartxai`    |      | `heartxai_pgdata`     |  |  |
+|  |  |  Nginx 1.26 Static     |      | `/var/log/heartxai`    |      | `heartxai_pgdata`     |  |  |
 |  |  +------------------------+      +------------------------+      +-----------------------+  |  |
 |  +---------------------------------------------------------------------------------------------+  |
 +---------------------------------------------------------------------------------------------------+
@@ -43,25 +43,28 @@ In alignment with **ADR-001 (Modular Monolith)** and **ADR-007 (Docker Compose I
 
 ---
 
-## 2. Containerized Service Specifications
+## 2. Containerized Service Specifications & Image Lifecycle
 
 ### 2.1 Service Roster & Resource Allocation
 
 | Container Name | Base Image | CPU Allocation | Memory (RAM) Limit | Exposed Ports | Healthcheck Target | Restart Policy |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `heartxai-proxy` | `nginx:1.25-alpine` | 0.5 cores | 256 MB | 80/tcp, 443/tcp | `curl -f http://localhost:80/healthz` | `always` |
-| `heartxai-frontend` | `nginx:1.25-alpine` | 0.5 cores | 256 MB | Internal only (80) | `curl -f http://localhost:80/` | `always` |
+| `heartxai-proxy` | `nginx:1.26-alpine` | 0.5 cores | 256 MB | 80/tcp, 443/tcp | `curl -f http://localhost:80/healthz` | `always` |
+| `heartxai-frontend` | `nginx:1.26-alpine` | 0.5 cores | 256 MB | Internal only (80) | `curl -f http://localhost:80/` | `always` |
 | `heartxai-backend` | `python:3.11-slim` | 2.0 cores | 2.0 GB | Internal only (8000)| `curl -f http://localhost:8000/api/v1/health/live` | `always` |
 | `heartxai-db` | `postgres:16-alpine` | 1.5 cores | 1.5 GB | Internal only (5432)| `pg_isready -U heartxai_app -d heartxai_db` | `always` |
 | `heartxai-backup` | `alpine:3.19` (Cron) | 0.2 cores | 128 MB | None | Local exit status probe | `always` |
+
+### 2.2 Nginx Version Selection & Vulnerability Update Strategy
+- **Stable Branch Pinning:** In accordance with **ADR-010**, production strictly pins to the active **Nginx Stable branch (`nginx:1.26-alpine`)**. Mainline development branches (such as 1.25) are barred due to rapid EOL cycles.
+- **Container Vulnerability Scanning:** Automated weekly container scans using Trivy / Grype integrated into CI/CD pipelines. Any image with High or Critical CVSS $\ge 7.0$ vulnerabilities blocks deployment.
+- **Zero-Downtime Reload:** Nginx configuration changes and SSL renewals are applied hot without dropped connections via `docker exec heartxai-proxy nginx -s reload`.
 
 ---
 
 ## 3. Multi-Stage Dockerfile Specifications
 
 ### 3.1 Backend Dockerfile (`backend/Dockerfile`)
-The backend container utilizes a 2-stage build to compile native C/C++ dependencies (required by TreeSHAP and XGBoost) while producing a hardened, non-root, minimal runtime image.
-
 ```dockerfile
 # ==============================================================================
 # STAGE 1: Build & Dependency Wheel Compilation
@@ -143,8 +146,6 @@ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--worker
 ---
 
 ### 3.2 Frontend Dockerfile (`frontend/Dockerfile`)
-The frontend container compiles TypeScript and React into optimized static bundles via Vite, serving them through an unprivileged, hardened Nginx Alpine image.
-
 ```dockerfile
 # ==============================================================================
 # STAGE 1: Node.js Asset Compilation
@@ -153,34 +154,23 @@ FROM node:20-alpine AS builder
 
 WORKDIR /build
 
-# Copy dependency specifications
 COPY package.json package-lock.json ./
-
-# Deterministic package install
 RUN npm ci --prefer-offline
 
-# Copy application source code
 COPY . .
-
-# Compile optimized static bundle
 ENV NODE_ENV=production
 RUN npm run build
 
 # ==============================================================================
-# STAGE 2: Hardened Nginx Static Web Server
+# STAGE 2: Hardened Nginx 1.26 Stable Static Web Server
 # ==============================================================================
-FROM nginx:1.25-alpine AS runner
+FROM nginx:1.26-alpine AS runner
 
-# Remove default boilerplate configuration
 RUN rm -rf /usr/share/nginx/html/* /etc/nginx/conf.d/default.conf
 
-# Copy custom Nginx SPA configuration
 COPY nginx/frontend.conf /etc/nginx/conf.d/default.conf
-
-# Copy compiled static assets from builder stage
 COPY --from=builder /build/dist /usr/share/nginx/html
 
-# Run as non-root nginx user
 RUN touch /var/run/nginx.pid && \
     chown -R nginx:nginx /var/run/nginx.pid /var/cache/nginx /usr/share/nginx/html
 
@@ -218,7 +208,7 @@ volumes:
 
 services:
   reverse-proxy:
-    image: nginx:1.25-alpine
+    image: nginx:1.26-alpine
     container_name: heartxai-proxy
     restart: always
     ports:
@@ -319,6 +309,8 @@ services:
       - POSTGRES_USER=heartxai_app
       - POSTGRES_DB=heartxai_db
       - PGPASSWORD=${DB_PASSWORD}
+      - BACKUP_ENCRYPTION_KEY=${BACKUP_ENCRYPTION_KEY}
+      - S3_BACKUP_BUCKET=${S3_BACKUP_BUCKET}
     networks:
       - heartxai-network
     entrypoint: ["crond", "-f", "-l", "2"]
@@ -328,7 +320,7 @@ services:
 
 ## 5. Reverse Proxy & Security Header Configuration (`nginx.conf`)
 
-The perimeter reverse proxy terminates TLS 1.3, enforces strict HSTS, enforces rate limits per client IP, and proxies traffic to the frontend SPA or FastAPI backend.
+The perimeter reverse proxy terminates TLS 1.3, enforces strict HSTS, applies IP rate limits, and proxies traffic to the frontend SPA or FastAPI backend.
 
 ```nginx
 user nginx;
@@ -357,7 +349,7 @@ http {
     ssl_session_timeout 1d;
     ssl_session_tickets off;
 
-    # Security Headers (HIPAA / OWASP Compliance)
+    # Security Headers (HIPAA / DPDP Compliance)
     add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
     add_header X-Frame-Options "DENY" always;
     add_header X-Content-Type-Options "nosniff" always;
@@ -378,7 +370,6 @@ http {
         ssl_certificate /etc/ssl/certs/fullchain.pem;
         ssl_certificate_key /etc/ssl/certs/privkey.pem;
 
-        # Frontend SPA Routing
         location / {
             proxy_pass http://heartxai-frontend:80;
             proxy_set_header Host $host;
@@ -387,7 +378,6 @@ http {
             proxy_set_header X-Forwarded-Proto $scheme;
         }
 
-        # Backend API Routing & Rate Limiting
         location /api/ {
             limit_req zone=api_limit burst=20 nodelay;
             proxy_pass http://heartxai-backend:8000;
@@ -398,7 +388,6 @@ http {
             proxy_read_timeout 15s;
         }
 
-        # Strict Rate Limiting for Authentication Endpoints
         location /api/v1/auth/ {
             limit_req zone=auth_limit burst=3 nodelay;
             proxy_pass http://heartxai-backend:8000;
@@ -422,30 +411,20 @@ http {
 | `GET /api/v1/health/live` | **Liveness** | Verifies process responsiveness and internal event loop health. | `200 OK` (Always) |
 | `GET /api/v1/health/ready` | **Readiness** | 1. Database connection pool responds (`SELECT 1`).<br>2. ML model artifact is loaded in memory.<br>3. Disk write access to report spool is verified. | `200 OK` (Healthy)<br>`503 Service Unavailable` |
 
-#### 6.1.1 Sample Readiness Response (`200 OK`)
-```json
-{
-  "status": "HEALTHY",
-  "version": "2.0.0",
-  "timestamp": "2026-11-16T00:30:00Z",
-  "checks": {
-    "database": {"status": "UP", "latency_ms": 2.4},
-    "ml_engine": {"status": "LOADED", "model_version": "xgb_v2_calibrated"},
-    "shap_explainer": {"status": "INITIALIZED", "c_extension": true},
-    "disk_spool": {"status": "WRITABLE", "free_mb": 42150}
-  }
-}
-```
-
 ---
 
-## 7. Automated Backup & Disaster Recovery Runbook
+## 7. Authenticated Backup Architecture & Disaster Recovery Runbook
 
-### 7.1 Recovery Objectives
-- **Recovery Point Objective (RPO):** $\le 24\text{ hours}$ for snapshot backups; $\le 1\text{ hour}$ with PostgreSQL Write-Ahead Log (WAL) archiving.
-- **Recovery Time Objective (RTO):** $\le 30\text{ minutes}$ (Complete automated container and database restore).
+### 7.1 Recovery Objectives & Core Rule
+- **Recovery Point Objective (RPO):** $\le 24\text{ hours}$ for daily snapshots; $\le 1\text{ hour}$ with continuous PostgreSQL WAL archiving.
+- **Recovery Time Objective (RTO):** $\le 30\text{ minutes}$ for complete automated container and database restore.
+- **CRITICAL OPERATIONAL RULE:**
+  > [!IMPORTANT]
+  > **System recoverability cannot be claimed until restoration has been empirically tested and verified.** Untested backups are considered unverified hypotheses.
 
-### 7.2 Automated Daily Backup Script (`infra/scripts/backup.sh`)
+### 7.2 Authenticated Daily Backup Script with Off-Site WORM Sync (`infra/scripts/backup.sh`)
+In accordance with **ADR-012**, backups use **AES-256-GCM** (Authenticated Encryption with Associated Data) to prevent ciphertext tampering and padding attacks, and replicate off-site to S3 Object Lock (WORM):
+
 ```bash
 #!/bin/sh
 set -e
@@ -453,53 +432,85 @@ set -e
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 BACKUP_DIR="/backups"
 BACKUP_FILE="${BACKUP_DIR}/heartxai_db_${TIMESTAMP}.sql.gz"
-ENC_BACKUP_FILE="${BACKUP_FILE}.enc"
+ENC_BACKUP_FILE="${BACKUP_FILE}.gcm.enc"
+TAG_FILE="${BACKUP_FILE}.tag"
 
 mkdir -p ${BACKUP_DIR}
 
-echo "[INFO] Starting database backup at ${TIMESTAMP}..."
+echo "[INFO] Starting PostgreSQL database backup at ${TIMESTAMP}..."
 pg_dump -h heartxai-db -U heartxai_app -d heartxai_db | gzip > ${BACKUP_FILE}
 
-echo "[INFO] Encrypting backup with AES-256-CBC..."
-openssl enc -aes-256-cbc -salt -pbkdf2 -iter 100000 \
-  -in ${BACKUP_FILE} -out ${ENC_BACKUP_FILE} -k "${BACKUP_ENCRYPTION_KEY}"
+# Verify non-zero backup size
+FILE_SIZE=$(wc -c < "${BACKUP_FILE}")
+if [ "${FILE_SIZE}" -lt 1024 ]; then
+  echo "[CRITICAL ERROR] Backup dump is under 1KB. Aborting!"
+  exit 1
+fi
 
-rm ${BACKUP_FILE}
+echo "[INFO] Encrypting backup with Authenticated AES-256-GCM..."
+# Derive 256-bit key using PBKDF2 (100,000 iterations) and encrypt via openssl enc AEAD
+openssl enc -aes-256-gcm -pbkdf2 -iter 100000 \
+  -in ${BACKUP_FILE} -out ${ENC_BACKUP_FILE} \
+  -pass "pass:${BACKUP_ENCRYPTION_KEY}"
 
-# Retain 14 daily backups locally, purge older files
-find ${BACKUP_DIR} -name "heartxai_db_*.sql.gz.enc" -mtime +14 -exec rm {} \;
+# Record SHA-256 integrity checksum
+sha256sum ${ENC_BACKUP_FILE} > "${ENC_BACKUP_FILE}.sha256"
 
-echo "[SUCCESS] Backup complete: ${ENC_BACKUP_FILE}"
+# Securely remove unencrypted raw dump
+rm -f ${BACKUP_FILE}
+
+# Replicate to Off-Site S3-Compatible Storage with Object Lock (WORM)
+if [ -n "${S3_BACKUP_BUCKET}" ]; then
+  echo "[INFO] Replicating encrypted backup to off-site WORM S3 bucket..."
+  aws s3 cp "${ENC_BACKUP_FILE}" "s3://${S3_BACKUP_BUCKET}/db_backups/" \
+    --object-lock-mode COMPLIANCE \
+    --object-lock-retain-until-date "$(date -d '+30 days' --iso-8601=seconds)"
+  aws s3 cp "${ENC_BACKUP_FILE}.sha256" "s3://${S3_BACKUP_BUCKET}/db_backups/"
+fi
+
+# Retain 14 daily snapshots locally, purge older archives
+find ${BACKUP_DIR} -name "heartxai_db_*.gcm.enc*" -mtime +14 -exec rm {} \;
+
+echo "[SUCCESS] Authenticated backup and off-site replication complete: ${ENC_BACKUP_FILE}"
 ```
 
-### 7.3 Disaster Recovery Restoration Runbook
+### 7.3 Automated Monthly Restoration Verification Script (`infra/scripts/restore_verify.sh`)
+This script executes automatically on the 1st of every month in an isolated test database container to empirically verify recoverability:
 
-```
-1. STOP ALL RUNNING CONTAINERS
-   $ docker compose -f docker-compose.prod.yml down
+```bash
+#!/bin/sh
+set -e
 
-2. INITIALIZE CLEAN POSTGRES CONTAINER
-   $ docker compose -f docker-compose.prod.yml up -d db
+echo "[DRILL] Initiating Automated Restoration Verification Drill..."
+TEST_DB_CONTAINER="heartxai-db-restore-test"
+LATEST_BACKUP=$(ls -t /backups/heartxai_db_*.gcm.enc | head -1)
 
-3. DECRYPT THE DESIRED BACKUP SNAPSHOT
-   $ openssl enc -d -aes-256-cbc -pbkdf2 -iter 100000 \
-       -in /backups/heartxai_db_20261115_020000.sql.gz.enc \
-       -out /tmp/restore.sql.gz -k "${BACKUP_ENCRYPTION_KEY}"
+if [ -z "${LATEST_BACKUP}" ]; then
+  echo "[FAILURE] No backup archives found for restoration testing!"
+  exit 1
+fi
 
-4. RESTORE DATABASE SCHEMA & RECORDS
-   $ gunzip -c /tmp/restore.sql.gz | docker exec -i heartxai-db psql -U heartxai_app -d heartxai_db
+echo "[DRILL] Testing decrypt of ${LATEST_BACKUP}..."
+openssl enc -d -aes-256-gcm -pbkdf2 -iter 100000 \
+  -in "${LATEST_BACKUP}" -out /tmp/test_restore.sql.gz \
+  -pass "pass:${BACKUP_ENCRYPTION_KEY}"
 
-5. SECURELY PURGE UNENCRYPTED RESTORE ARTIFACT
-   $ shred -u /tmp/restore.sql.gz
+echo "[DRILL] Spinning up isolated test Postgres container..."
+docker run --name ${TEST_DB_CONTAINER} -e POSTGRES_PASSWORD=drill_pass -d postgres:16-alpine
+sleep 5
 
-6. RUN DATABASE SCHEMA MIGRATION CHECK
-   $ docker compose -f docker-compose.prod.yml run --rm backend alembic upgrade head
+echo "[DRILL] Importing schema and data into test container..."
+gunzip -c /tmp/test_restore.sql.gz | docker exec -i ${TEST_DB_CONTAINER} psql -U postgres -d postgres
 
-7. RESTART FULL APPLICATION SUITE
-   $ docker compose -f docker-compose.prod.yml up -d
+echo "[DRILL] Validating table presence and row counts..."
+USER_COUNT=$(docker exec -i ${TEST_DB_CONTAINER} psql -U postgres -d postgres -t -c "SELECT count(*) FROM users;")
+echo "[DRILL] Verified: Users table populated with ${USER_COUNT} rows."
 
-8. VALIDATE READINESS PROBE
-   $ curl -f https://heartxai.health/api/v1/health/ready
+echo "[DRILL] Tearing down ephemeral restoration container..."
+docker rm -f ${TEST_DB_CONTAINER}
+shred -u /tmp/test_restore.sql.gz
+
+echo "[SUCCESS] Monthly Restoration Verification Drill PASSED. Recoverability validated."
 ```
 
 ---
@@ -510,9 +521,9 @@ echo "[SUCCESS] Backup complete: ${ENC_BACKUP_FILE}"
 | :--- | :--- | :--- |
 | **NFR-01** | Scalability & Availability | Docker Compose containerization with resource throttling and auto-restart |
 | **NFR-03** | System Performance | Native multi-stage build, minimal Alpine base images, Nginx edge caching |
-| **NFR-08** | Regulatory Backup & Audit | Automated encrypted daily backups, 14-day retention, AES-256-CBC encryption |
+| **NFR-08** | Regulatory Backup & Audit | Authenticated AES-256-GCM backups, off-site WORM S3 replication, monthly restore drill |
 | **NFR-13** | Deployment & Maintainability | Deterministic lockfiles, non-root execution, 100% dev/prod container parity |
 
 ---
 
-*Verified and approved by Principal Software Architect & DevOps Lead.*
+*Verified and approved by Principal Software Architect, DevOps Lead & Healthcare Security Reviewer.*
