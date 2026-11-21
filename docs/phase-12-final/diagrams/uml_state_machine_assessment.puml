@@ -1,0 +1,41 @@
+@startuml uml_state_machine_assessment
+title Clinical Assessment Lifecycle State Machine
+
+[*] --> Draft : Patient initiates intake wizard
+
+Draft --> Draft : Autosave step progress in session
+Draft --> Validating : Patient clicks "Analyze Cardiovascular Profile"
+
+Validating --> Draft : Range or enum validation error (HTTP 422)
+Validating --> Processing : Valid 13-biomarker vector confirmed
+
+state Processing {
+    [*] --> ScalingFeatures
+    ScalingFeatures --> CalculatingCAD : StandardScaler applied
+    CalculatingCAD --> CalculatingASCVD : Calibrated XGBoost inference
+    CalculatingASCVD --> ComputingSHAP : ACC/AHA equations
+    ComputingSHAP --> InvarianceCheck : TreeSHAP C++ traversal
+    InvarianceCheck --> CompletedState : Additivity error <= 10^-5
+}
+
+Processing --> Completed : DB transaction committed
+
+state Completed {
+    [*] --> Unreviewed
+    Unreviewed --> GrantedToDoctor : Patient creates time-bounded grant
+    GrantedToDoctor --> UnderClinicianReview : Doctor accesses chart
+    UnderClinicianReview --> Reviewed : Doctor appends countersigned note
+}
+
+Completed --> CounterfactualSimulating : Patient runs what-if sliders
+CounterfactualSimulating --> Completed : Target saved or dismissed
+
+Completed --> Exported : 1-page clinical visit briefing generated
+Reviewed --> Exported : Final consultation summary downloaded
+
+Completed --> Purged : Patient exercises GDPR Right to Erasure
+Reviewed --> Purged : Patient exercises GDPR Right to Erasure
+
+Purged --> [*]
+
+@enduml

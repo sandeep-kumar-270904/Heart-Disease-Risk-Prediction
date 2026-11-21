@@ -1,0 +1,54 @@
+@startuml master_implementation_roadmap
+!theme plain
+skinparam roundcorner 6
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+
+title HeartXAI 2.0 - 20-Milestone Master Implementation Roadmap
+
+|Stage 1: Foundation & Scaffolding|
+start
+:M01: Repository & Dev Environment Foundation\n(Docker Compose, CI, Zero Cloud Provisioning);
+:M02: Core Scaffolding, Canonical Types & Synthetic Data Generator\n(Pydantic v2, TypeScript 5.4, generate_synthetic_patients.py);
+
+|Stage 2: Core Infrastructure & Design System|
+fork
+    :M03: Design System & UI Component Library\n(Radix UI, Tailwind CSS, WCAG 2.2 AA Target);
+fork again
+    :M04: Database Engine & PostgreSQL 16 Migrations\n(Alembic, UUIDv7, Real PostgreSQL 16 Container);
+    :M05: Backend Core Services & RFC 7807 Error Envelopes\n(FastAPI lifespan, logging with request_id);
+    :M06: Authentication, Sessions & Fail-Closed Redis\n(Argon2id, 15m JWT, HttpOnly Cookie Rotation);
+fork again
+    :M09: ML Data Verification & Stratification\n(Cleveland Cohort Audit, Leakage-Free 5-Fold Split);
+    :M10: Task A Model Training & Probability Calibration\n(XGBoost 2.0, Platt/Isotonic, Brier <= 0.12);
+end fork
+
+|Stage 3: Frontend Shell & ML Serving|
+:M07: Frontend Core Shell, Routing & Auth State\n(React Router v6, Zustand store, silent token refresh);
+:M08: Clinical Intake Wizard & Input Validation\n(14 Biomarkers, mg/dL <-> mmol/L toggle, emergency triggers);
+:M11: In-Process ML Model Serving Pipeline\n(Sub-20ms C++ worker in FastAPI, non-diagnostic response);
+
+|Stage 4: Explainability & Clinical Results|
+fork
+    :M12: TreeSHAP Local Explanation Engine\n(Exact Shapley waterfall chart, statistical attribution);
+fork again
+    :M13: Constrained Counterfactual Engine\n(DiCE-ML, Actionable targets only, Age/Sex frozen);
+end fork
+:M14: Clinical Assessment Results & PDF Dossier Export\n(Task B completely excluded; non-diagnostic notices, SHA-256 seal);
+
+|Stage 5: Directory, Consent & Administration|
+fork
+    :M15: Localized Healthcare Directory & Emergency Hotlines\n(150+ verified centers, 911/112/999 quick-dial);
+fork again
+    :M16: Clinician Portal & Consent Sharing Grants\n(72-hour signed tokens, doctor review notes, patient revocation);
+fork again
+    :M17: Administrative Console & Immutable Audit Trail\n(Paginated audit log search, model registry tracking);
+end fork
+
+|Stage 6: Hardening, Accessibility & Acceptance|
+:M18: Security Hardening & Penetration Testing\n(Bandit, pip-audit, OWASP ZAP, 100% anti-IDOR verification);
+:M19: Accessibility (WCAG 2.2 AA) & Performance Testing\n(axe-core automated scans, keyboard traversal, K6 load tests);
+:M20: Staging Deployment & Synthetic UAT Sign-Off\n(Docker Compose on staging VPS, Playwright E2E suite, disaster recovery drill);
+stop
+
+@enduml

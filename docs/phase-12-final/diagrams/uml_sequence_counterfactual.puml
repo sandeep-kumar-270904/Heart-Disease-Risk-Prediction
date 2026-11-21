@@ -1,0 +1,38 @@
+@startuml uml_sequence_counterfactual
+autonumber
+skinparam responseMessageBelowArrow true
+
+actor "Patient (Marcus)" as Patient
+participant "SPA Client (React/TS)" as SPA
+participant "API Gateway (FastAPI)" as API
+participant "Inference Controller" as Ctrl
+participant "Counterfactual Solver" as Solver
+participant "ML Engine" as ML
+participant "PostgreSQL DB" as DB
+
+Patient -> SPA: Drags Resting BP slider from 158 to 125 mmHg\n(or clicks "Calculate Optimal Target")
+SPA -> SPA: Debounce input (150ms)\nLocks immutable attributes (Age, Sex, Anatomy)
+SPA -> API: POST /api/v1/inference/{id}/counterfactual/simulate\nPayload: {target_bp: 125, modifiable_overrides: {...}}
+
+API -> Ctrl: Authenticate patient ownership
+Ctrl -> DB: Retrieve original assessment vector & inference record
+DB -->> Ctrl: Original vector x
+
+Ctrl -> Solver: solve_counterfactual(x, target_threshold=0.20, locks=[age, sex, ca, thal])
+Solver -> Solver: Partition features into Immutable (delta=0) and Modifiable
+Solver -> Solver: Clamp candidate values to physiological floors (BP >= 110, Chol >= 140)
+Solver -> ML: Evaluate candidate perturbed vector P(x + delta)
+ML -->> Solver: Perturbed risk probability P_new
+Solver -> Solver: Minimize L1 normalized distance: D(x, x+delta) = sum(|delta_k| / MAD_k)
+Solver -->> Ctrl: Optimal counterfactual solution (new_prob=0.21, feasibility='MODERATE', deltas)
+
+opt User clicks "Save Counterfactual Target"
+    Ctrl -> DB: INSERT INTO counterfactual_profiles (inference_id, target, achieved, deltas)
+    DB -->> Ctrl: Persisted
+end
+
+Ctrl -->> API: Counterfactual payload
+API -->> SPA: HTTP 200 OK (Projected Risk: 21%, Delta: -23%, Target Biomarkers)
+SPA -->> Patient: Updates projected risk dial in real-time with green reduction badge (-23%)
+
+@enduml

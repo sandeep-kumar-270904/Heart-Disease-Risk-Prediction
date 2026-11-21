@@ -1,0 +1,79 @@
+@startuml uml_use_case
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+actor "Public Visitor (Guest)" as Guest
+actor "Patient (Registered)" as Patient
+actor "Healthcare Professional (Doctor)" as Doctor
+actor "System Administrator" as Admin
+
+rectangle "HeartXAI 2.0 System Boundary" {
+    package "Public & Onboarding" {
+        usecase "UC-01: View Educational Materials" as UC_Edu
+        usecase "UC-02: Run Anonymous Sandbox Simulation" as UC_Sandbox
+        usecase "UC-03: Register Account" as UC_Register
+        usecase "UC-04: Login & Manage Session" as UC_Login
+        usecase "UC-05: Manage Baseline Profile" as UC_Profile
+    }
+
+    package "Clinical Assessment & AI Core" {
+        usecase "UC-06: Submit 13-Biomarker Assessment" as UC_Intake
+        usecase "UC-07: View Dual-Target Predictions (CAD & ASCVD)" as UC_Predict
+        usecase "UC-08: Inspect Exact TreeSHAP Waterfall Plot" as UC_SHAP
+        usecase "UC-09: Explore Constrained Counterfactuals" as UC_CF
+        usecase "UC-10: View Longitudinal History & Deltas" as UC_History
+        usecase "UC-11: Export 1-Page Clinical Briefing (PDF/JSON)" as UC_Export
+    }
+
+    package "Care Connect & Privacy" {
+        usecase "UC-12: Search Doctor & Hospital Directory" as UC_Dir
+        usecase "UC-13: Explore Preventative Insurance Guide" as UC_Ins
+        usecase "UC-14: Grant / Revoke Doctor Access" as UC_Grant
+        usecase "UC-15: Review Authorized Patient Chart" as UC_ReviewChart
+        usecase "UC-16: Sign Clinical Review Notes" as UC_SignNotes
+    }
+
+    package "Governance & Audit" {
+        usecase "UC-17: Monitor System Health & Latency" as UC_Health
+        usecase "UC-18: Verify Clinician Credentials" as UC_VerifyClinician
+        usecase "UC-19: Inspect Model Registry & Hash Checksums" as UC_ModelReg
+        usecase "UC-20: Explore Immutable Audit Logs" as UC_Audit
+        usecase "UC-21: Manage Directory & Content" as UC_ManageContent
+    }
+}
+
+Guest --> UC_Edu
+Guest --> UC_Sandbox
+Guest --> UC_Register
+Guest --> UC_Login
+Guest --> UC_Dir
+Guest --> UC_Ins
+
+Patient --> UC_Profile
+Patient --> UC_Intake
+Patient --> UC_Predict
+Patient --> UC_SHAP
+Patient --> UC_CF
+Patient --> UC_History
+Patient --> UC_Export
+Patient --> UC_Grant
+Patient --> UC_Dir
+Patient --> UC_Ins
+
+Doctor --> UC_ReviewChart
+Doctor --> UC_SignNotes
+Doctor --> UC_Dir
+
+Admin --> UC_Health
+Admin --> UC_VerifyClinician
+Admin --> UC_ModelReg
+Admin --> UC_Audit
+Admin --> UC_ManageContent
+
+UC_Intake ..> UC_Predict : <<include>>
+UC_Predict ..> UC_SHAP : <<include>>
+UC_ReviewChart ..> UC_Grant : <<requires active grant>>
+UC_SignNotes ..> UC_ReviewChart : <<extend>>
+
+@enduml

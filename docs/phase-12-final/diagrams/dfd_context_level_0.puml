@@ -1,0 +1,31 @@
+@startuml dfd_context_level_0
+title Context-Level Data Flow Diagram (DFD Level 0)
+
+skinparam monochrome false
+
+actor "Public Visitor" as Visitor
+actor "Patient" as Patient
+actor "Clinician" as Doctor
+actor "Administrator" as Admin
+
+rectangle "HeartXAI 2.0 System\n(Process 0.0)" as HeartXAI
+
+database "PostgreSQL Relational DB" as DB
+file "Model Artifact Store" as ModelStore
+
+Visitor --> HeartXAI : 1. Sandbox Biomarkers & Public Requests
+HeartXAI --> Visitor : 2. Educational Content & Stateless Sandbox Predictions
+
+Patient --> HeartXAI : 3. Registration, Credentials & 13 Biomarkers
+HeartXAI --> Patient : 4. Dual Risk Scores, SHAP Waterfall, Counterfactuals & Briefings
+
+Doctor --> HeartXAI : 5. Credentials, Consultation Grant Queries & Review Notes
+HeartXAI --> Doctor : 6. Authorized Patient Charts & Feature Attributions
+
+Admin --> HeartXAI : 7. Verification Actions, Directory Edits & Audit Queries
+HeartXAI --> Admin : 8. System Telemetry, Model Registries & Audit Logs
+
+HeartXAI <--> DB : 9. Persistent CRUD Transactions & Immutable Audit Logs
+HeartXAI <-- ModelStore : 10. Validated ML Pipeline (.joblib) with SHA-256 Checksum
+
+@enduml

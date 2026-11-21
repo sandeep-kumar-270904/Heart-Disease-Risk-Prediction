@@ -1,0 +1,225 @@
+@startuml uml_class_diagram
+skinparam classAttributeIconSize 0
+skinparam monochrome false
+
+package "Identity & Authorization" {
+    class User {
+        +String id
+        +String email
+        +String hashedPassword
+        +String fullName
+        +String role
+        +String clinicianStatus
+        +String countryCode
+        +Boolean isActive
+        +DateTime createdAt
+        +DateTime lastLoginAt
+        +register(email, password, role)
+        +login(email, password)
+        +logout()
+        +updateProfile()
+    }
+
+    class PatientProfile {
+        +String id
+        +String patientId
+        +Date dateOfBirth
+        +String biologicalSex
+        +String preferredUnits
+        +String emergencyContactName
+        +String emergencyContactPhone
+        +getAge(): Integer
+        +updatePreferences()
+    }
+}
+
+package "Assessment & Clinical Intelligence" {
+    class Assessment {
+        +String id
+        +String patientId
+        +String clinicianId
+        +String status
+        +Integer age
+        +Integer sex
+        +Integer cp
+        +Integer trestbps
+        +Integer chol
+        +Integer fbs
+        +Integer restecg
+        +Integer thalach
+        +Integer exang
+        +Float oldpeak
+        +Integer slope
+        +Integer ca
+        +Integer thal
+        +DateTime createdAt
+        +validateBiomarkers(): Boolean
+        +getFeatureVector(): Float[]
+    }
+
+    class InferenceResult {
+        +String id
+        +String assessmentId
+        +String modelVersion
+        +Float cadProbability
+        +String cadRiskTier
+        +Float confidenceIntervalLow
+        +Float confidenceIntervalHigh
+        +Float ascvd10yrRisk
+        +String ascvdRiskTier
+        +Float baseExpectedValue
+        +Float rawDecisionMargin
+        +Boolean isOutOfDistribution
+        +DateTime computedAt
+        +getCalibratedCADRisk(): Float
+        +getASCVDEventRisk(): Float
+    }
+
+    class ShapExplanation {
+        +String id
+        +String inferenceId
+        +String featureName
+        +Float featureValue
+        +Float shapValue
+        +Integer rankImportance
+        +String directionalImpact
+        +String clinicalInterpretation
+        +isProtective(): Boolean
+        +getContributionMagnitude(): Float
+    }
+
+    class CounterfactualProfile {
+        +String id
+        +String inferenceId
+        +Float targetRiskThreshold
+        +Float achievedRiskProbability
+        +JSON modifiedBiomarkers
+        +JSON immutableBiomarkers
+        +Float l1NormalizedDistance
+        +String feasibilityRating
+        +DateTime createdAt
+        +getBiomarkerDeltas(): Map
+    }
+}
+
+package "Care Collaboration & Consent" {
+    class DoctorGrant {
+        +String id
+        +String patientId
+        +String doctorId
+        +String accessCode
+        +String status
+        +DateTime grantedAt
+        +DateTime expiresAt
+        +DateTime revokedAt
+        +isValid(): Boolean
+        +revoke()
+    }
+
+    class ClinicalNote {
+        +String id
+        +String assessmentId
+        +String authorId
+        +String noteContent
+        +String signoffStatus
+        +DateTime signedAt
+        +DateTime createdAt
+        +signoff(doctorId)
+    }
+}
+
+package "Directories & Guidance (Review-II Legacy)" {
+    class Doctor {
+        +String id
+        +String doctorName
+        +String specialization
+        +String hospitalName
+        +String contactNumber
+        +String location
+        +String email
+        +Boolean telehealthAvailable
+        +Boolean isActive
+        +search(query, specialty)
+    }
+
+    class Hospital {
+        +String id
+        +String hospitalName
+        +String facilityType
+        +String emergencyPhone
+        +String address
+        +String city
+        +String state
+        +String accreditationDetails
+        +Boolean has247CathLab
+    }
+
+    class InsurancePolicy {
+        +String id
+        +String providerName
+        +String policyName
+        +String coverageSummary
+        +Float monthlyPremiumEst
+        +Integer waitingPeriodDays
+        +String exclusionsSummary
+        +compareWith(otherPolicy)
+    }
+
+    class EducationalResource {
+        +String id
+        +String title
+        +String biomarkerCode
+        +String summary
+        +String guidelineSource
+        +String dietPlanSummary
+        +String exerciseTipsSummary
+        +String lifestyleGuidance
+    }
+}
+
+package "Governance & Observability" {
+    class AuditLog {
+        +String id
+        +DateTime timestamp
+        +String userId
+        +String role
+        +String actionType
+        +String resourceId
+        +String endpoint
+        +String method
+        +String ipAddress
+        +Integer statusCode
+        +Float durationMs
+        +appendLog()
+    }
+
+    class ModelRegistry {
+        +String id
+        +String version
+        +String algorithm
+        +String trainingCohort
+        +Float testAuroc
+        +Float brierScore
+        +String sha256Hash
+        +DateTime deployedAt
+        +Integer isActive
+        +verifyIntegrity(): Boolean
+    }
+}
+
+' Relationships
+User "1" *-- "0..1" PatientProfile : owns
+User "1" o-- "0..*" Assessment : submits
+User "1" o-- "0..*" DoctorGrant : grants_as_patient
+User "1" o-- "0..*" DoctorGrant : receives_as_doctor
+User "1" o-- "0..*" ClinicalNote : authors
+
+Assessment "1" *-- "1" InferenceResult : produces
+Assessment "1" *-- "0..*" ClinicalNote : receives
+InferenceResult "1" *-- "13" ShapExplanation : decomposes_into
+InferenceResult "1" *-- "0..*" CounterfactualProfile : optimizes_into
+
+DoctorGrant ..> Assessment : authorizes_access_to
+ModelRegistry ..> InferenceResult : traces_version
+
+@enduml

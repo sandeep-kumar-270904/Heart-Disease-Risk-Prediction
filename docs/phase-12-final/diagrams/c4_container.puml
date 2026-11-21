@@ -1,0 +1,35 @@
+@startuml c4_container
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Container Diagram for HeartXAI 2.0 (Audited Baseline)
+
+Person(patient, "Patient", "Individual tracking cardiovascular metrics")
+Person(doctor, "Clinician", "Licensed physician reviewing authorized patient records")
+Person(admin, "Administrator", "Compliance and ML governance officer")
+Person(guest, "Public Visitor", "Anonymous explorer")
+
+System_Boundary(c1, "HeartXAI 2.0 System") {
+    Container(proxy, "Perimeter Reverse Proxy", "Nginx 1.26 Stable Alpine", "Terminates TLS 1.3, applies IP rate limits, and proxies traffic.")
+    Container(spa, "Single-Page Application", "React 18, TypeScript, Vite, Tailwind CSS", "Delivers accessible, responsive clinical UI, SVG SHAP waterfall charts, interactive what-if sliders, and intake wizard.")
+    Container(api, "API Application Gateway & Services", "Python 3.11+, FastAPI, Pydantic v2, SQLAlchemy 2.0", "Handles REST endpoints, RBAC authentication, input validation, transaction boundaries, and audit logging.")
+    Container(ml_subsystem, "ML & Explainability Subsystem", "Python, Scikit-learn, XGBoost, TreeSHAP, NumPy, SciPy", "Executes calibrated CAD inference, 10-yr ASCVD equations, TreeSHAP attributions, and constrained counterfactual solver.")
+    ContainerDb(database, "Relational Database", "PostgreSQL 16 (SQLite Unit Test Harness)", "Stores users, patient profiles, assessments, inferences, SHAP attributions, consent grants, directory data, and immutable audit logs.")
+    Container(model_store, "Model Artifact Store", "Local Filesystem / Object Storage", "Stores serialized versioned pipelines (heartxai_model_v2.0.0.joblib) with cryptographic checksums.")
+}
+
+Rel(guest, proxy, "Visits landing page, tests sandbox", "HTTPS")
+Rel(patient, proxy, "Logs in, submits assessments, explores counterfactuals", "HTTPS")
+Rel(doctor, proxy, "Logs in, views cohort, signs clinical notes", "HTTPS")
+Rel(admin, proxy, "Inspects audit logs, monitors model health", "HTTPS")
+
+Rel(proxy, spa, "Serves static assets", "HTTP")
+Rel(proxy, api, "Proxies REST API requests", "HTTP Loopback")
+
+Rel(spa, api, "Makes API calls, transmits JSON payloads, receives HttpOnly JWT cookies", "JSON/HTTPS via Proxy")
+Rel(api, ml_subsystem, "Invokes in-process inference, SHAP, and counterfactual solvers", "Python Internal API / In-Memory")
+Rel(api, database, "Reads and writes transactional data via SQLAlchemy ORM", "SQL/TCP / asyncpg")
+Rel(ml_subsystem, model_store, "Loads and verifies model artifact via SHA-256 at boot", "Filesystem I/O")
+
+@enduml

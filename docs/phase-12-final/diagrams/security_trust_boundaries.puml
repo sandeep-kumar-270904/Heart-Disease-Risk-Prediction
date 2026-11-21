@@ -1,0 +1,46 @@
+@startuml security_trust_boundaries
+title Security Trust Boundaries & Threat Perimeter
+
+skinparam monochrome false
+
+package "Zone 0: Public Untrusted Internet" {
+    actor "Public User / Attacker" as Attacker
+    actor "Legitimate Patient" as User
+}
+
+package "Zone 1: DMZ & Perimeter Ingress" {
+    rectangle "Nginx Reverse Proxy / Cloudflare" as WAF {
+        note right: TLS 1.3 Termination\nDDoS / Rate Limiting (5 login/min)\nCORS Enforcement\nAsset Gzip/Brotli
+    }
+}
+
+package "Zone 2: Authenticated Application Tier (Private Network)" {
+    rectangle "FastAPI Backend Service" as Backend {
+        rectangle "Security & Auth Middleware" as AuthMid
+        rectangle "Input Sanitizer & Pydantic Validation" as Validator
+        rectangle "Domain Business Logic" as Domain
+        rectangle "In-Memory ML & TreeSHAP Runtime" as ML_Runtime
+    }
+}
+
+package "Zone 3: Secure Data Persistence Tier (Isolated Subnet)" {
+    database "PostgreSQL Relational DB" as DB {
+        note right: Parameterized SQL (SQLAlchemy)\nEncrypted at Rest (AES-256)\nRole-Based DB User (No DDL)\nAppend-Only Triggers on Audit Logs
+    }
+    file "Model Artifact Store" as Disk {
+        note right: Read-only Filesystem Mount\nSHA-256 Checksum on Boot
+    }
+}
+
+' Boundaries
+Attacker --> WAF : HTTPS (Port 443)\n[Untrusted Flow]
+User --> WAF : HTTPS (Port 443)\n[Untrusted Flow]
+
+WAF --> AuthMid : Internal HTTP (Port 8000)\n[Sanitized Ingress Perimeter]
+AuthMid --> Validator : Decoded & Verified JWT Claims
+Validator --> Domain : Validated Pydantic Models
+Domain --> ML_Runtime : In-Process Call (Zero-IPC)
+Domain --> DB : TCP / Port 5432 (SSL/TLS)\n[Restricted DB Credential Flow]
+ML_Runtime <-- Disk : Local Read-Only I/O
+
+@enduml

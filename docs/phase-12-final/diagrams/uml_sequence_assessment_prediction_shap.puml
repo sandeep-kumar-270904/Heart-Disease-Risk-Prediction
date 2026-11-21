@@ -1,0 +1,56 @@
+@startuml uml_sequence_assessment_prediction_shap
+autonumber
+skinparam responseMessageBelowArrow true
+
+actor "Patient (Marcus)" as Patient
+participant "SPA Client (React/TS)" as SPA
+participant "API Gateway (FastAPI)" as API
+participant "Validation Middleware" as Val
+participant "Assessment Service" as Svc
+participant "ML & ASCVD Engine" as ML
+participant "TreeSHAP Engine" as SHAP
+participant "PostgreSQL DB" as DB
+participant "Audit Logger" as Audit
+
+Patient -> SPA: Enters 13 clinical biomarkers in 3-step wizard\nClicks "Analyze Cardiovascular Profile"
+SPA -> SPA: Zod client validation (range & enum checks)
+SPA -> API: POST /api/v1/assessments (JSON payload, HttpOnly cookie)
+
+API -> Val: Inspect payload against AssessmentCreateSchema
+alt Validation Fails (e.g. trestbps = 300)
+    Val -->> API: Raise RequestValidationError
+    API -->> SPA: HTTP 422 Unprocessable Entity (Stripe-formatted errors)
+    SPA -->> Patient: Highlights invalid input with normal reference helper
+else Validation Passes
+    Val -> Svc: Process valid biomarker vector
+    
+    Svc -> DB: Begin ACID Database Transaction
+    Svc -> DB: INSERT INTO assessments (patient_id, 13 biomarkers, status='COMPLETED')
+    
+    Svc -> ML: predict_cad_and_ascvd(biomarker_vector)
+    ML -> ML: Standardize features via StandardScaler
+    ML -> ML: Execute CalibratedClassifierCV (XGBoost) -> P(CAD >= 50%)
+    ML -> ML: Compute Wilson 95% Confidence Interval
+    ML -> ML: Execute ACC/AHA Pooled Cohort Equations -> 10-Yr ASCVD Risk %
+    ML -->> Svc: InferenceResult payload (CAD Prob, ASCVD Risk, tiers, CI bounds)
+    
+    Svc -> DB: INSERT INTO inference_results (assessment_id, model_version, probabilities, tiers)
+    
+    Svc -> SHAP: compute_local_shap(biomarker_vector, model_pipeline)
+    SHAP -> SHAP: Run TreeSHAP C++ tree traversal -> local phi_1 ... phi_13
+    SHAP -> SHAP: Assert additivity: | f(x) - (E[f(x)] + sum(phi)) | <= 10^-5
+    SHAP -> SHAP: Rank features by absolute contribution |phi_i|
+    SHAP -->> Svc: 13 Shapley attribution records with direction & plain narrative
+    
+    Svc -> DB: INSERT INTO shap_explanations (13 rows referencing inference_id)
+    Svc -> DB: Commit ACID Transaction
+    
+    Svc -> Audit: Log ASSESSMENT_SUBMITTED (user_id, assessment_id, status=201)
+    Audit -> DB: INSERT INTO audit_logs
+    
+    Svc -->> API: Complete Assessment & Explanation Object
+    API -->> SPA: HTTP 201 Created (Assessment ID, Dual Risk Gauges, SHAP Waterfall)
+    SPA -->> Patient: Renders Dual Risk Dials, Waterfall Chart, and Plain-English Insights
+end
+
+@enduml

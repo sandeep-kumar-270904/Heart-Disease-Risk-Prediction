@@ -1,0 +1,49 @@
+@startuml c4_deployment
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Deployment.puml
+
+LAYOUT_WITH_LEGEND()
+
+title Deployment Diagram for HeartXAI 2.0 (Audited Baseline)
+
+Deployment_Node(user_device, "User Workstation / Mobile Device", "Windows, macOS, iOS, Android") {
+    Deployment_Node(browser, "Modern Web Browser", "Chrome, Safari, Firefox, Edge") {
+        Container(spa_instance, "Single-Page Application", "React 18 / Static Assets", "Executes clinical UI, SVG charting, and local state management.")
+    }
+}
+
+Deployment_Node(cloud_host, "Target Production Host / VM", "Linux Ubuntu 22.04 LTS / Cloud VM") {
+    Deployment_Node(ingress, "Perimeter Reverse Proxy & TLS Termination", "Nginx 1.26 Stable Alpine") {
+        Container(proxy, "Reverse Proxy", "Nginx 1.26", "Terminates TLS 1.3, applies token bucket rate limits, compresses assets, proxies traffic.")
+    }
+
+    Deployment_Node(docker_env, "Docker Container Runtime", "Docker Compose / Internal Bridge Network") {
+        Deployment_Node(app_container, "Backend API Container", "Docker / Python 3.11 Slim") {
+            Container(api_instance, "FastAPI Application", "Uvicorn ASGI Workers", "Stateless API server executing business logic, ML inference, and TreeSHAP calculations.")
+            Container(model_disk, "Model Artifact Volume", "Local Volume /app/models", "Versioned serialized model artifact (heartxai_model_v2.0.0.joblib).")
+        }
+
+        Deployment_Node(db_container, "Database Container", "Docker / PostgreSQL 16 Alpine") {
+            ContainerDb(pg_instance, "PostgreSQL Database Engine", "PostgreSQL 16", "ACID-compliant relational persistence with indexed tables, JSONB, and audit logs.")
+            ContainerDb(pg_volume, "Persistent Database Volume", "Docker Named Volume /var/lib/postgresql/data", "Durable encrypted storage.")
+        }
+
+        Deployment_Node(backup_container, "Backup Container", "Docker / Alpine 3.19 Cron") {
+            Container(backup_script, "Authenticated Backup Script", "Shell / OpenSSL AES-256-GCM", "Generates daily AEAD encrypted backups and triggers monthly restore drills.")
+        }
+    }
+}
+
+Deployment_Node(offsite_storage, "Off-Site Cloud Storage", "AWS S3 / S3-Compatible Cloud Storage") {
+    ContainerDb(s3_worm, "Immutable Backup Archive", "S3 Object Lock (Compliance Mode)", "Stores AES-256-GCM encrypted database dumps with 30-day WORM immutability.")
+}
+
+Rel(spa_instance, proxy, "Sends HTTPS requests and receives responses", "HTTPS (Port 443)")
+Rel(proxy, spa_instance, "Serves HTML/JS/CSS static bundles", "HTTP/2")
+Rel(proxy, api_instance, "Forwards API traffic to /api/v1 and /health", "HTTP (Internal Port 8000)")
+Rel(api_instance, model_disk, "Loads model pipeline at boot", "Filesystem Mount")
+Rel(api_instance, pg_instance, "Executes SQL queries over connection pool", "TCP / Port 5432")
+Rel(pg_instance, pg_volume, "Persists tables and WAL logs to disk", "Block I/O")
+Rel(backup_script, pg_instance, "Executes daily pg_dump", "TCP / Port 5432")
+Rel(backup_script, s3_worm, "Replicates encrypted archives via PutObject", "HTTPS / S3 API")
+
+@enduml

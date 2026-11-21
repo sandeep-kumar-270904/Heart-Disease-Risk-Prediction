@@ -1,0 +1,84 @@
+@startuml implementation_dependency_graph
+!theme plain
+skinparam roundcorner 6
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+
+title HeartXAI 2.0 - Implementation Dependency Graph (DAG)
+
+package "Foundation & Infrastructure" {
+    [M01: Dev Environment & CI/CD] as M01
+    [M02: Scaffolding, Types & Synth Generator] as M02
+}
+
+package "Data & Security Core" {
+    [M04: DB Schema & PostgreSQL 16 Migrations] as M04
+    [M05: Backend API Framework & RFC 7807] as M05
+    [M06: Auth, Sessions & Fail-Closed Redis] as M06
+}
+
+package "Machine Learning Subsystem" {
+    [M09: ML Data Verification & Split] as M09
+    [M10: Task A XGBoost & Probability Calibration] as M10
+    [M11: In-Process ML Serving Pipeline] as M11
+    [M12: TreeSHAP Explanation Engine] as M12
+    [M13: Constrained Counterfactual Engine] as M13
+}
+
+package "Frontend Architecture" {
+    [M03: Design System (WCAG 2.2 AA Target)] as M03
+    [M07: Frontend Core Shell & Router] as M07
+    [M08: Clinical Intake Wizard (14 Biomarkers)] as M08
+}
+
+package "Integrated Healthcare Features" {
+    [M14: Assessment Results & PDF (Task B Excluded)] as M14
+    [M15: Localized Healthcare Directory] as M15
+    [M16: Doctor Portal & Consent Grants] as M16
+    [M17: Admin Console & Audit Log] as M17
+}
+
+package "Hardening & Release" {
+    [M18: Security Hardening & Anti-IDOR Tests] as M18
+    [M19: Accessibility (WCAG 2.2 AA) & Performance] as M19
+    [M20: Staging VPS Deployment & Synthetic UAT] as M20
+}
+
+M01 --> M02
+
+M02 --> M04
+M04 --> M05
+M05 --> M06
+
+M02 --> M09
+M09 --> M10
+M10 --> M11
+M05 --> M11
+M11 --> M12
+M11 --> M13
+
+M02 --> M03
+M03 --> M07
+M06 --> M07
+M07 --> M08
+
+M08 --> M14
+M12 --> M14
+M13 --> M14
+
+M05 --> M15
+M07 --> M15
+
+M06 --> M16
+M14 --> M16
+
+M06 --> M17
+M15 --> M17
+
+M16 --> M18
+M17 --> M18
+
+M18 --> M19
+M19 --> M20
+
+@enduml

@@ -1,0 +1,57 @@
+@startuml ml_architecture_diagram
+!theme plain
+skinparam monochrome false
+skinparam roundcorner 8
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+
+title HeartXAI 2.0 - Machine Learning & Explainability Subsystem (Task A Only)
+
+package "Offline Research & Training Pipeline (Milestones 09-10)" {
+    [UCI Cleveland Cohort\n(N=303, Robert Detrano 1989)] as D_Raw
+    [Data Cleaning & Missing Imputation\n(ca, thal handling)] as D_Clean
+    [Stratified 5-Fold Split\n(Leakage-Free Cross-Validation)] as D_Split
+    [XGBoost 2.0 Estimator\n(max_depth=3, reg_alpha=0.1)] as ML_Train
+    [Probability Calibrator\n(Platt Scaling / Isotonic Reg)] as ML_Calib
+    [Model Card & Registry\n(Brier <= 0.12, ECE <= 0.05)] as ML_Registry
+    
+    D_Raw --> D_Clean
+    D_Clean --> D_Split
+    D_Split --> ML_Train
+    ML_Train --> ML_Calib
+    ML_Calib --> ML_Registry
+}
+
+package "In-Process Serving & Explainability Engine (Milestones 11-13)" {
+    [FastAPI Intake Endpoint\n(POST /api/v1/assessments)] as API_In
+    [Biomarker Unit Normalizer\n(mg/dL <-> mmol/L)] as Norm_Engine
+    [In-Process C++ ML Worker\n(Sub-20ms Calibrated Inference)] as Inf_Worker
+    [TreeSHAP Explainer\n(Local Attribution Waterfall)] as SHAP_Worker
+    [Constrained DiCE Optimizer\n(Actionable Features Only; Age/Sex Frozen)] as CF_Worker
+    [Assessment Entity Store\n(PostgreSQL 16 JSONB)] as DB_Store
+
+    API_In --> Norm_Engine
+    Norm_Engine --> Inf_Worker : Normalized 13-Vector
+    ML_Registry ..> Inf_Worker : model.joblib (startup)
+    Inf_Worker --> SHAP_Worker : Margin & Trees
+    Inf_Worker --> CF_Worker : Target Classification
+    
+    Inf_Worker --> DB_Store : Calibrated Probability & Risk Tier
+    SHAP_Worker --> DB_Store : shap_values JSONB
+    CF_Worker --> DB_Store : counterfactuals JSONB
+}
+
+package "Patient & Clinician Presentation Layer (Milestone 14)" {
+    [Results Dashboard\n(Non-Diagnostic Clinical Notice)] as UI_Results
+    [Interactive TreeSHAP Waterfall Chart\n(Statistical Attribution)] as UI_SHAP
+    [What-If Scenario Simulator\n(Constrained Lifestyle Sliders)] as UI_CF
+    [Signed PDF Clinical Dossier\n(SHA-256 Digital Seal)] as UI_PDF
+
+    DB_Store --> UI_Results
+    DB_Store --> UI_SHAP
+    DB_Store --> UI_CF
+    DB_Store --> UI_PDF
+}
+
+@enduml
