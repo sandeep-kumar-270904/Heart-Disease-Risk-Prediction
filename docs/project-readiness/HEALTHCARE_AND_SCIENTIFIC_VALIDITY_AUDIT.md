@@ -80,9 +80,9 @@ This audit establishes the definitive scientific boundaries for HeartXAI 2.0, pr
    - **What is Unknown & Unverified:** The primary paper (Detrano et al., *Am J Cardiol* 1989) does not document the specific institutional data extraction protocol, whether informed consent was obtained from the 1981–1984 patients for secondary public open-source distribution, or whether Cleveland Clinic Institutional Review Board approval was formally granted for public web deposition. Whether quasi-identifier combinations (e.g., age, sex, resting ECG patterns, fluoroscopy vessel counts) could present theoretical re-identification risk against historical hospital catheterization logs remains unassessed in modern literature.
    - **Mandatory Pre-Training Assessment (Milestone 09 Gate):** Prior to ingesting Category A data for model training in Milestone 09, a formal, documented assessment of **data provenance, repository licensing terms, permitted research use, and jurisdiction-specific privacy obligations** must be executed and approved.
    - **Retraction of Blanket Exposure Claims & Separation of Data Risks:** Claims that data classification policies "eliminate all PHI/PII exposure or statutory breach-notification liabilities" are unsupported and hereby retracted. Data risks are strictly differentiated:
-     - *Category A (Historical Research Data Risks):* Human-origin clinical data carrying potential re-identification risks in high-dimensional or linkage scenarios, ambiguous historical patient consent/licensing provenance, and potential residual privacy obligations under specific local jurisdictions.
-     - *Category B (Synthetic Application Data Risks):* Zero human-origin clinical data; risks are restricted to algorithmic generation artifacts, physiological distribution mismatch, and software/infrastructure cybersecurity vulnerabilities (e.g. credentials, tokens, session hijacking, server exploits).
-     - *Category C (Real Patient Data):* **Strictly prohibited across all MVP milestones (01–20).**
+     - *Category A (Historical Research Data Risks):* Human-origin clinical data ($N=303$) carrying potential re-identification risks in high-dimensional or linkage scenarios, ambiguous historical patient consent/licensing provenance, and potential residual privacy obligations under specific local jurisdictions. Confined strictly to offline model research.
+     - *Category B (Synthetic Application Data Provenance & Risks):* The synthetic patient generator (`scripts/generate_synthetic_patients.py`) derives its continuous biomarker distributions (blood pressure, cholesterol, max heart rate) and conditional multinomial probabilities from the empirical multivariate distributions of the **human-origin UCI Cleveland benchmark** (as specified in `ENVIRONMENT_CONFIGURATION_STRATEGY.md` and `TEST_DATA_AND_PRIVACY_STRATEGY.md`). Consequently, Category B is **statistically derived synthetic data parameterized from human-origin clinical reference distributions**, NOT "zero-human-origin" data. Because statistical sampling from small empirical cohorts ($N=303$) carries theoretical **residual privacy, membership inference, and memorization risks** (potential replication of rare outlier feature combinations), Milestone 02 mandates parametric truncation, distribution smoothing, and differential privacy checks ($\epsilon$-DP bounds) to ensure generated records do not memorize or disclose historical patient vectors.
+     - *Category C (Real Patient Data):* Real PHI/PII. **Strictly prohibited across all MVP milestones (01–20).**
 
 ### 3.4 Operational & Research Classification
 The model trained on this dataset must be classified strictly as an **Experimental Machine Learning Dataset Classifier**. Its outputs must never be presented as:
@@ -104,8 +104,8 @@ In earlier planning documents, numerical thresholds were proposed for probabilit
 3. **Rigorous Calibration Validation Framework (Milestone 10/11 Requirements):**
    - **Leakage-Safe Out-of-Fold (OOF) Probability Predictions:** All calibration evaluation and metric computation (Brier score, ECE, calibration curves) must be performed strictly using **out-of-fold (OOF) cross-validation predictions** or a held-out test split, completely isolated from in-sample training data.
    - **Training-Only Fitting of Calibration Transformers:** Post-hoc calibration methods (e.g., Platt scaling / logistic calibration, Isotonic regression) must be **fitted strictly on the training folds/sets only**. Applying or fitting calibration transformers across full datasets or test folds constitutes data leakage and is strictly prohibited.
-   - **Confidence Intervals & Statistical Rigor:** All reported calibration metrics (Brier score, ECE, calibration slope, calibration intercept) must be accompanied by **95% confidence intervals** (e.g., via 1,000-iteration stratified bootstrap resampling).
-   - **External Validation Prerequisite:** Internal cross-validation calibration does not prove generalizability. **External validation on an independent clinical cohort is strictly required before asserting any clinical calibration claim.**
+   - **Confidence Intervals & Statistical Uncertainty (Exploratory Nature):** All reported calibration metrics (Brier score, ECE, calibration slope, calibration intercept) must be accompanied by 95% bootstrap confidence intervals (1,000 stratified resamples). However, because $N=303$ is small, bootstrap resamples capture internal sampling variability only; **neither the proposed sample size, bootstrap count, nor numerical thresholds may be treated as proof of reliable clinical performance**. Confidence intervals remain **strictly exploratory statistical estimates**.
+   - **External Validation Prerequisite:** Internal cross-validation calibration does not prove generalizability. **External validation on an independent, contemporary clinical cohort is strictly required before asserting any clinical calibration claim.**
    - **Exploratory Status of Decision Curve Analysis (DCA):** Decision Curve Analysis (DCA; Vickers et al.) must be formally labeled as **exploratory** unless an explicit, defensible clinical decision context (e.g., referral for non-invasive imaging vs. outpatient monitoring) and an explicit harm-to-benefit threshold probability range ($p_t$) are clinically established and justified.
    - **Provisional Status of Numerical Thresholds:** The thresholds $\text{Brier} \le 0.12$ and $\text{ECE} \le 0.05$ remain **provisional engineering heuristic targets** until methodologically justified against empirical out-of-fold distributions and clinical context. Meeting these numerical targets does NOT warrant claiming that the model is clinically calibrated.
 
@@ -183,8 +183,9 @@ While PREVENT represents the current clinical standard in the United States unde
 | **Category B**        | Artificially generated test fixtures, mock    | - Used for **all** frontend UI demonstrations, test   |
 | **Synthetic**         | patient personas (Sarah, Marcus, Elena), and  |   fixtures, intake form tests, and integration tests. |
 | **Application Data**  | integration testing records.                  | - Generated via `scripts/generate_synthetic_patients`|
-|                       | Derived from parameterized distributions.      | - Contains **zero real human data**; zero PHI/PII.    |
-|                       | Algorithmic generation with zero human origin.| - Standard application & infrastructure cyber defense.|
+|                       | Parameterized distributions derived from      | - Statistically derived from clinical reference data; |
+|                       | empirical multivariate clinical benchmark data.|   carries residual memorization & outlier risks.      |
+|                       | Not direct real records; subject to DP checks.| - Standard application & infrastructure cyber defense.|
 +-----------------------+-----------------------------------------------+-------------------------------------------------------+
 | **Category C**        | Personally Identifiable Information (PII) or  | - **STRICTLY PROHIBITED** during initial development, |
 | **Real Patient**      | Personal Health Information (PHI) collected   |   demonstration, testing, and staging (Milestones 01- |
@@ -252,7 +253,7 @@ Clinical governance is not an informal advisory checkbox. HeartXAI 2.0 establish
 
 #### 2. European Union — European Medicines Agency & Notified Bodies
 - **Governing Framework:** Regulation (EU) 2017/745 on Medical Devices (**EU MDR**); Medical Device Coordination Group guidance documents:
-  - **MDCG 2019-11:** *Guidance on Qualification and Classification of Software in Regulation (EU) 2017/745 and Regulation (EU) 2017/746* (October 2019).
+  - **MDCG 2019-11 rev.1:** *Guidance on Qualification and Classification of Software in Regulation (EU) 2017/745 and Regulation (EU) 2017/746* (**June 2025 Revision**).
   - **MDCG 2020-1:** *Guidance on Clinical Evaluation (MDR) / Performance Evaluation (IVDR) of Medical Device Software* (March 2020).
 - **Classification Rules (Annex VIII, Chapter III, Rule 11 Verbatim Text):**
   > *"Software intended to provide information which is used to take decisions with diagnosis or therapeutic purposes is classified as class IIa, except if such decisions have an impact that may cause:*
@@ -275,13 +276,28 @@ Clinical governance is not an informal advisory checkbox. HeartXAI 2.0 establish
 - **Current CDSCO Guidance Document on Medical Device Software:**
   - **Title:** *Guidance Document on Medical Device Software (MDSW)*
   - **Document Number:** **CDSCO/MD/GD/MDSW/01/2026**
-  - **Publication Date:** **July 21, 2026** (following the previous draft published October 21, 2025)
+  - **Publication Date:** **21 July 2026** (finalized following public stakeholder consultation on the draft issued 21 October 2025)
   - **Issuing Authority:** Central Drugs Standard Control Organisation (CDSCO), Directorate General of Health Services, Ministry of Health & Family Welfare, Government of India.
-- **Classification System (Risk Classes A, B, C, D):**
-  - The MDSW 2026 guidance governs both Software as a Medical Device (SaMD) and Software in a Medical Device (SiMD).
-  - Classification is determined based on: (1) the significance of the information provided by the software to the healthcare decision (e.g., to treat or diagnose, to drive clinical management, or to inform clinical management), and (2) the state of the healthcare situation or condition (critical, serious, or non-serious).
-  - SaMD intended to inform clinical management or assist in screening/risk-assessment for serious cardiovascular conditions is categorized under **Class B (low-moderate risk) or Class C (moderate-high risk)**.
-  - **Statutory Requirements:** Requires registration on the CDSCO SUGAM portal, clinical evaluation, and regulatory manufacturing/import licensing from the Central or State Licensing Authority under MDR 2017. No blanket non-device CDS carve-out exists under Indian law.
+- **Classification Principles (Table 2: Risk Classification Matrix for Standalone MDSW / SaMD):**
+  Under Section 4 and Table 2 of the MDSW 2026 guidance, standalone software classification is not automated, but is determined strictly by evaluating:
+  1. The **significance of the information** provided by the software to the healthcare decision (*Treats or Diagnoses*, *Drives Clinical Management*, or *Informs Clinical Management*).
+  2. The **state of the healthcare situation or condition** (*Critical*, *Serious*, or *Non-serious*).
+
+```
++-----------------------------------+--------------------+----------------------------+-----------------------------+
+| State of Healthcare Situation     | Treats or Diagnoses| Drives Clinical Management | Informs Clinical Management |
++-----------------------------------+--------------------+----------------------------+-----------------------------+
+| Critical (e.g. life-threatening)  | Class D            | Class C                    | Class B                     |
+| Serious (e.g. major impairment)   | Class C            | Class B                    | Class A                     |
+| Non-serious (e.g. mild/transient) | Class B            | Class A                    | Class A                     |
++-----------------------------------+--------------------+----------------------------+-----------------------------+
+```
+
+  - *Non-Clinical / Lay User Caveat:* Standalone MDSW intended to be used directly by lay persons or consumers in a serious situation or condition without the oversight of specialized healthcare professionals may be elevated into a higher risk category.
+  - *No Definitive Classification Assigned:* HeartXAI 2.0 is NOT automatically assigned to Class B or Class C. Its risk tier depends on formal legal review of its intended user (lay person vs. physician), intended use (educational vs. clinical management), and diagnostic autonomy. Status remains formally **undetermined**.
+- **Submission & Licensing Portals:**
+  - **National Single Window System (NSWS)** (`nsws.gov.in`): Mandated for test-licence applications (e.g., Form MD-12 / MD-13 for testing, clinical investigation, or evaluation).
+  - **Online System for Medical Devices** (`cdscomdonline.gov.in`): Mandated for other relevant regulatory permissions, manufacturing licences, and import licences under MDR 2017 (e.g., Form MD-7, MD-8, MD-14, MD-15).
 
 #### 5. Cross-Jurisdictional Synthesis
 ```
@@ -294,14 +310,13 @@ Clinical governance is not an informal advisory checkbox. HeartXAI 2.0 establish
 |                     | Jan 2026 CDS Final Guidance   | SaMD Class II if non-exempt.      | Criteria 3/4; device status likely. |
 +---------------------+-------------------------------+-----------------------------------+-------------------------------------+
 | **European Union**  | EU MDR 2017/745               | Annex VIII Rule 11 (Class IIa+);  | No non-device CDS exemption; Rule 11|
-|                     | MDCG 2019-11 & 2020-1         | Class IIa default for CDS.        | classifies diagnostic CDS as IIa+.  |
+|                     | MDCG 2019-11 rev.1 (June 2025)| Class IIa default for CDS.        | classifies diagnostic CDS as IIa+.  |
 +---------------------+-------------------------------+-----------------------------------+-------------------------------------+
 | **United Kingdom**  | UK MDR 2002 (as amended)      | MHRA SaMD framework;              | Software interpreting health data to|
 |                     | MHRA AI/Software Programme    | UKCA Class IIa/IIb.               | guide decisions requires UKCA mark. |
 +---------------------+-------------------------------+-----------------------------------+-------------------------------------+
-| **India**           | CDSCO / MDR 2017 &            | SaMD Risk Classification;         | Diagnostic/prognostic CDS for CVD   |
-|                     | MDSW Guidance (July 2026)     | Class B or Class C.               | requires SUGAM registration & license|
-|                     | SUGAM Registration Rules      | Class B or Class C.               | requires CDSCO regulatory license.  |
+| **India**           | CDSCO / MDR 2017 &            | Standalone MDSW Table 2 Matrix;   | Classification per Table 2 matrix;  |
+|                     | MDSW Guidance (21 July 2026)  | Class A, B, C, or D (Undetermined)| NSWS for test-licences; Online Sys. |
 +---------------------+-------------------------------+-----------------------------------+-------------------------------------+
 ```
 
