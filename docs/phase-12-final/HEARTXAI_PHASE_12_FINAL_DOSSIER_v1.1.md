@@ -26,10 +26,14 @@ This master dossier consolidates the complete, audited, and evidence-verified en
 ```
 
 ### Comprehensive Verdict Justification
-1. **Zero Technical Contradictions:** Cross-layer data dictionaries (`shared/data-dictionary.json`), Pydantic v2 schemas, TypeScript interfaces, and SQLAlchemy 2.0 async ORM models are 100% reconciled across all 192 unique documentation files.
+1. **Evidence-Based Technical Status (4-Part Separation):**
+   - *Documentation Readiness:* Complete & internally consistent. Cross-layer data dictionaries (`shared/data-dictionary.json`), Pydantic v2 schemas, TypeScript interfaces, and SQLAlchemy 2.0 async ORM models are reconciled across all 192 unique documentation files.
+   - *Implementation Status:* Minimal scaffolding only. 15 unit tests pass on an in-memory SQLite fixture; the React frontend, ML inference worker, SHAP explainer, and intake wizard are NOT yet implemented in code.
+   - *Runtime Integration:* Pending. Zero live communication between frontend, backend, ML worker, Redis, and PostgreSQL has been executed.
+   - *Validation Gates:* All empirical verification gates (Postgres container M04, security pen-test M18, WCAG 2.2 AA & load testing M19) are strictly enforced in the roadmap.
 2. **Clinical Scope Strictly Bounded:** Task A is bounded strictly as an **experimental dataset classifier** on the retrospective UCI Cleveland catheterization cohort ($N=303$). Task B (prospective 10-year risk estimation) has been **completely excised from the MVP scope**, and the proposed deterministic calculator deleted to prevent unvalidated clinical claims.
 3. **Three-Tier Data Classification:** All development, unit tests, integration tests, demonstrations, and staging deployments are restricted strictly to **Category B synthetic application data**. Real patient information (Category C) is strictly prohibited across all MVP milestones (01–20).
-4. **Four-Pillar Clinical Governance:** Independent separation of Physician Advisory Review, Clinical Content Review, Institutional Ethics / IRB Determination, and Regulatory Applicability Assessment (incorporating FDA January 2026 Clinical Decision Support Software Guidance), eliminating blanket exemption claims.
+4. **Four-Pillar Clinical Governance & Undetermined Regulatory Status:** Independent separation of Physician Advisory Review, Clinical Content Review, Institutional Ethics / IRB Determination, and Regulatory Applicability Assessment. Regulatory applicability remains strictly undetermined pending formal classification of intended use, intended users, functionality, and jurisdiction; no claims of exemption or non-device status are made.
 5. **Governance Dependency Precedent:** Implementation of Milestone 01 is blocked solely pending explicit user confirmation of the five strategic governance decisions (DEC-001 through DEC-005).
 
 ---
@@ -111,8 +115,12 @@ All architectural and quality claims have been audited against tangible reposito
 
 ### 6.1 Task A Epistemological Ground Truth
 - **Dataset Provenance:** Dr. Robert Detrano et al., *Am J Cardiol* 1989. $N=303$ symptomatic patients referred for catheterization at the Cleveland Clinic (1981–1984).
-- **Target `num`:** Angiographic diameter narrowing ($\ge 50\%$ in major coronary vessels). Binary target: $0$ vs $1$ ($num \ge 1$).
+- **Target `num` Exact Definition:** In the primary UCI documentation (`heart-disease.names` by Robert Detrano & David Aha), the target attribute is defined verbatim as:
+  `Value 0: < 50% diameter narrowing` vs `Value 1: > 50% diameter narrowing (in any major vessel)`.
+  In the primary research paper (Detrano et al., 1989), coronary disease is defined as *"greater than 50% reduction in luminal diameter of at least 1 of the major coronary arteries on selective coronary arteriography."*
+  *Precision Finding:* The source documentation explicitly defines positive CAD as strictly **greater than 50% diameter narrowing** ($>50\%$), NOT $\ge 50\%$. Borderline $50\%$ stenosis is not categorized as positive in the source documentation.
 - **Absence of Longitudinal Follow-up:** The dataset contains **zero follow-up data**. Any claim that Cleveland data predicts future heart attack risk is scientifically invalid.
+- **Privacy & De-Identification Limitations:** Collected in 1981–1984, the dataset pre-dates modern statutory privacy frameworks (HIPAA, GDPR). While names and social security numbers were removed before publication, the data was **never formally certified under modern statutory de-identification standards** (such as HIPAA Safe Harbor / Expert Determination, or GDPR anonymization).
 
 ### 6.2 ACC/AHA PCE vs. AHA PREVENT Evaluation (Task B Research)
 - **Guideline Adoption (2026):** The **2026 ACC/AHA Multisociety Dyslipidemia Guideline** formally adopted the **AHA PREVENT equations** (published late 2023 / early 2024) to replace the 2013 Pooled Cohort Equations (PCE) for primary prevention in US adults aged 30–79.
@@ -120,24 +128,24 @@ All architectural and quality claims have been audited against tangible reposito
 - **Geographic Limitations:** PREVENT is US-derived and calibrated on US cohorts. International jurisdictions use locally validated models (UK NICE mandates QRISK3; Europe mandates SCORE2; India uses WHO/CSI risk charts).
 - **MVP Boundary:** Task B is **strictly excluded from the MVP**. No 10-year risk calculator will be implemented.
 
-### 6.3 Four-Pillar Clinical Governance Framework
+### 6.3 Four-Pillar Clinical Governance & Undetermined Regulatory Status
 1. **Physician Advisory Review:** Independent practicing clinicians audit clinical logic, contraindications, and threshold plausibility.
 2. **Clinical Content Review:** Qualified medical reviewers audit patient-facing educational language, lifestyle tips, and emergency triggers.
 3. **Institutional Ethics / IRB Determination:** Research ethics determination for human subjects evaluation.
-4. **Regulatory Applicability Assessment:** Systematic evaluation under the **FDA January 2026 Clinical Decision Support Software Guidance** and Section 520(o)(1)(E) criteria, eliminating blanket exemption claims.
+4. **Regulatory Applicability Assessment:** Systematic evaluation under medical device rules (FDA CDS guidance, EU MDR, UK MHRA, CDSCO).
+*Mandatory Regulatory Posture:* **Regulatory applicability remains strictly undetermined.** HeartXAI shall NOT be classified as non-device, exempt, or definitively educational CDS pending formal assessment of intended use, intended users, functionality, and jurisdiction.
 
 ### 6.4 Mandatory Clinical Disclaimer
-> **MANDATORY NOTICE:** HeartXAI 2.0 is an educational clinical decision support tool demonstrating explainable machine learning on historical research data. It **DOES NOT** provide medical diagnoses, prognoses, or treatment plans. If you are experiencing chest pain, tightness, shortness of breath, or acute discomfort, **IMMEDIATELY CALL EMERGENCY SERVICES (911 in US, 999 in UK, 112 in India)** or go to the nearest emergency room.
+> **MANDATORY NOTICE:** HeartXAI 2.0 is an experimental educational tool demonstrating explainable machine learning on historical research data. It **DOES NOT** provide medical diagnoses, prognoses, or treatment plans. If you are experiencing chest pain, tightness, shortness of breath, or acute discomfort, **IMMEDIATELY CALL EMERGENCY SERVICES (911 in US, 999 in UK, 112 in India)** or go to the nearest emergency room.
 
 ---
 
 ## 7. Global Architecture Readiness (ADR-011)
 
-- **Universal Country Adapter Pattern:** Extensible architecture supporting any ISO 3166-1 country code. Decouples core logic from localized formatting, units, hotlines, and provider directories.
-- **Initial Demonstration Profiles:** Configured for the United States (`US`), India (`IN`), and the United Kingdom (`GB`).
+- **Universal Country Adapter Pattern as an Extensibility Goal:** The adapter pattern is an **architectural extensibility goal and software design pattern**, NOT proof of operational support, clinical validation, or regulatory readiness in every country.
+- **Initial Demonstration Profiles:** Configured for the United States (`US`), India (`IN`), and the United Kingdom (`GB`) to test unit conversions ($\text{mg/dL} \leftrightarrow \text{mmol/L}$), currencies, emergency numbers (911/112/999), and seed directories using synthetic data.
 - **Bi-Directional Unit Normalization:**
   $$\text{Chol}_{\text{mg/dL}} = \text{Chol}_{\text{mmol/L}} \times 38.67 \quad \Longleftrightarrow \quad \text{Glucose}_{\text{mg/dL}} = \text{Glucose}_{\text{mmol/L}} \times 18.0182$$
-- **Emergency Hotline Routing:** Native quick-dial routing to 911 (US), 112/102 (IN), and 999/111 (UK).
 - **No Unverified Clinical Claims:** Regional profiles configure UI formatting and emergency infrastructure only. No region-specific clinical validity or algorithmic calibration is claimed without local validation.
 
 ---
@@ -314,21 +322,26 @@ heartxai-2.0/
 | 001**   | Infrastructure Budget**  |    (~$25-$55/mo)      | Minimal VPS**           | vendor lock-in;    | Milestone 20  | USER      |
 |         |                          | B: Tier B AWS Cloud   |                         | capacity estimate. |               | DECISION**|
 +---------+--------------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
-| **DEC-  | **Clinical Governance &  | A: Four-Pillar CDS    | **Option A: Four-Pillar | Structured clinical| Milestones    | **PENDING |
-| 002**   | Review Framework**       |    Governance Model   | CDS Governance**        | oversight; FDA Jan | 08, 14, 16    | USER      |
-|         |                          | B: Formal Device IRB  |                         | 2026 CDS compliance|               | DECISION**|
+| **DEC-  | **Clinical Governance    | A: Multi-Track Phased | **Option A: Multi-    | Establishes distinct    | Requires strict    | Milestones    | **PENDING |
+| 002**   | Implementation Scope**   |    Governance (MVP     | Track Phased          | physician and content   | enforcement of     | 08, 14, 16    | USER      |
+|         | (4 Distinct Tracks)      |    Advisory/Content;   | Governance**          | review in MVP while     | prohibited clinical|               | DECISION**|
+|         |                          |    Ethics/Reg in par.) |                       | preparing ethics & reg  | claims ledger.     |               |           |
+|         |                          | B: Pre-Dev IRB &      |                       | assessments; never      |                    |               |           |
+|         |                          |    Regulatory Pre-Sub  |                       | presents IRB as alt.    |                    |               |           |
 +---------+--------------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
 | **DEC-  | **Cardiovascular         | A: Task A MVP only    | **Option A: Task A      | Preserves clinical | Milestones    | **PENDING |
 | 003**   | Prediction Scope**       | B: Implement Task B   | MVP Only**              | integrity; PREVENT | 09, 10, 11,   | USER      |
 |         |                          |    calculator in MVP  |                         | 2026 noted; B out. | 14            | DECISION**|
 +---------+--------------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
-| **DEC-  | **Geographic Launch &    | A: Universal Adapters | **Option A: Universal   | Validates multi-   | Milestones    | **PENDING |
-| 004**   | Localization Scope**     |    (US/IN/UK Profiles)| Country Adapter         | country units and  | 08, 15        | USER      |
-|         |                          | B: US-Only Launch     | Architecture**          | emergency hotlines.|               | DECISION**|
+| **DEC-  | **Geographic Adapter     | A: Adapter Pattern as | **Option A: Adapter   | Proves architectural    | Operational and    | Milestones    | **PENDING |
+| 004**   | Extensibility Goal &     |    Extensibility Goal | Pattern Extensibility | decoupling for units    | regulatory readiness| 08, 15       | USER      |
+|         | Localization Scope**     |    (US/IN/UK Synth)   | Goal (US/IN/UK Synth)*| without claiming global | must be verified per|              | DECISION**|
+|         |                          | B: US-Only Baseline   |                       | operational readiness.  | jurisdiction.      |               |           |
 +---------+--------------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
-| **DEC-  | **Data Classification &  | A: Three-Tier Class-  | **Option A: Three-Tier  | Zero PHI breach    | All           | **PENDING |
-| 005**   | Patient Data Policy**    |    ification (Cat A/B)| Classification (Cat C   | liability during   | Milestones    | USER      |
-|         |                          | B: Real PHI Pilot     | Strictly Prohibited)**  | pre-launch phase.  | (01–20)       | DECISION**|
+| **DEC-  | **Data Classification &  | A: Three-Tier Class-  | **Option A: Three-    | Eliminates breach risk; | Any future live use| All           | **PENDING |
+| 005**   | Patient Data Policy**    |    ification (Cat A/B;| Tier Classification   | contextual ethics/reg   | depends on local   | Milestones    | USER      |
+|         |                          |    Cat C Prohibited)  | (Cat C Prohibited)**  | rules noted; Category C | laws (HIPAA/GDPR/  | (01–20)       | DECISION**|
+|         |                          | B: Real PHI Pilot     |                       | prohibited in MVP.      | DPA/IRB/REC/IEC).  |               |           |
 +---------+--------------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
 ```
 

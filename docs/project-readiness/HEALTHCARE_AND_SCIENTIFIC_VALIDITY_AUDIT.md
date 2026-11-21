@@ -53,24 +53,29 @@ This audit establishes the definitive scientific boundaries for HeartXAI 2.0, pr
 - **Dataset Extraction:** The raw repository contains 76 raw attributes; the standard clinical subset distributed by UCI Machine Learning Repository consists of **14 attributes** across **303 patient records**.
 
 ### 3.2 Target Semantics and Transformation
-- **Original Target Attribute (`num`):** Represents the angiographically determined presence and extent of coronary artery disease:
-  - `num = 0`: $<50\%$ diameter narrowing in all major coronary vessels (angiographically normal or non-obstructive atherosclerotic wall irregularity).
-  - `num = 1`: Significant stenosis ($\ge 50\%$ diameter narrowing) in 1 major coronary vessel.
-  - `num = 2`: Significant stenosis in 2 major coronary vessels.
-  - `num = 3`: Significant stenosis in 3 major coronary vessels.
-  - `num = 4`: Significant stenosis in 4 major vessels (including left main / trifurcations).
+- **Original Source Target Definition (`num`):** In the primary UCI documentation (`heart-disease.names` by Robert Detrano & David Aha), the target attribute is defined verbatim as:
+  ```
+  58 num: diagnosis of heart disease (angiographic disease status)
+        -- Value 0: < 50% diameter narrowing
+        -- Value 1: > 50% diameter narrowing
+        (in any major vessel: attributes 59 through 68 are vessels)
+  ```
+  In the primary research paper (Detrano et al., *Am J Cardiol* 1989;64:304–310), coronary disease is defined as:
+  > *"greater than 50% reduction in luminal diameter of at least 1 of the major coronary arteries (left anterior descending, circumflex, or right coronary artery) on selective coronary arteriography."*
+- **Precision on the 50% Threshold:** The primary source documentation and paper explicitly define positive CAD as **strictly greater than 50% diameter narrowing** ($>50\%$), NOT $\ge 50\%$. The borderline threshold of exactly $50\%$ narrowing is not categorized as positive in the source documentation. In the processed 14-attribute dataset, `num` takes discrete values 0, 1, 2, 3, 4 indicating the number of major vessels with $>50\%$ diameter narrowing.
 - **Approved Binary Transformation for Task A:**
-  $$y = \begin{cases} 0 & \text{if } num = 0 \text{ (absence of significant stenosis, } <50\%) \\ 1 & \text{if } num \ge 1 \text{ (presence of significant stenosis, } \ge 50\%) \end{cases}$$
+  $$y = \begin{cases} 0 & \text{if } num = 0 \text{ (absence of significant stenosis, } <50\%) \\ 1 & \text{if } num \ge 1 \text{ (presence of significant stenosis, } >50\% \text{ in 1–4 vessels)} \end{cases}$$
   Distribution in Cleveland: 164 negative ($54.1\%$) and 139 positive ($45.9\%$).
 
-### 3.3 Critical Population & Methodology Limitations
+### 3.3 Critical Population, Methodology & Privacy Limitations
 1. **Referral Cohort (Severe Selection Bias):** The cohort consists exclusively of symptomatic patients or patients with abnormal non-invasive findings (e.g., severe treadmill stress tests) who were referred for invasive coronary catheterization. The background disease prevalence is $\approx 46\%$, vastly higher than the $2\text{--}6\%$ prevalence in asymptomatic general adult populations.
 2. **Small Sample Size ($N=303$):** With only 303 total instances (and 6 records containing missing values in `ca` or `thal`, leaving $N=297$ complete cases), the sample is underpowered for generalizable sub-population modeling.
 3. **Demographic Imbalance:** 206 male ($68\%$) and 97 female ($32\%$). The cohort was drawn from a regional US urban clinical population in the early 1980s; it lacks racial, ethnic, and global diversity.
 4. **Historical Diagnostic Technology:** Catheterization procedures and laboratory assays reflect 1980s clinical standards. Modern high-sensitivity troponin assays, coronary CT angiography (CCTA), and current lipid fractionation were not available.
-5. **Absence of Longitudinal Follow-up:** **The dataset contains zero follow-up data.** It records solely whether a patient had $\ge 50\%$ vessel narrowing on the day of angiography. **It cannot calculate the probability of a future heart attack, stroke, or cardiovascular event.**
+5. **Absence of Longitudinal Follow-up:** **The dataset contains zero follow-up data.** It records solely whether a patient had $>50\%$ vessel narrowing on the day of angiography. **It cannot calculate the probability of a future heart attack, stroke, or cardiovascular event.**
+6. **Privacy & De-Identification Limitations:** Collected between 1981 and 1984, the dataset pre-dates modern statutory privacy and data protection frameworks including the US Health Insurance Portability and Accountability Act of 1996 (HIPAA) and the EU General Data Protection Regulation (GDPR). While personal identifiers (names, patient IDs, social security numbers) were stripped by original researchers prior to deposition in the UCI repository, the dataset was **never formally certified under modern statutory de-identification standards** (such as HIPAA Safe Harbor 45 CFR § 164.514(b) or Expert Determination § 164.514(a), or GDPR Article 4(1) anonymization). No modern re-identification risk analysis or Data Protection Impact Assessment (DPIA) has ever been performed on this historical research asset.
 
-### 3.4 Regulatory & Clinical Classification
+### 3.4 Operational & Research Classification
 The model trained on this dataset must be classified strictly as an **Experimental Machine Learning Dataset Classifier**. Its outputs must never be presented as:
 - A medical diagnosis.
 - A validated future cardiovascular event prediction.
@@ -186,19 +191,24 @@ Clinical governance is not an informal advisory checkbox. HeartXAI 2.0 establish
 |                                    | involving human participants or processing Category C real PHI.    |
 +------------------------------------+--------------------------------------------------------------------+
 | **4. Regulatory Applicability      | Formal legal and regulatory assessment under medical device rules. |
-|    Assessment**                    | *US Reference:* **FDA January 2026 Clinical Decision Support (CDS)**|
-|                                    | **Software Guidance** and Section 520(o)(1)(E) of the FD&C Act.    |
-|                                    | *Boundary:* Software generating patient-facing predictive outputs is|
-|                                    | scrutinized; HeartXAI makes **no blanket claims of exemption**     |
-|                                    | and **no claims of formal certification or clinical validation**.  |
+|    Assessment**                    | *US Reference:* FDA Section 520(o)(1)(E) and **FDA January 2026**   |
+|                                    | **Clinical Decision Support (CDS) Software Guidance**; EU MDR       |
+|                                    | 2017/745 Rule 11; UK MHRA; India CDSCO Medical Device Rules.        |
+|                                    | *Boundary:* HeartXAI makes **no claims of exemption**, no claims of  |
+|                                    | non-device status, and no claims of regulatory clearance.          |
 +------------------------------------+--------------------------------------------------------------------+
 ```
 
-### 6.1 Regulatory Applicability under FDA January 2026 CDS Guidance
-Under the FDA January 2026 Final Guidance on Clinical Decision Support Software:
-- Non-device CDS status under Section 520(o)(1)(E) requires that the software be intended for healthcare professionals (HCPs) who can independently review the basis for the recommendations.
-- **Patient-directed or consumer-facing software** that analyzes patient-specific medical data to predict risk or output clinical classifications is **not exempt** under Criterion 3/4 and may be regulated as a device (Software as a Medical Device - SaMD).
-- **HeartXAI 2.0 Posture:** HeartXAI 2.0 does NOT claim an automatic statutory exemption from medical device oversight. For MVP, it is developed strictly as an educational technology demonstration operating on synthetic data. Formal regulatory classification (513(g) or pre-market submission) will be required before any clinical or commercial deployment.
+### 6.1 Regulatory Applicability Posture: Status Undetermined
+**Regulatory applicability remains strictly undetermined.** HeartXAI 2.0 shall NOT be classified as non-device, exempt, or definitively educational CDS. 
+
+Under global medical device legislation (including the US Food, Drug, and Cosmetic Act, the FDA January 2026 Final Guidance on Clinical Decision Support Software, EU MDR 2017/745, and UK MHRA guidance):
+1. **Intended Use Dependency:** Whether software constitutes a regulated medical device (Software as a Medical Device - SaMD) depends on the specific clinical claims, indication for use, and decision-support context.
+2. **Intended User Dependency:** Under Criterion 3 & 4 of FDA Section 520(o)(1)(E), software intended for healthcare professionals (HCPs) who can independently review the clinical basis may be evaluated differently from patient- or consumer-facing software. Patient-facing risk estimators are frequently regulated as medical devices.
+3. **Functionality Dependency:** The degree of algorithmic automation, presentation of numerical disease likelihood, and actionability of counterfactual scenarios influence risk classification.
+4. **Jurisdictional Divergence:** Software classified as non-device in one country may be classified as Class IIa/IIb SaMD under EU MDR Rule 11 or UK MHRA regulations.
+
+**Mandatory Project Stance:** Regulatory applicability cannot be resolved by technical architecture alone and remains undetermined pending a formal assessment of intended use, intended users, functionality, and jurisdiction. During MVP engineering, all work operates exclusively as prototype research using Category B synthetic application data. No clinical deployment or marketing claims shall be made without formal regulatory determination.
 
 ### 6.2 Mandatory Medical Disclaimer (Required on All Assessment Views)
 > **MANDATORY CLINICAL NOTICE:** HeartXAI 2.0 is an experimental educational tool designed to demonstrate explainable machine learning concepts using historical research data. It **DOES NOT** provide medical diagnoses, clinical prognoses, or treatment recommendations. The assessment reflects statistical patterns observed in historical research datasets and cannot substitute for an evaluation by a licensed healthcare professional. If you are experiencing chest pain, tightness, shortness of breath, radiating arm or jaw pain, or acute discomfort, **IMMEDIATELY CALL EMERGENCY SERVICES (911 in the US, 999 in the UK, 112 in India)** or visit the nearest hospital emergency room.

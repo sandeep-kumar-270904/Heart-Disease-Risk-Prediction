@@ -10,14 +10,14 @@
 
 ## 1. Executive Summary
 
-Healthcare systems, clinical measurement conventions, statutory privacy frameworks, and emergency response infrastructures vary fundamentally across international jurisdictions. In accordance with **ADR-011 (Global Country Configuration Architecture)**, HeartXAI 2.0 establishes a **globally configurable architecture** that decouples the core platform engine from localized national rules.
+Healthcare systems, clinical measurement conventions, statutory privacy frameworks, and emergency response infrastructures vary fundamentally across international jurisdictions. In accordance with **ADR-011 (Global Country Configuration Architecture)**, HeartXAI 2.0 establishes a pluggable adapter pattern that decouples the core platform engine from localized national rules.
 
-While the United States (`US`), India (`IN`), and United Kingdom (`GB`) are used as initial demonstration configurations, the Country Adapter architecture is designed to support **any ISO 3166-1 alpha-2 jurisdiction** declaratively without altering core business logic or machine learning pipelines.
-
-### Mandatory Compliance & Governance Caveats
-> **CRITICAL POSTURE STATEMENT 1 (Data Prohibition):** The initial implementation, demonstration, and testing milestones are restricted strictly to **Category B synthetic application data**. Real patient data (Category C) is strictly prohibited.
-
-> **CRITICAL POSTURE STATEMENT 2 (No Unverified Clinical Claims):** HeartXAI makes **no claims of clinical validation, regulatory clearance, or statutory approval** in the US, UK, India, or any other country. Demonstrating country adapters tests architectural extensibility only.
+### Reclassification: Architectural Extensibility Goal
+Universal ISO country adapter support is an **architectural extensibility goal and design pattern**, NOT proof of operational support, clinical validation, or regulatory readiness in every country:
+- **Design Pattern:** The adapter pattern ensures that software interfaces (unit conversion, hotline display, locale formatting, and directory schemas) are structurally decoupled from US-centric assumptions and can theoretically accommodate any ISO 3166-1 alpha-2 code without rewriting core code.
+- **Operational Reality:** Full operational support requires locally verified provider directories, accredited language translations, live emergency service routing, and country-specific data privacy compliance.
+- **Regulatory Reality:** Regulatory clearance and clinical validation must be pursued individually on a per-jurisdiction basis. HeartXAI makes **zero claims of operational readiness, clinical validity, or regulatory clearance** in any country.
+- **Initial Engineering Scope:** The United States (`US`), India (`IN`), and United Kingdom (`GB`) are used strictly as initial demonstration configurations to test unit conversions ($\text{mg/dL} \leftrightarrow \text{mmol/L}$) and UI formatting using **Category B synthetic demonstration data**. Real patient data (Category C) remains strictly prohibited across all MVP milestones (01–20).
 
 ---
 

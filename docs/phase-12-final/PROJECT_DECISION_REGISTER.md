@@ -115,26 +115,27 @@ The table below reconciles all open governance questions into a single authorita
 |         |                          |    (~$250/mo)         |                       | ('500+ assessments') is | hardware outage.   |               |           |
 |         |                          |                       |                       | unverified estimate.    |                    |               |           |
 +---------+--------------------------+-----------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
-| **DEC-  | **Clinical Governance &  | A: Four-Pillar        | **Option A: Four-     | Provides structured     | Requires strict    | Milestones    | **PENDING |
-| 002**   | Review Framework**       |    Governance & CDS   | Pillar Governance &   | clinical oversight and  | enforcement of     | 08, 14, 16    | USER      |
-|         |                          |    Assessment         | CDS Assessment**      | transparent compliance  | prohibited clinical|               | DECISION**|
-|         |                          | B: Institutional IRB  |                       | under FDA Jan 2026 CDS  | claims ledger.     |               |           |
-|         |                          |    Protocol (Device)  |                       | guidance & Sec 520(o).  |                    |               |           |
+| **DEC-  | **Clinical Governance    | A: Multi-Track Phased | **Option A: Multi-    | Establishes distinct    | Requires strict    | Milestones    | **PENDING |
+| 002**   | Implementation Scope**   |    Governance (MVP     | Track Phased          | physician and content   | enforcement of     | 08, 14, 16    | USER      |
+|         | (4 Distinct Tracks)      |    Advisory/Content;   | Governance**          | review in MVP while     | prohibited clinical|               | DECISION**|
+|         |                          |    Ethics/Reg in par.) |                       | preparing ethics & reg  | claims ledger.     |               |           |
+|         |                          | B: Pre-Dev IRB &      |                       | assessments; never      |                    |               |           |
+|         |                          |    Regulatory Pre-Sub  |                       | presents IRB as alt.    |                    |               |           |
 +---------+--------------------------+-----------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
 | **DEC-  | **Cardiovascular         | A: Task A MVP only    | **Option A: Task A    | Preserves scientific    | Users cannot get   | Milestones    | **PENDING |
 | 003**   | Prediction Scope**       |    (Task B to research| MVP Only**            | integrity; eliminates   | 10-year risk % in  | 09, 10, 11,   | USER      |
 |         |                          | B: Implement Task B   |                       | confusion between CAD   | MVP; must wait for | 14            | DECISION**|
 |         |                          |    calculator in MVP  |                       | detection & future risk.| future research.   |               |           |
 +---------+--------------------------+-----------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
-| **DEC-  | **Geographic Launch &    | A: Universal Country  | **Option A: Universal | Validates multi-unit    | Requires seeding   | Milestones    | **PENDING |
-| 004**   | Localization Scope**     |    Adapter (US/IN/UK) | Country Adapter       | engine (mg/dL <-> mmol) | emergency contacts | 08, 15        | USER      |
-|         |                          | B: US-Only Launch     | with Synthetic Demo** | and internationalization| across three       |               | DECISION**|
-|         |                          |                       |                       | in MVP without lock-in. | national regions.  |               |           |
+| **DEC-  | **Geographic Adapter     | A: Adapter Pattern as | **Option A: Adapter   | Proves architectural    | Operational and    | Milestones    | **PENDING |
+| 004**   | Extensibility Goal &     |    Extensibility Goal | Pattern Extensibility | decoupling for units    | regulatory readiness| 08, 15       | USER      |
+|         | Localization Scope**     |    (US/IN/UK Synth)   | Goal (US/IN/UK Synth)*| without claiming global | must be verified per|              | DECISION**|
+|         |                          | B: US-Only Baseline   |                       | operational readiness.  | jurisdiction.      |               |           |
 +---------+--------------------------+-----------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
-| **DEC-  | **Data Classification &  | A: Three-Tier Class-  | **Option A: Three-    | Eliminates HIPAA/GDPR   | Demonstrations use | All           | **PENDING |
-| 005**   | Patient Data Policy**    |    ification (Cat A/B;| Tier Classification   | breach liability during | synthetic patient  | Milestones    | USER      |
-|         |                          |    Cat C Prohibited)  | (Cat C Prohibited)**  | development; protects   | personas rather    | (01–20)       | DECISION**|
-|         |                          | B: Real PHI Pilot     |                       | patient confidentiality.| than live records. |               |           |
+| **DEC-  | **Data Classification &  | A: Three-Tier Class-  | **Option A: Three-    | Eliminates breach risk; | Any future live use| All           | **PENDING |
+| 005**   | Patient Data Policy**    |    ification (Cat A/B;| Tier Classification   | contextual ethics/reg   | depends on local   | Milestones    | USER      |
+|         |                          |    Cat C Prohibited)  | (Cat C Prohibited)**  | rules noted; Category C | laws (HIPAA/GDPR/  | (01–20)       | DECISION**|
+|         |                          | B: Real PHI Pilot     |                       | prohibited in MVP.      | DPA/IRB/REC/IEC).  |               |           |
 +---------+--------------------------+-----------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
 ```
 

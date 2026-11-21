@@ -34,20 +34,22 @@ This document articulates the **five strategic governance decisions** that requi
 
 ---
 
-### Question 2 (DEC-002): Clinical Governance Framework & Regulatory Positioning
-- **Option A (Recommended): Four-Pillar Clinical Governance & CDS Software Assessment**
-  - *Structure:* Establish four independent governance pillars:
-    1. *Physician Advisory Review:* Independent practicing clinical advisors audit clinical logic, contraindications, and threshold plausibility.
-    2. *Clinical Content Review:* Qualified medical reviewers audit patient-facing educational language, lifestyle guidance, and emergency red-flag triggers.
-    3. *Institutional Ethics / IRB Determination:* Formal research ethics determination for human subjects evaluation.
-    4. *Regulatory Applicability Assessment:* Systematic review under the **FDA January 2026 Clinical Decision Support Software Guidance** and Section 520(o)(1)(E) criteria, eliminating blanket exemption claims.
-  - *Intended Purpose:* Ensures rigorous clinical oversight, transparent feature attribution (TreeSHAP), and strict adherence to non-diagnostic educational boundaries.
-  - *Pros:* Rigorous clinical oversight without premature device filings; transparent and compliant.
-  - *Cons:* Requires continuous maintenance of the prohibited clinical claims ledger and four review workflows.
-- **Option B: Formal Investigational Device Protocol (IRB + FDA Pre-Submission)**
-  - *Structure:* Treat HeartXAI 2.0 as an investigational medical device (SaMD Class II); submit an FDA Q-Submission / Pre-Sub and obtain hospital IRB approval prior to any software deployment.
-  - *Pros:* Direct pathway toward formal medical device clearance.
-  - *Cons:* 6 to 12-month regulatory lead time; high clinical trial costs; inappropriate for an early-stage research/educational tool.
+### Question 2 (DEC-002): Clinical Governance Implementation Scope (Four Distinct Tracks)
+*Governance Principle:* Physician advisory review, clinical content review, institutional ethics / IRB determination, and regulatory assessment are four distinct, concurrent governance tracks. An IRB determination is an institutional ethics safeguard, not an alternative to physician review of clinical logic. Furthermore, regulatory applicability remains undetermined pending formal classification.
+
+- **Option A (Recommended): Multi-Track Phased Governance for MVP**
+  - *Structure:* Maintain all four governance tracks as distinct workflows:
+    1. *Physician Advisory Review:* Active during MVP to audit clinical features, boundary conditions, and emergency triggers.
+    2. *Clinical Content Review:* Active during MVP to verify health literacy, educational copy, and patient communication.
+    3. *Institutional Ethics / IRB Protocol:* Formal research protocol drafted in parallel during MVP, submitted prior to any human subject testing.
+    4. *Regulatory Applicability Assessment:* Systematic review under FDA guidance (including Jan 2026 CDS guidance), EU MDR, UK MHRA, and CDSCO rules; regulatory status remains formally undetermined during MVP development.
+  - *Intended Purpose:* Ensures rigorous clinical safety and content oversight during development while preparing formal ethics and regulatory determinations in parallel without making unverified exemption claims.
+  - *Pros:* High clinical rigor; zero premature claims of device exemption or certification.
+  - *Cons:* Requires coordinating four distinct oversight workflows.
+- **Option B: Pre-Development Institutional IRB Protocol & Regulatory Pre-Submission**
+  - *Structure:* Require formal hospital or university institutional sponsorship, IRB ethics approval, and an official FDA pre-submission (Q-Submission) to be fully approved before any software engineering begins.
+  - *Pros:* Complete institutional and regulatory alignment prior to writing code.
+  - *Cons:* 6 to 12-month institutional lead time; high upfront financial cost; inappropriate for an early-stage prototype using synthetic data.
 - **Recommendation:** **Option A for MVP software release.**
 
 ---
@@ -66,14 +68,14 @@ This document articulates the **five strategic governance decisions** that requi
 
 ---
 
-### Question 4 (DEC-004): Geographic Launch & Localization Scope
-- **Option A (Recommended): Universal Country Adapter Architecture (ADR-011) with Synthetic Demonstration Data**
-  - *Scope:* Deploy the universal country configuration engine supporting pluggable adapters for any ISO 3166-1 country, with initial demonstration profiles for the United States (US), India (IN), and the United Kingdom (UK). Covers measurement units ($\text{mg/dL} \leftrightarrow \text{mmol/L}$), currencies, emergency numbers (911/112/999), and seed directories, tested exclusively with synthetic data.
-  - *Clinical Safeguard:* Country adapters configure formatting, units, hotlines, and directory structures only. No region-specific clinical validity or algorithmic calibration is claimed for international populations without local clinical validation.
+### Question 4 (DEC-004): Geographic Adapter Architecture & Localization Goal
+- **Option A (Recommended): Universal Country Adapter Pattern as an Architectural Extensibility Goal**
+  - *Scope:* Deploy the universal country configuration engine (ADR-011) as an architectural extensibility design pattern to decouple core logic from national rules. Seed initial demonstration profiles for the United States (US), India (IN), and the United Kingdom (UK) to test unit conversions ($\text{mg/dL} \leftrightarrow \text{mmol/L}$), currencies, emergency numbers (911/112/999), and directory schemas using synthetic data.
+  - *Crucial Governance Boundary:* Universal country adapter support is an **architectural extensibility goal and design pattern**, NOT proof of operational support, clinical validation, or regulatory readiness in every country. Operational readiness and regulatory compliance must be established individually per jurisdiction.
   - *Pros:* Proves multi-country extensibility and verifies unit conversion math in MVP without geographical lock-in.
   - *Cons:* Requires maintaining synthetic seed directory data for three jurisdictions.
-- **Option B: Single Jurisdiction (US Only) for Initial MVP**
-  - *Scope:* Restrict MVP to US clinical conventions (mg/dL only, 911 only); defer international adapters to post-MVP.
+- **Option B: Single Jurisdiction (US Only) Baseline for MVP**
+  - *Scope:* Restrict MVP strictly to US clinical conventions (mg/dL only, 911 only); defer international adapter architecture to post-MVP.
   - *Pros:* Simpler initial directory footprint.
   - *Cons:* Fails to validate international unit conversions and localization engine in the initial release.
 - **Recommendation:** **Option A.**
@@ -86,12 +88,13 @@ This document articulates the **five strategic governance decisions** that requi
     - **Category A (Public Research Datasets):** Publicly available de-identified datasets (UCI Cleveland, 303 records) used exclusively for model training, offline validation, and calibration.
     - **Category B (Synthetic Application Data):** 100% synthetically generated personas, UI fixtures, and mock clinical records (`scripts/generate_synthetic_patients.py`). Plausible physiological distributions with zero link to real individuals. Used for all application development, integration testing, demonstrations, and staging.
     - **Category C (Real Patient Information):** Real PHI/PII. **Strictly prohibited** across all MVP milestones (01–20).
-  - *Pros:* Complete protection against data breaches, HIPAA/GDPR regulatory violations, and privacy liabilities during development.
+  - *Pros:* Complete protection against data breaches, regulatory violations, and privacy liabilities during development.
   - *Cons:* Real clinical usability studies must wait for a subsequent protocol phase under institutional governance.
 - **Option B: Authorize Real Patient Pilot Data in Staging (Permit Category C)**
   - *Policy:* Allow beta testing with real patient health data during Milestone 20 staging acceptance.
   - *Pros:* Tests system with live clinical records.
-  - *Cons:* Severe regulatory and legal exposure; requires signed BAAs, security audits, and formal ethics approval before any code is written.
+  - *Cons:* Severe regulatory, legal, and privacy exposure. Applicable ethics, privacy, contractual, and regulatory requirements depend on the jurisdiction and institutional context (e.g., HIPAA BAAs for US covered entities, GDPR Article 28 DPAs in the EU/UK, DPDP compliance in India, and local institutional ethics review). Attempting to ingest Category C real patient data during MVP would introduce complex cross-jurisdictional compliance burdens before core functionality is verified.
+- **Recommendation:** **Option A.**
 - **Recommendation:** **Option A.**
 
 ---

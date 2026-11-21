@@ -72,7 +72,7 @@ In accordance with Phase 12.2 governance requirements, HeartXAI 2.0 enforces thr
 ### 4.1 Core Capabilities (Mandatory for MVP)
 1. **Secure Patient Identity Management:** Argon2id hashing, short-lived in-memory JWTs (15 min), HttpOnly refresh cookies with Redis token-family rotation, optional TOTP MFA.
 2. **Clinical Intake Questionnaire (14-Feature Canonical Contract):** Structured capture of cardiovascular biomarkers with automated unit conversion ($\text{mg/dL} \leftrightarrow \text{mmol/L}$) and real-time physiological plausibility validation.
-3. **Calibrated Machine Learning Risk Scoring (Task A Only):** Experimental classification of coronary stenosis likelihood ($P(\text{stenosis} \ge 50\% \mid \mathbf{x})$) generated via calibrated XGBoost on the retrospective Cleveland cohort, categorized into Low ($<20\%$), Moderate ($20\text{--}60\%$), and Elevated ($\ge 60\%$) tiers.
+3. **Calibrated Machine Learning Risk Scoring (Task A Only):** Experimental classification of coronary stenosis likelihood ($P(\text{stenosis} > 50\% \mid \mathbf{x})$) generated via calibrated XGBoost on the retrospective Cleveland cohort (Detrano et al., 1989; UCI documentation defines target as $>50\%$ diameter narrowing), categorized into Low ($<20\%$), Moderate ($20\text{--}60\%$), and Elevated ($\ge 60\%$) tiers.
 4. **Local Feature Attribution (TreeSHAP):** Interactive waterfall chart displaying top positive and negative risk contributors with clear statements that SHAP reflects statistical association, not biological causation.
 5. **Constrained Actionable Counterfactual Engine:** Optimization algorithm generating realistic lifestyle modification scenarios strictly restricted to actionable variables (blood pressure, cholesterol, fasting glucose), with immutable features strictly frozen.
 6. **Statutory Medical Disclaimers & Emergency Banners:** Prominent non-diagnostic clinical boundaries and dynamic emergency warnings when red-flag symptoms are entered.
@@ -83,10 +83,10 @@ In accordance with Phase 12.2 governance requirements, HeartXAI 2.0 enforces thr
 1. **Longitudinal Assessment History:** Graphical tracking of synthetic patient scores over successive assessments.
 2. **Patient-to-Doctor Secure Sharing:** Time-limited (72-hour), revocable cryptographic grant links allowing doctors to view a specific assessment.
 3. **Immutable Audit Trail:** Append-only database logging of all system access, authentication events, and ML inference operations.
-4. **Globally Configurable Country Architecture (ADR-011):** Declarative Country Adapters supporting any ISO 3166-1 jurisdiction, demonstrated initially with pre-configured US, India, and UK profiles.
+4. **Country Adapter Architecture as Extensibility Goal (ADR-011):** Declarative Country Adapters supporting any ISO 3166-1 jurisdiction as an architectural extensibility design pattern, demonstrated initially with pre-configured US, India, and UK profiles using Category B synthetic data (no claims of universal operational support or global regulatory clearance).
 
 ### 4.3 Optional & Future Capabilities (Deferred to Post-MVP Research)
-1. **Task B Prospective 10-Year ASCVD Risk Engine:** **Excluded from MVP.** Relegated to future research pending clinical guideline updates (e.g., 2026 ACC/AHA PREVENT adoption, UK QRISK3), clinical advisory review, and institutional ethics determinations.
+1. **Task B Prospective 10-Year ASCVD Risk Engine:** **Excluded from MVP.** Relegated to future research pending clinical guideline updates (e.g., 2026 ACC/AHA PREVENT adoption in US, UK QRISK3), clinical advisory review, and institutional ethics determinations.
 2. **Direct Electronic Health Record (EHR) Integration:** HL7 FHIR US Core profiles for automated lab value ingestion (Post-MVP).
 3. **Live Insurance Formulary & Benefit Verification:** Real-time payer API connectivity (Post-MVP).
 4. **Telehealth Video Consultation:** In-app WebRTC video calling between patients and directory doctors (Post-MVP).
@@ -96,8 +96,8 @@ In accordance with Phase 12.2 governance requirements, HeartXAI 2.0 enforces thr
 - **Primary Diagnostic Medical Device:** HeartXAI shall never declare that a patient "has" heart disease or is having a heart attack.
 - **Automated Prescription or Medication Dosage Adjustments:** The system shall never recommend specific drug brand names or dosages.
 - **Emergency Dispatch Automation:** The system shall not automatically trigger 911/999/112 calls or dispatch ambulances without user intervention.
-- **Real Patient Data Ingestion in Non-Production:** Strict prohibition against real PHI in development, testing, or staging.
-- **Blanket Claims of Regulatory Exemption:** HeartXAI makes no blanket claims that it is exempt from FDA or medical device regulation.
+- **Category C Real Patient Data Ingestion:** Strict prohibition against real PHI/PII across all MVP milestones (01–20).
+- **Undetermined Regulatory Status:** HeartXAI makes no claims of being non-device, exempt, or definitively educational CDS; regulatory applicability remains undetermined pending formal classification.
 
 ---
 
