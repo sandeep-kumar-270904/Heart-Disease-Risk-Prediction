@@ -73,7 +73,9 @@ This audit establishes the definitive scientific boundaries for HeartXAI 2.0, pr
 3. **Demographic Imbalance:** 206 male ($68\%$) and 97 female ($32\%$). The cohort was drawn from a regional US urban clinical population in the early 1980s; it lacks racial, ethnic, and global diversity.
 4. **Historical Diagnostic Technology:** Catheterization procedures and laboratory assays reflect 1980s clinical standards. Modern high-sensitivity troponin assays, coronary CT angiography (CCTA), and current lipid fractionation were not available.
 5. **Absence of Longitudinal Follow-up:** **The dataset contains zero follow-up data.** It records solely whether a patient had $>50\%$ vessel narrowing on the day of angiography. **It cannot calculate the probability of a future heart attack, stroke, or cardiovascular event.**
-6. **Privacy & De-Identification Limitations:** Collected between 1981 and 1984, the dataset pre-dates modern statutory privacy and data protection frameworks including the US Health Insurance Portability and Accountability Act of 1996 (HIPAA) and the EU General Data Protection Regulation (GDPR). While personal identifiers (names, patient IDs, social security numbers) were stripped by original researchers prior to deposition in the UCI repository, the dataset was **never formally certified under modern statutory de-identification standards** (such as HIPAA Safe Harbor 45 CFR § 164.514(b) or Expert Determination § 164.514(a), or GDPR Article 4(1) anonymization). No modern re-identification risk analysis or Data Protection Impact Assessment (DPIA) has ever been performed on this historical research asset.
+6. **Privacy, Provenance & De-Identification Audit (Known vs. Unknown):**
+   - **What is Known from Primary Sources:** The dataset was contributed to the UCI Machine Learning Repository in 1988 by Dr. Robert Detrano and David Aha. In the documentation file `heart-disease.names`, raw attribute 2 (`ccf: social security number`) is documented as having been replaced by the contributor with a dummy value of 0. In the standardized 14-attribute file (`processed.cleveland.data`), attributes 1 and 2 (`id` and `ccf`) were omitted entirely. The published 14-attribute CSV contains no patient names, home addresses, phone numbers, or social security numbers.
+   - **What is Unknown & Unverified:** The primary paper (Detrano et al., *Am J Cardiol* 1989) does not document the specific institutional data extraction protocol, whether informed consent was obtained from the 1981–1984 patients for secondary public open-source distribution, or whether Cleveland Clinic Institutional Review Board approval was formally granted for public web deposition. No formal HIPAA Safe Harbor certification (45 CFR § 164.514(b)) or Expert Determination (§ 164.514(a)) was ever conducted because HIPAA was enacted over a decade later (1996). Whether quasi-identifier combinations (e.g., age, sex, resting ECG patterns, fluoroscopy vessel counts) could present theoretical re-identification risk against historical hospital catheterization logs remains unassessed in modern literature.
 
 ### 3.4 Operational & Research Classification
 The model trained on this dataset must be classified strictly as an **Experimental Machine Learning Dataset Classifier**. Its outputs must never be presented as:
@@ -81,6 +83,25 @@ The model trained on this dataset must be classified strictly as an **Experiment
 - A validated future cardiovascular event prediction.
 - A clinically validated risk score.
 - A replacement for a licensed physician's evaluation.
+
+### 3.5 Methodological Review of Calibration Metrics: Brier Score & ECE
+In earlier planning documents, numerical thresholds were proposed for probability calibration: **Brier score $\le 0.12$** and **Expected Calibration Error (ECE) $\le 0.05$**.
+
+#### Methodological Justification & Limitations
+1. **Brier Score Sensitivity to Disease Prevalence:**
+   $$\text{Brier} = \frac{1}{N} \sum_{i=1}^N (p_i - y_i)^2$$
+   The Brier score measures the mean squared error between predicted probabilities $p_i \in [0, 1]$ and actual binary outcomes $y_i \in \{0, 1\}$. It is a strictly proper scoring rule combining discrimination and calibration. However, its value is directly dependent on baseline disease prevalence ($\bar{y}$). In the Cleveland cohort ($\bar{y} \approx 0.4587$), an uninformative model predicting the sample mean has a baseline Brier score of $\text{Brier}_{\text{ref}} = \bar{y}(1 - \bar{y}) \approx 0.2483$. A threshold of $\le 0.12$ represents a Brier Skill Score ($\text{BSS} = 1 - \frac{0.12}{0.2483} \approx 51.7\%$) improvement over baseline. While $\le 0.12$ represents a strong engineering benchmark, it does NOT guarantee clinical calibration because a model with high discrimination could mask poor calibration in low-risk patients.
+2. **Expected Calibration Error (ECE) Vulnerabilities:**
+   $$\text{ECE} = \sum_{m=1}^M \frac{|B_m|}{N} \left| \text{acc}(B_m) - \text{conf}(B_m) \right|$$
+   ECE groups predictions into $M$ bins (typically $M=10$). In a small test fold ($N \approx 60$ in 5-fold CV), each bin contains only 4 to 8 patients, making ECE highly volatile; a single patient outcome shifts a bin's empirical accuracy by $12\text{--}25\%$. Furthermore, ECE weights all bins equally, whereas clinical utility depends disproportionately on calibration around clinical decision thresholds ($10\%\text{--}30\%$).
+3. **Formal Classification as Provisional Engineering Targets:**
+   - The thresholds $\text{Brier} \le 0.12$ and $\text{ECE} \le 0.05$ are **provisional engineering heuristic targets**, NOT definitive proof of clinical calibration.
+   - Meeting these numerical thresholds does NOT warrant claiming that the model is clinically calibrated.
+   - **Mandatory Clinical Calibration Protocol (Milestone 10/11):** Genuine calibration assessment requires:
+     - Visual inspection of non-parametric calibration curves (spline or LOWESS regression with 95% confidence bands).
+     - Logistic calibration regression yielding calibration intercept ($a \approx 0$) and slope ($b \approx 1$).
+     - Subgroup calibration assessment across biological sex and age tiers.
+     - Clinical Net Benefit analysis via Decision Curve Analysis (DCA; Vickers et al.) across actionable threshold ranges ($10\%\text{--}50\%$).
 
 ---
 
@@ -199,16 +220,67 @@ Clinical governance is not an informal advisory checkbox. HeartXAI 2.0 establish
 +------------------------------------+--------------------------------------------------------------------+
 ```
 
-### 6.1 Regulatory Applicability Posture: Status Undetermined
-**Regulatory applicability remains strictly undetermined.** HeartXAI 2.0 shall NOT be classified as non-device, exempt, or definitively educational CDS. 
+### 6.1 Independent Jurisdictional Regulatory Analysis
 
-Under global medical device legislation (including the US Food, Drug, and Cosmetic Act, the FDA January 2026 Final Guidance on Clinical Decision Support Software, EU MDR 2017/745, and UK MHRA guidance):
-1. **Intended Use Dependency:** Whether software constitutes a regulated medical device (Software as a Medical Device - SaMD) depends on the specific clinical claims, indication for use, and decision-support context.
-2. **Intended User Dependency:** Under Criterion 3 & 4 of FDA Section 520(o)(1)(E), software intended for healthcare professionals (HCPs) who can independently review the clinical basis may be evaluated differently from patient- or consumer-facing software. Patient-facing risk estimators are frequently regulated as medical devices.
-3. **Functionality Dependency:** The degree of algorithmic automation, presentation of numerical disease likelihood, and actionability of counterfactual scenarios influence risk classification.
-4. **Jurisdictional Divergence:** Software classified as non-device in one country may be classified as Class IIa/IIb SaMD under EU MDR Rule 11 or UK MHRA regulations.
+> [!WARNING]
+> **MANDATORY LEGAL DISCLAIMER & SPECIALIST REVIEW REQUIREMENT**  
+> The regulatory analyses below represent technical architectural assessments based on published statutes and agency guidance. They do NOT constitute formal legal advice. **Specialist review by qualified healthcare regulatory legal counsel in each target jurisdiction is strictly required** before drawing definitive legal conclusions regarding device qualification, risk classification, or marketing authorization. HeartXAI 2.0 makes no claim of exemption, non-device status, or regulatory clearance in any jurisdiction.
 
-**Mandatory Project Stance:** Regulatory applicability cannot be resolved by technical architecture alone and remains undetermined pending a formal assessment of intended use, intended users, functionality, and jurisdiction. During MVP engineering, all work operates exclusively as prototype research using Category B synthetic application data. No clinical deployment or marketing claims shall be made without formal regulatory determination.
+#### 1. United States — Food and Drug Administration (FDA)
+- **Governing Framework:** Federal Food, Drug, and Cosmetic Act (FD&C Act) § 520(o)(1)(E), amended by the 21st Century Cures Act; **FDA January 2026 Final Guidance on Clinical Decision Support Software**.
+- **The Four Statutory Criteria (US Only):** Under § 520(o)(1)(E), software is excluded from the definition of a medical device ONLY if it meets all four cumulative criteria:
+  1. *Criterion 1:* Not intended to acquire, process, or analyze medical images or signals from IVDs or pattern recognition.
+  2. *Criterion 2:* Intended to display, analyze, or print medical information about a patient or other medical information.
+  3. *Criterion 3:* Intended to support or provide recommendations to a **healthcare professional (HCP)** about prevention, diagnosis, or treatment.
+  4. *Criterion 4:* Intended to enable such HCP to **independently review the basis** for the recommendations so that the HCP does not rely primarily on the software to make a clinical decision.
+- **Critical US Analysis:**
+  - The four statutory criteria apply **strictly to US FDA jurisdiction**; they do not apply in the EU, UK, or India.
+  - While HeartXAI 2.0 incorporates TreeSHAP feature attributions, complex gradient-boosted decision trees may not permit an HCP to independently verify the mathematical calculations in real time.
+  - Crucially, patient-facing risk estimators or clinical likelihood tools intended for direct consumer use **fail Criterion 3 & 4** and are generally regulated as medical devices (Software as a Medical Device - SaMD).
+  - *Status:* **Undetermined.** Formal 513(g) determination or Pre-Submission (Q-Submission) required prior to clinical deployment.
+
+#### 2. European Union — European Medicines Agency & Notified Bodies
+- **Governing Framework:** Regulation (EU) 2017/745 on Medical Devices (**EU MDR**); Medical Device Coordination Group guidance **MDCG 2019-11** (*Qualification and classification of software*).
+- **Classification Rules (Annex VIII, Rule 11):**
+  - *No "Non-Device CDS Exemption":* The EU MDR contains **no statutory non-device exemption analogous to US Section 520(o)(1)(E)**. If software processes patient parameters to provide information used in taking decisions with diagnostic or therapeutic purposes, it qualifies as medical device software.
+  - *Rule 11 Classification Thresholds:*
+    - **Class IIa (Default):** Software intended to provide information used to take decisions with diagnosis or therapeutic purposes.
+    - **Class IIb:** If decisions may cause a serious deterioration of a person's state of health or surgical intervention.
+    - **Class III:** If decisions may cause death or irreversible deterioration.
+- **Critical EU Analysis:** Because HeartXAI 2.0 calculates coronary disease likelihood to inform clinical discussion, under EU MDR Rule 11 it would almost certainly be classified as a **Class IIa or higher medical device**, requiring a notified body conformity assessment, quality management system (ISO 13485), and clinical evaluation report (CER) prior to CE marking.
+
+#### 3. United Kingdom — Medicines and Healthcare products Regulatory Agency (MHRA)
+- **Governing Framework:** UK Medical Devices Regulations 2002 (SI 2002 No 618, as amended); **MHRA Software and AI as a Medical Device Change Programme**.
+- **Critical UK Analysis:**
+  - Software intended to analyze patient data to provide diagnostic information, calculate disease probability, or guide clinical management is regulated as a medical device requiring a **UKCA mark** (or recognized CE mark under transitional extension arrangements).
+  - MHRA evaluates whether software performs an automated calculation that influences clinical decisions. Patient-facing symptom and risk checkers are closely scrutinized for Class IIa/IIb classification under UK MDR Part II.
+
+#### 4. India — Central Drugs Standard Control Organisation (CDSCO)
+- **Governing Framework:** Medical Device Rules, 2017 (MDR 2017); CDSCO notifications on Software as a Medical Device (SaMD); Central Licensing Authority guidelines.
+- **Classification System (Class A, B, C, D):**
+  - Software intended to assist in diagnosis, prognosis, or monitoring of cardiovascular disease is categorized based on risk. SaMD influencing clinical decisions for serious cardiovascular conditions is typically classified as **Class B (low-moderate risk) or Class C (moderate-high risk)**.
+  - Requires registration on the CDSCO SUGAM portal, clinical evaluation, and manufacturing/import licensing from the Central or State Licensing Authority.
+
+#### 5. Cross-Jurisdictional Synthesis
+```
++-------------------------------------------------------------------------------------------------------------------------------+
+|                                            JURISDICTIONAL REGULATORY COMPARISON MATRIX                                        |
++---------------------+-------------------------------+-----------------------------------+-------------------------------------+
+| Jurisdiction        | Governing Regulation          | Primary Software Classification   | Key SaMD Threshold                  |
++---------------------+-------------------------------+-----------------------------------+-------------------------------------+
+| **United States**   | FDA / FD&C Act § 520(o)(1)(E) | Evaluated against 4 CDS criteria; | Patient-facing risk prediction fails|
+|                     | Jan 2026 CDS Final Guidance   | SaMD Class II if non-exempt.      | Criteria 3/4; device status likely. |
++---------------------+-------------------------------+-----------------------------------+-------------------------------------+
+| **European Union**  | EU MDR 2017/745               | Annex VIII Rule 11;               | No non-device CDS exemption; Class  |
+|                     | MDCG 2019-11 Guidance         | Class IIa or higher.              | IIa default for diagnostic support. |
++---------------------+-------------------------------+-----------------------------------+-------------------------------------+
+| **United Kingdom**  | UK MDR 2002 (as amended)      | MHRA SaMD framework;              | Software interpreting health data to|
+|                     | MHRA AI/Software Programme    | UKCA Class IIa/IIb.               | guide decisions requires UKCA mark. |
++---------------------+-------------------------------+-----------------------------------+-------------------------------------+
+| **India**           | CDSCO / MDR 2017              | SaMD Risk Classification;         | Diagnostic/prognostic CDS for CVD   |
+|                     | SUGAM Registration Rules      | Class B or Class C.               | requires CDSCO regulatory license.  |
++---------------------+-------------------------------+-----------------------------------+-------------------------------------+
+```
 
 ### 6.2 Mandatory Medical Disclaimer (Required on All Assessment Views)
 > **MANDATORY CLINICAL NOTICE:** HeartXAI 2.0 is an experimental educational tool designed to demonstrate explainable machine learning concepts using historical research data. It **DOES NOT** provide medical diagnoses, clinical prognoses, or treatment recommendations. The assessment reflects statistical patterns observed in historical research datasets and cannot substitute for an evaluation by a licensed healthcare professional. If you are experiencing chest pain, tightness, shortness of breath, radiating arm or jaw pain, or acute discomfort, **IMMEDIATELY CALL EMERGENCY SERVICES (911 in the US, 999 in the UK, 112 in India)** or visit the nearest hospital emergency room.

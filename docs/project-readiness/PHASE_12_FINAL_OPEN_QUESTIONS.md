@@ -46,10 +46,11 @@ This document articulates the **five strategic governance decisions** that requi
   - *Intended Purpose:* Ensures rigorous clinical safety and content oversight during development while preparing formal ethics and regulatory determinations in parallel without making unverified exemption claims.
   - *Pros:* High clinical rigor; zero premature claims of device exemption or certification.
   - *Cons:* Requires coordinating four distinct oversight workflows.
-- **Option B: Pre-Development Institutional IRB Protocol & Regulatory Pre-Submission**
-  - *Structure:* Require formal hospital or university institutional sponsorship, IRB ethics approval, and an official FDA pre-submission (Q-Submission) to be fully approved before any software engineering begins.
+- **Option B: Upfront Institutional Sponsorship Gate (Pre-Development IRB & Pre-Submission)**
+  - *Structure:* Require formal institutional sponsorship, institutional ethics / IRB approval, and an official FDA pre-submission (Q-Submission) to be fully approved before any software engineering begins.
+  - *Lifecycle Distinction:* Note that developing early prototype software on synthetic data does not universally or legally require an FDA Pre-Submission or IRB approval under healthcare regulations. A formal IRB protocol applies specifically to human-subject research or usability testing with live subjects; an FDA Q-Submission or regulatory clearance applies to formal clinical evaluation, diagnostic trials, and clinical or commercial deployment.
   - *Pros:* Complete institutional and regulatory alignment prior to writing code.
-  - *Cons:* 6 to 12-month institutional lead time; high upfront financial cost; inappropriate for an early-stage prototype using synthetic data.
+  - *Cons:* 6 to 12-month institutional lead time; high upfront financial cost; introduces premature compliance gates for an early-stage synthetic-data prototype.
 - **Recommendation:** **Option A for MVP software release.**
 
 ---
@@ -88,13 +89,12 @@ This document articulates the **five strategic governance decisions** that requi
     - **Category A (Public Research Datasets):** Publicly available de-identified datasets (UCI Cleveland, 303 records) used exclusively for model training, offline validation, and calibration.
     - **Category B (Synthetic Application Data):** 100% synthetically generated personas, UI fixtures, and mock clinical records (`scripts/generate_synthetic_patients.py`). Plausible physiological distributions with zero link to real individuals. Used for all application development, integration testing, demonstrations, and staging.
     - **Category C (Real Patient Information):** Real PHI/PII. **Strictly prohibited** across all MVP milestones (01–20).
-  - *Pros:* Complete protection against data breaches, regulatory violations, and privacy liabilities during development.
+  - *Pros:* Eliminates real patient health information (PHI/PII) exposure, regulatory non-compliance liabilities, and privacy breach liabilities concerning patient data during development. (General software and infrastructure cybersecurity risks such as credentials, session hijacking, and server vulnerabilities remain active and are mitigated by standard DevSecOps controls.)
   - *Cons:* Real clinical usability studies must wait for a subsequent protocol phase under institutional governance.
 - **Option B: Authorize Real Patient Pilot Data in Staging (Permit Category C)**
   - *Policy:* Allow beta testing with real patient health data during Milestone 20 staging acceptance.
   - *Pros:* Tests system with live clinical records.
   - *Cons:* Severe regulatory, legal, and privacy exposure. Applicable ethics, privacy, contractual, and regulatory requirements depend on the jurisdiction and institutional context (e.g., HIPAA BAAs for US covered entities, GDPR Article 28 DPAs in the EU/UK, DPDP compliance in India, and local institutional ethics review). Attempting to ingest Category C real patient data during MVP would introduce complex cross-jurisdictional compliance burdens before core functionality is verified.
-- **Recommendation:** **Option A.**
 - **Recommendation:** **Option A.**
 
 ---

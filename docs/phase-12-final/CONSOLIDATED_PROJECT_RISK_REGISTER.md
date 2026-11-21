@@ -75,7 +75,8 @@ Severity (RPN):    Low (1-5), Medium (6-12), High (15-20), Critical (25)
 | R11| **Real Patient PHI   |  1   |  5   |  5  | Strict Three-Tier Classification: Category A       | Healthcare Safety| **Mitigated** |
 |    | Breach in Non-Prod** |      |      |     | (de-identified research), Category B (100%         | Consultant       | (Three-Tier   |
 |    |                      |      |      |     | synthetic application data), Category C (real PHI  |                  | Classification|
-|    |                      |      |      |     | - strictly prohibited in MVP). Zero live records.  |                  | Enforced)     |
+|    |                      |      |      |     | - strictly prohibited in MVP). Eliminates patient   |                  | Enforced; PHI |
+|    |                      |      |      |     | PHI exposure; general cyber risks actively managed.|                  | Eliminated)   |
 +----+----------------------+------+------+-----+----------------------------------------------------+------------------+---------------+
 | R12| **Accessibility      |  2   |  3   |  6  | Target upgraded to WCAG 2.2 AA; automated axe-core | Frontend Quality | **Mitigated** |
 |    | Non-Conformance**    |      |      |     | scans integrated into CI; compliance gates in M19. | Lead             | (Target Set)  |
@@ -105,6 +106,7 @@ Severity (RPN):    Low (1-5), Medium (6-12), High (15-20), Critical (25)
   - **Category A (Public Research Datasets):** Publicly available de-identified datasets (UCI Cleveland, 303 records) used exclusively for model training, offline validation, and calibration.
   - **Category B (Synthetic Application Data):** 100% synthetically generated personas, UI fixtures, and mock clinical records (`scripts/generate_synthetic_patients.py`). Plausible physiological distributions with zero link to real individuals.
   - **Category C (Real Patient Information):** Real PHI/PII. **Strictly prohibited** across all MVP milestones (01–20).
+- **Scope & Cybersecurity Clarification:** Prohibiting Category C data eliminates patient PHI/PII exposure, patient privacy breach liabilities, and statutory non-compliance risks during development. However, it does not eliminate general application and infrastructure cybersecurity risks (e.g., credentials, session tokens, SQL injection, denial of service, server misconfigurations, supply chain vulnerabilities). General cybersecurity risks remain active and are mitigated by standard DevSecOps controls, automated SAST/DAST, dependency auditing, and penetration testing (Milestone 18).
 
 ### 3.3 Risk R13: Blanket Regulatory Exemption Claim / Regulatory Misclassification (RPN = 8 - Mitigated)
 - **Root Cause:** Incorrectly asserting that HeartXAI 2.0 is automatically exempt from medical device regulation under Section 520(o)(1)(E) without assessing the FDA's updated January 2026 Clinical Decision Support Software Guidance.
