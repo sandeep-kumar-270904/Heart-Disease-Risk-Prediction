@@ -73,9 +73,16 @@ This audit establishes the definitive scientific boundaries for HeartXAI 2.0, pr
 3. **Demographic Imbalance:** 206 male ($68\%$) and 97 female ($32\%$). The cohort was drawn from a regional US urban clinical population in the early 1980s; it lacks racial, ethnic, and global diversity.
 4. **Historical Diagnostic Technology:** Catheterization procedures and laboratory assays reflect 1980s clinical standards. Modern high-sensitivity troponin assays, coronary CT angiography (CCTA), and current lipid fractionation were not available.
 5. **Absence of Longitudinal Follow-up:** **The dataset contains zero follow-up data.** It records solely whether a patient had $>50\%$ vessel narrowing on the day of angiography. **It cannot calculate the probability of a future heart attack, stroke, or cardiovascular event.**
-6. **Privacy, Provenance & De-Identification Audit (Known vs. Unknown):**
-   - **What is Known from Primary Sources:** The dataset was contributed to the UCI Machine Learning Repository in 1988 by Dr. Robert Detrano and David Aha. In the documentation file `heart-disease.names`, raw attribute 2 (`ccf: social security number`) is documented as having been replaced by the contributor with a dummy value of 0. In the standardized 14-attribute file (`processed.cleveland.data`), attributes 1 and 2 (`id` and `ccf`) were omitted entirely. The published 14-attribute CSV contains no patient names, home addresses, phone numbers, or social security numbers.
-   - **What is Unknown & Unverified:** The primary paper (Detrano et al., *Am J Cardiol* 1989) does not document the specific institutional data extraction protocol, whether informed consent was obtained from the 1981–1984 patients for secondary public open-source distribution, or whether Cleveland Clinic Institutional Review Board approval was formally granted for public web deposition. No formal HIPAA Safe Harbor certification (45 CFR § 164.514(b)) or Expert Determination (§ 164.514(a)) was ever conducted because HIPAA was enacted over a decade later (1996). Whether quasi-identifier combinations (e.g., age, sex, resting ECG patterns, fluoroscopy vessel counts) could present theoretical re-identification risk against historical hospital catheterization logs remains unassessed in modern literature.
+6. **Privacy, Provenance & Research-Data Reclassification (Known vs. Unknown):**
+   - **Formal Reclassification:** The UCI Cleveland dataset is formally reclassified as **public, historical, human-origin health research data with documented privacy limitations**.
+   - **Absence of Modern De-Identification Certification:** The dataset pre-dates modern statutory privacy legislation (HIPAA enacted 1996; EU GDPR enacted 2016). It was **never formally evaluated or certified under modern statutory de-identification standards** (such as HIPAA Safe Harbor 45 CFR § 164.514(b) or Expert Determination § 164.514(a), or GDPR Recital 26 / Article 4(1) anonymization). HeartXAI 2.0 makes **no claim of formal anonymization, modern de-identification, or blanket exclusion from privacy laws** without sufficient evidence.
+   - **What is Known from Primary Sources:** The dataset was contributed to the UCI Machine Learning Repository in 1988 by Dr. Robert Detrano and David Aha. In the primary documentation file `heart-disease.names`, raw attribute 2 (`ccf: social security number`) is documented as having been replaced by the contributor with a dummy value of 0. In the standardized 14-attribute file (`processed.cleveland.data`), attributes 1 and 2 (`id` and `ccf`) were omitted entirely. The published 14-attribute CSV contains no patient names, home addresses, phone numbers, or social security numbers.
+   - **What is Unknown & Unverified:** The primary paper (Detrano et al., *Am J Cardiol* 1989) does not document the specific institutional data extraction protocol, whether informed consent was obtained from the 1981–1984 patients for secondary public open-source distribution, or whether Cleveland Clinic Institutional Review Board approval was formally granted for public web deposition. Whether quasi-identifier combinations (e.g., age, sex, resting ECG patterns, fluoroscopy vessel counts) could present theoretical re-identification risk against historical hospital catheterization logs remains unassessed in modern literature.
+   - **Mandatory Pre-Training Assessment (Milestone 09 Gate):** Prior to ingesting Category A data for model training in Milestone 09, a formal, documented assessment of **data provenance, repository licensing terms, permitted research use, and jurisdiction-specific privacy obligations** must be executed and approved.
+   - **Retraction of Blanket Exposure Claims & Separation of Data Risks:** Claims that data classification policies "eliminate all PHI/PII exposure or statutory breach-notification liabilities" are unsupported and hereby retracted. Data risks are strictly differentiated:
+     - *Category A (Historical Research Data Risks):* Human-origin clinical data carrying potential re-identification risks in high-dimensional or linkage scenarios, ambiguous historical patient consent/licensing provenance, and potential residual privacy obligations under specific local jurisdictions.
+     - *Category B (Synthetic Application Data Risks):* Zero human-origin clinical data; risks are restricted to algorithmic generation artifacts, physiological distribution mismatch, and software/infrastructure cybersecurity vulnerabilities (e.g. credentials, tokens, session hijacking, server exploits).
+     - *Category C (Real Patient Data):* **Strictly prohibited across all MVP milestones (01–20).**
 
 ### 3.4 Operational & Research Classification
 The model trained on this dataset must be classified strictly as an **Experimental Machine Learning Dataset Classifier**. Its outputs must never be presented as:
@@ -94,14 +101,13 @@ In earlier planning documents, numerical thresholds were proposed for probabilit
 2. **Expected Calibration Error (ECE) Vulnerabilities:**
    $$\text{ECE} = \sum_{m=1}^M \frac{|B_m|}{N} \left| \text{acc}(B_m) - \text{conf}(B_m) \right|$$
    ECE groups predictions into $M$ bins (typically $M=10$). In a small test fold ($N \approx 60$ in 5-fold CV), each bin contains only 4 to 8 patients, making ECE highly volatile; a single patient outcome shifts a bin's empirical accuracy by $12\text{--}25\%$. Furthermore, ECE weights all bins equally, whereas clinical utility depends disproportionately on calibration around clinical decision thresholds ($10\%\text{--}30\%$).
-3. **Formal Classification as Provisional Engineering Targets:**
-   - The thresholds $\text{Brier} \le 0.12$ and $\text{ECE} \le 0.05$ are **provisional engineering heuristic targets**, NOT definitive proof of clinical calibration.
-   - Meeting these numerical thresholds does NOT warrant claiming that the model is clinically calibrated.
-   - **Mandatory Clinical Calibration Protocol (Milestone 10/11):** Genuine calibration assessment requires:
-     - Visual inspection of non-parametric calibration curves (spline or LOWESS regression with 95% confidence bands).
-     - Logistic calibration regression yielding calibration intercept ($a \approx 0$) and slope ($b \approx 1$).
-     - Subgroup calibration assessment across biological sex and age tiers.
-     - Clinical Net Benefit analysis via Decision Curve Analysis (DCA; Vickers et al.) across actionable threshold ranges ($10\%\text{--}50\%$).
+3. **Rigorous Calibration Validation Framework (Milestone 10/11 Requirements):**
+   - **Leakage-Safe Out-of-Fold (OOF) Probability Predictions:** All calibration evaluation and metric computation (Brier score, ECE, calibration curves) must be performed strictly using **out-of-fold (OOF) cross-validation predictions** or a held-out test split, completely isolated from in-sample training data.
+   - **Training-Only Fitting of Calibration Transformers:** Post-hoc calibration methods (e.g., Platt scaling / logistic calibration, Isotonic regression) must be **fitted strictly on the training folds/sets only**. Applying or fitting calibration transformers across full datasets or test folds constitutes data leakage and is strictly prohibited.
+   - **Confidence Intervals & Statistical Rigor:** All reported calibration metrics (Brier score, ECE, calibration slope, calibration intercept) must be accompanied by **95% confidence intervals** (e.g., via 1,000-iteration stratified bootstrap resampling).
+   - **External Validation Prerequisite:** Internal cross-validation calibration does not prove generalizability. **External validation on an independent clinical cohort is strictly required before asserting any clinical calibration claim.**
+   - **Exploratory Status of Decision Curve Analysis (DCA):** Decision Curve Analysis (DCA; Vickers et al.) must be formally labeled as **exploratory** unless an explicit, defensible clinical decision context (e.g., referral for non-invasive imaging vs. outpatient monitoring) and an explicit harm-to-benefit threshold probability range ($p_t$) are clinically established and justified.
+   - **Provisional Status of Numerical Thresholds:** The thresholds $\text{Brier} \le 0.12$ and $\text{ECE} \le 0.05$ remain **provisional engineering heuristic targets** until methodologically justified against empirical out-of-fold distributions and clinical context. Meeting these numerical targets does NOT warrant claiming that the model is clinically calibrated.
 
 ---
 
@@ -167,16 +173,18 @@ While PREVENT represents the current clinical standard in the United States unde
 +-----------------------+-----------------------------------------------+-------------------------------------------------------+
 | Category              | Scope, Definition & Source                    | Permitted System Usage & Mandatory Safeguards         |
 +-----------------------+-----------------------------------------------+-------------------------------------------------------+
-| **Category A**        | Retrospective, open-access, de-identified     | - Permitted **only** for offline ML research, training|
-| **Public Research**   | academic clinical datasets.                   |   and calibration (Milestones 09-10).                 |
-| **Datasets**          | *Primary Source:* UCI Cleveland Heart Disease | - Subject to explicit dataset provenance verification.|
-|                       | Catheterization Cohort ($N=303$, 1981-1984).  | - Documented limitations: symptomatic referral bias,  |
-|                       | Open-access research license.                 |   small sample size, zero longitudinal follow-up.     |
+| **Category A**        | Public, historical, human-origin health       | - Permitted **only** for offline ML research, training|
+| **Public Research**   | research data with documented privacy          |   and calibration (Milestones 09-10).                 |
+| **Data**              | limitations (UCI Cleveland, $N=303$, 1981-1984)| - Requires documented provenance, license, permitted-  |
+|                       | Historical public repository deposition.       |   use, and privacy risk assessment prior to training. |
+|                       | Lacks modern HIPAA/GDPR certification.         | - Limitations: human-origin data, potential linkage    |
+|                       |                                               |   risks, referral bias, zero longitudinal follow-up.  |
 +-----------------------+-----------------------------------------------+-------------------------------------------------------+
 | **Category B**        | Artificially generated test fixtures, mock    | - Used for **all** frontend UI demonstrations, test   |
 | **Synthetic**         | patient personas (Sarah, Marcus, Elena), and  |   fixtures, intake form tests, and integration tests. |
 | **Application Data**  | integration testing records.                  | - Generated via `scripts/generate_synthetic_patients`|
 |                       | Derived from parameterized distributions.      | - Contains **zero real human data**; zero PHI/PII.    |
+|                       | Algorithmic generation with zero human origin.| - Standard application & infrastructure cyber defense.|
 +-----------------------+-----------------------------------------------+-------------------------------------------------------+
 | **Category C**        | Personally Identifiable Information (PII) or  | - **STRICTLY PROHIBITED** during initial development, |
 | **Real Patient**      | Personal Health Information (PHI) collected   |   demonstration, testing, and staging (Milestones 01- |
@@ -207,14 +215,17 @@ Clinical governance is not an informal advisory checkbox. HeartXAI 2.0 establish
 |                                    | emergency red-flag thresholds (e.g., SBP > 180), and directory listings|
 |                                    | against published national cardiology society guidelines.          |
 +------------------------------------+--------------------------------------------------------------------+
-| **3. Institutional Ethics / IRB    | Formal determination by an Institutional Review Board (IRB) or     |
-|    Determination**                 | Research Ethics Committee (REC). Mandatory if conducting research  |
-|                                    | involving human participants or processing Category C real PHI.    |
+| **3. Institutional Ethics / IRB    | Formal determination by an Institutional Review Board (IRB),       |
+|    Determination**                 | Research Ethics Committee (REC), or applicable institutional       |
+|                                    | ethics authority. Mandatory documented determination before        |
+|                                    | initiating any human-participant usability or research activities, |
+|                                    | or processing Category C real PHI.                                 |
 +------------------------------------+--------------------------------------------------------------------+
 | **4. Regulatory Applicability      | Formal legal and regulatory assessment under medical device rules. |
 |    Assessment**                    | *US Reference:* FDA Section 520(o)(1)(E) and **FDA January 2026**   |
 |                                    | **Clinical Decision Support (CDS) Software Guidance**; EU MDR       |
-|                                    | 2017/745 Rule 11; UK MHRA; India CDSCO Medical Device Rules.        |
+|                                    | 2017/745 Rule 11 & MDCG 2019-11 / 2020-1; UK MHRA; India CDSCO     |
+|                                    | MDR 2017 & **CDSCO MDSW Guidance (July 2026)**.                    |
 |                                    | *Boundary:* HeartXAI makes **no claims of exemption**, no claims of  |
 |                                    | non-device status, and no claims of regulatory clearance.          |
 +------------------------------------+--------------------------------------------------------------------+
@@ -240,14 +251,18 @@ Clinical governance is not an informal advisory checkbox. HeartXAI 2.0 establish
   - *Status:* **Undetermined.** Formal 513(g) determination or Pre-Submission (Q-Submission) required prior to clinical deployment.
 
 #### 2. European Union — European Medicines Agency & Notified Bodies
-- **Governing Framework:** Regulation (EU) 2017/745 on Medical Devices (**EU MDR**); Medical Device Coordination Group guidance **MDCG 2019-11** (*Qualification and classification of software*).
-- **Classification Rules (Annex VIII, Rule 11):**
-  - *No "Non-Device CDS Exemption":* The EU MDR contains **no statutory non-device exemption analogous to US Section 520(o)(1)(E)**. If software processes patient parameters to provide information used in taking decisions with diagnostic or therapeutic purposes, it qualifies as medical device software.
-  - *Rule 11 Classification Thresholds:*
-    - **Class IIa (Default):** Software intended to provide information used to take decisions with diagnosis or therapeutic purposes.
-    - **Class IIb:** If decisions may cause a serious deterioration of a person's state of health or surgical intervention.
-    - **Class III:** If decisions may cause death or irreversible deterioration.
-- **Critical EU Analysis:** Because HeartXAI 2.0 calculates coronary disease likelihood to inform clinical discussion, under EU MDR Rule 11 it would almost certainly be classified as a **Class IIa or higher medical device**, requiring a notified body conformity assessment, quality management system (ISO 13485), and clinical evaluation report (CER) prior to CE marking.
+- **Governing Framework:** Regulation (EU) 2017/745 on Medical Devices (**EU MDR**); Medical Device Coordination Group guidance documents:
+  - **MDCG 2019-11:** *Guidance on Qualification and Classification of Software in Regulation (EU) 2017/745 and Regulation (EU) 2017/746* (October 2019).
+  - **MDCG 2020-1:** *Guidance on Clinical Evaluation (MDR) / Performance Evaluation (IVDR) of Medical Device Software* (March 2020).
+- **Classification Rules (Annex VIII, Chapter III, Rule 11 Verbatim Text):**
+  > *"Software intended to provide information which is used to take decisions with diagnosis or therapeutic purposes is classified as class IIa, except if such decisions have an impact that may cause:*
+  > *- death or an irreversible deterioration of a person’s state of health, in which case it is in class III; or*
+  > *- a serious deterioration of a person’s state of health or a surgical intervention, in which case it is classified as class IIb.*
+  > *Software intended to monitor physiological processes is classified as class IIa, except if it is intended for monitoring of vital physiological parameters, where the nature of variations of those parameters is such that it could result in immediate danger to the patient, in which case it is classified as class IIb.*
+  > *All other software is classified as class I."*
+- **Critical EU Analysis:**
+  - *Absence of Non-Device CDS Exemption:* The EU MDR contains **no statutory non-device exemption analogous to US Section 520(o)(1)(E)**. If software processes clinical parameters to provide information used to take decisions with diagnostic or therapeutic purposes, it qualifies as medical device software.
+  - *Rule 11 Impact:* Because HeartXAI 2.0 calculates coronary disease likelihood to inform clinical discussion, under EU MDR Rule 11 it defaults to **Class IIa or higher** (Class IIb if misclassification could lead to serious clinical deterioration). This requires a notified body conformity assessment, quality management system (ISO 13485), and clinical evaluation report (CER) prior to CE marking.
 
 #### 3. United Kingdom — Medicines and Healthcare products Regulatory Agency (MHRA)
 - **Governing Framework:** UK Medical Devices Regulations 2002 (SI 2002 No 618, as amended); **MHRA Software and AI as a Medical Device Change Programme**.
@@ -256,10 +271,17 @@ Clinical governance is not an informal advisory checkbox. HeartXAI 2.0 establish
   - MHRA evaluates whether software performs an automated calculation that influences clinical decisions. Patient-facing symptom and risk checkers are closely scrutinized for Class IIa/IIb classification under UK MDR Part II.
 
 #### 4. India — Central Drugs Standard Control Organisation (CDSCO)
-- **Governing Framework:** Medical Device Rules, 2017 (MDR 2017); CDSCO notifications on Software as a Medical Device (SaMD); Central Licensing Authority guidelines.
-- **Classification System (Class A, B, C, D):**
-  - Software intended to assist in diagnosis, prognosis, or monitoring of cardiovascular disease is categorized based on risk. SaMD influencing clinical decisions for serious cardiovascular conditions is typically classified as **Class B (low-moderate risk) or Class C (moderate-high risk)**.
-  - Requires registration on the CDSCO SUGAM portal, clinical evaluation, and manufacturing/import licensing from the Central or State Licensing Authority.
+- **Governing Framework:** Medical Devices Rules, 2017 (MDR 2017), framed under the Drugs and Cosmetics Act, 1940; Central Licensing Authority (CLA).
+- **Current CDSCO Guidance Document on Medical Device Software:**
+  - **Title:** *Guidance Document on Medical Device Software (MDSW)*
+  - **Document Number:** **CDSCO/MD/GD/MDSW/01/2026**
+  - **Publication Date:** **July 21, 2026** (following the previous draft published October 21, 2025)
+  - **Issuing Authority:** Central Drugs Standard Control Organisation (CDSCO), Directorate General of Health Services, Ministry of Health & Family Welfare, Government of India.
+- **Classification System (Risk Classes A, B, C, D):**
+  - The MDSW 2026 guidance governs both Software as a Medical Device (SaMD) and Software in a Medical Device (SiMD).
+  - Classification is determined based on: (1) the significance of the information provided by the software to the healthcare decision (e.g., to treat or diagnose, to drive clinical management, or to inform clinical management), and (2) the state of the healthcare situation or condition (critical, serious, or non-serious).
+  - SaMD intended to inform clinical management or assist in screening/risk-assessment for serious cardiovascular conditions is categorized under **Class B (low-moderate risk) or Class C (moderate-high risk)**.
+  - **Statutory Requirements:** Requires registration on the CDSCO SUGAM portal, clinical evaluation, and regulatory manufacturing/import licensing from the Central or State Licensing Authority under MDR 2017. No blanket non-device CDS carve-out exists under Indian law.
 
 #### 5. Cross-Jurisdictional Synthesis
 ```
@@ -271,13 +293,14 @@ Clinical governance is not an informal advisory checkbox. HeartXAI 2.0 establish
 | **United States**   | FDA / FD&C Act § 520(o)(1)(E) | Evaluated against 4 CDS criteria; | Patient-facing risk prediction fails|
 |                     | Jan 2026 CDS Final Guidance   | SaMD Class II if non-exempt.      | Criteria 3/4; device status likely. |
 +---------------------+-------------------------------+-----------------------------------+-------------------------------------+
-| **European Union**  | EU MDR 2017/745               | Annex VIII Rule 11;               | No non-device CDS exemption; Class  |
-|                     | MDCG 2019-11 Guidance         | Class IIa or higher.              | IIa default for diagnostic support. |
+| **European Union**  | EU MDR 2017/745               | Annex VIII Rule 11 (Class IIa+);  | No non-device CDS exemption; Rule 11|
+|                     | MDCG 2019-11 & 2020-1         | Class IIa default for CDS.        | classifies diagnostic CDS as IIa+.  |
 +---------------------+-------------------------------+-----------------------------------+-------------------------------------+
 | **United Kingdom**  | UK MDR 2002 (as amended)      | MHRA SaMD framework;              | Software interpreting health data to|
 |                     | MHRA AI/Software Programme    | UKCA Class IIa/IIb.               | guide decisions requires UKCA mark. |
 +---------------------+-------------------------------+-----------------------------------+-------------------------------------+
-| **India**           | CDSCO / MDR 2017              | SaMD Risk Classification;         | Diagnostic/prognostic CDS for CVD   |
+| **India**           | CDSCO / MDR 2017 &            | SaMD Risk Classification;         | Diagnostic/prognostic CDS for CVD   |
+|                     | MDSW Guidance (July 2026)     | Class B or Class C.               | requires SUGAM registration & license|
 |                     | SUGAM Registration Rules      | Class B or Class C.               | requires CDSCO regulatory license.  |
 +---------------------+-------------------------------+-----------------------------------+-------------------------------------+
 ```

@@ -73,18 +73,18 @@ Severity (RPN):    Low (1-5), Medium (6-12), High (15-20), Critical (25)
 |    | Data Loss**          |      |      |     | backups (ADR-012) to offsite storage.              | Engineer         | (ADR-012)     |
 +----+----------------------+------+------+-----+----------------------------------------------------+------------------+---------------+
 | R11| **Real Patient PHI   |  1   |  5   |  5  | Strict Three-Tier Classification: Category A       | Healthcare Safety| **Mitigated** |
-|    | Breach in Non-Prod** |      |      |     | (de-identified research), Category B (100%         | Consultant       | (Three-Tier   |
-|    |                      |      |      |     | synthetic application data), Category C (real PHI  |                  | Classification|
-|    |                      |      |      |     | - strictly prohibited in MVP). Eliminates patient   |                  | Enforced; PHI |
-|    |                      |      |      |     | PHI exposure; general cyber risks actively managed.|                  | Eliminated)   |
+|    | Breach in Non-Prod** |      |      |     | (historical human research data; M09 review gate),  | Consultant       | (Three-Tier   |
+|    |                      |      |      |     | Category B (100% synthetic application data),       |                  | Classification|
+|    |                      |      |      |     | Category C (real PHI - strictly prohibited in MVP). |                  | Enforced; Cat |
+|    |                      |      |      |     | Differentiates Cat A vs B risks; real PHI excluded. |                  | C Prohibited) |
 +----+----------------------+------+------+-----+----------------------------------------------------+------------------+---------------+
 | R12| **Accessibility      |  2   |  3   |  6  | Target upgraded to WCAG 2.2 AA; automated axe-core | Frontend Quality | **Mitigated** |
 |    | Non-Conformance**    |      |      |     | scans integrated into CI; compliance gates in M19. | Lead             | (Target Set)  |
 +----+----------------------+------+------+-----+----------------------------------------------------+------------------+---------------+
 | R13| **Blanket Regulatory |  2   |  4   |  8  | Rejection of blanket non-device exemption claims;  | Regulatory &     | **Mitigated** |
 |    | Exemption Claim /    |      |      |     | implementation of 4-pillar clinical governance;    | Compliance Lead  | (4-Pillar     |
-|    | Misclassification**  |      |      |     | evaluation under FDA Jan 2026 CDS Software guidance|                  | Framework)    |
-|    |                      |      |      |     | and Section 520(o)(1)(E) criteria.                 |                  |               |
+|    | Misclassification**  |      |      |     | independent evaluation under FDA Jan 2026 CDS,     |                  | Framework)    |
+|    |                      |      |      |     | EU MDR Rule 11, UK MHRA, & CDSCO MDSW (July 2026).|                  |               |
 +----+----------------------+------+------+-----+----------------------------------------------------+------------------+---------------+
 | R14| **Unverified VPS     |  2   |  3   |  6  | Label '500+ daily assessments' as unverified       | Principal SRE    | **Mitigated** |
 |    | Capacity Claims**    |      |      |     | planning estimate; mandate empirical load testing  | & DevOps Lead    | (Milestone 19 |
@@ -100,21 +100,21 @@ Severity (RPN):    Low (1-5), Medium (6-12), High (15-20), Critical (25)
 - **Root Cause:** Amateur data science repositories frequently misrepresent the Cleveland catheterization dataset as a prospective cardiovascular risk predictor. Furthermore, clinical guidelines are actively transitioning: the **2026 ACC/AHA Multisociety Dyslipidemia Guideline** formally adopted the **AHA PREVENT equations** (published late 2023 / early 2024) to replace the 2013 Pooled Cohort Equations (PCE) for primary prevention in US adults aged 30–79. However, PREVENT is US-derived, and other nations use their own validated risk scores (UK NICE uses QRISK3, Europe uses SCORE2, India uses WHO/CSI charts).
 - **Action Plan:** Task B has been completely excised from the MVP scope. Task A is strictly labeled as an experimental dataset classification model. The UI enforces prominent non-diagnostic disclaimers.
 
-### 3.2 Risk R11: Real Patient Health Data Exposure (RPN = 5 - Mitigated)
-- **Root Cause:** Ingestion of live patient clinical records into development, staging, or test environments without comprehensive data governance and institutional IRB protocol.
+### 3.2 Risk R11: Real Patient Health Data Exposure & Research Data Governance (RPN = 5 - Mitigated)
+- **Root Cause:** Ingestion of live patient clinical records into development, staging, or test environments without comprehensive data governance and institutional ethics determination.
 - **Action Plan:** Strict enforcement of the Three-Tier Data Classification Policy:
-  - **Category A (Public Research Datasets):** Publicly available de-identified datasets (UCI Cleveland, 303 records) used exclusively for model training, offline validation, and calibration.
-  - **Category B (Synthetic Application Data):** 100% synthetically generated personas, UI fixtures, and mock clinical records (`scripts/generate_synthetic_patients.py`). Plausible physiological distributions with zero link to real individuals.
+  - **Category A (Public Historical Human-Origin Research Data):** Publicly available clinical dataset (UCI Cleveland, 303 records) with documented privacy limitations. Used exclusively for offline model training, offline validation, and calibration. Lacks formal HIPAA Safe Harbor / Expert Determination or GDPR anonymization certification. Requires a documented provenance, license, permitted research use, and privacy risk assessment prior to model training in Milestone 09.
+  - **Category B (Synthetic Application Data):** 100% synthetically generated personas, UI fixtures, and mock clinical records (`scripts/generate_synthetic_patients.py`). Purely algorithmic generation with zero human origin and zero link to real individuals.
   - **Category C (Real Patient Information):** Real PHI/PII. **Strictly prohibited** across all MVP milestones (01–20).
-- **Scope & Cybersecurity Clarification:** Prohibiting Category C data eliminates patient PHI/PII exposure, patient privacy breach liabilities, and statutory non-compliance risks during development. However, it does not eliminate general application and infrastructure cybersecurity risks (e.g., credentials, session tokens, SQL injection, denial of service, server misconfigurations, supply chain vulnerabilities). General cybersecurity risks remain active and are mitigated by standard DevSecOps controls, automated SAST/DAST, dependency auditing, and penetration testing (Milestone 18).
+- **Scope, Research Risk & Cybersecurity Clarification:** Prohibiting Category C data eliminates patient PHI/PII ingestion into the runtime platform and eliminates clinical HIPAA/GDPR patient data breach notification obligations during application operations. However, claims that data policies "eliminate all PHI/PII exposure or statutory breach notification liabilities" are unsupported and retracted. Category A carries historical human-origin research-data risks (e.g. potential linkage/re-identification risks, historical consent ambiguity) that are governed via Milestone 09 pre-training reviews. Concurrently, general software and infrastructure cybersecurity risks (credentials, session tokens, SQLi, DoS, supply chain CVEs) remain active and are defended by standard DevSecOps controls and Milestone 18 penetration testing.
 
 ### 3.3 Risk R13: Blanket Regulatory Exemption Claim / Regulatory Misclassification (RPN = 8 - Mitigated)
-- **Root Cause:** Incorrectly asserting that HeartXAI 2.0 is automatically exempt from medical device regulation under Section 520(o)(1)(E) without assessing the FDA's updated January 2026 Clinical Decision Support Software Guidance.
+- **Root Cause:** Incorrectly asserting that HeartXAI 2.0 is automatically exempt from medical device regulation under Section 520(o)(1)(E) without independent assessment across international target jurisdictions.
 - **Action Plan:** Elimination of blanket exemption language. Establishment of the Four-Pillar Clinical Governance Framework:
   1. *Physician Advisory Review:* Independent clinicians audit clinical logic, contraindications, and threshold plausibility.
   2. *Clinical Content Review:* Qualified medical reviewers audit patient-facing educational language, lifestyle tips, and emergency triggers.
-  3. *Institutional Ethics / IRB Determination:* Research ethics determination for human subjects evaluation.
-  4. *Regulatory Applicability Assessment:* Explicit legal/regulatory mapping against FDA January 2026 CDS guidance, EU MDR (2017/745), UK MHRA, and India CDSCO rules.
+  3. *Institutional Ethics / Determination Gate:* Documented determination from an Institutional Review Board (IRB), Research Ethics Committee (REC), or applicable institutional authority prior to any human-participant usability or research activities.
+  4. *Regulatory Applicability Assessment:* Explicit legal/regulatory mapping against US FDA January 2026 CDS guidance, EU MDR 2017/745 Rule 11 & MDCG 2019-11 / 2020-1, UK MHRA SaMD framework, and India CDSCO MDR 2017 & Guidance Document on Medical Device Software (CDSCO/MD/GD/MDSW/01/2026, July 21, 2026). All legal classifications remain formally undetermined pending review by qualified regulatory counsel.
 
 ### 3.4 Risk R14: Unverified Infrastructure Capacity Over-Estimation (RPN = 6 - Mitigated)
 - **Root Cause:** Stating that a single 4 vCPU / 8 GB RAM VPS will comfortably handle "500+ daily assessments" without empirical load testing.

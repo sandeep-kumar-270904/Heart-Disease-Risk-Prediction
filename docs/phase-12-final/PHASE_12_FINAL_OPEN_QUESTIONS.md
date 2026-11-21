@@ -35,16 +35,16 @@ This document articulates the **five strategic governance decisions** that requi
 ---
 
 ### Question 2 (DEC-002): Clinical Governance Implementation Scope (Four Distinct Tracks)
-*Governance Principle:* Physician advisory review, clinical content review, institutional ethics / IRB determination, and regulatory assessment are four distinct, concurrent governance tracks. An IRB determination is an institutional ethics safeguard, not an alternative to physician review of clinical logic. Furthermore, regulatory applicability remains undetermined pending formal classification.
+*Governance Principle:* Physician advisory review, clinical content review, institutional ethics / IRB determination, and regulatory assessment are four distinct, concurrent governance tracks. Human-participant activities exist on a spectrum (from internal formative usability evaluations with mock synthetic fixtures to formal clinical user studies with clinicians or patients); they do not all require identical review pathways. However, before initiating any human-participant usability or research activities, a **documented determination from the applicable institutional ethics committee (IRB/REC/IEC) or regulatory authority** is strictly required. Furthermore, regulatory applicability remains undetermined pending formal classification, and real patient data (Category C) remains strictly prohibited across the MVP.
 
 - **Option A (Recommended): Multi-Track Phased Governance for MVP**
   - *Structure:* Maintain all four governance tracks as distinct workflows:
     1. *Physician Advisory Review:* Active during MVP to audit clinical features, boundary conditions, and emergency triggers.
     2. *Clinical Content Review:* Active during MVP to verify health literacy, educational copy, and patient communication.
-    3. *Institutional Ethics / IRB Protocol:* Formal research protocol drafted in parallel during MVP, submitted prior to any human subject testing.
-    4. *Regulatory Applicability Assessment:* Systematic review under FDA guidance (including Jan 2026 CDS guidance), EU MDR, UK MHRA, and CDSCO rules; regulatory status remains formally undetermined during MVP development.
-  - *Intended Purpose:* Ensures rigorous clinical safety and content oversight during development while preparing formal ethics and regulatory determinations in parallel without making unverified exemption claims.
-  - *Pros:* High clinical rigor; zero premature claims of device exemption or certification.
+    3. *Institutional Ethics / Determination Gate:* Documented determination obtained from applicable institutional ethics authority (IRB/REC/IEC) before initiating any human-participant usability or research activities, applying the relevant review, consent, privacy, and data protection rules based on jurisdiction and activity.
+    4. *Regulatory Applicability Assessment:* Systematic review under FDA guidance (including Jan 2026 CDS guidance), EU MDR Rule 11 & MDCG guidance, UK MHRA, and CDSCO MDR 2017 & MDSW Guidance (July 2026); regulatory status remains formally undetermined during MVP development.
+  - *Intended Purpose:* Ensures rigorous clinical safety and content oversight during development while establishing formal ethics determinations and regulatory mappings in parallel without making unverified exemption claims.
+  - *Pros:* High clinical rigor; zero premature claims of device exemption or certification; appropriate governance calibrated by activity.
   - *Cons:* Requires coordinating four distinct oversight workflows.
 - **Option B: Upfront Institutional Sponsorship Gate (Pre-Development IRB & Pre-Submission)**
   - *Structure:* Require formal institutional sponsorship, institutional ethics / IRB approval, and an official FDA pre-submission (Q-Submission) to be fully approved before any software engineering begins.
@@ -86,11 +86,11 @@ This document articulates the **five strategic governance decisions** that requi
 ### Question 5 (DEC-005): Data Classification & Real Patient Data Prohibition
 - **Option A (Recommended): Three-Tier Data Classification Policy (Category C Strictly Prohibited in MVP)**
   - *Policy:* Formally establish and enforce three distinct data categories:
-    - **Category A (Public Research Datasets):** Publicly available de-identified datasets (UCI Cleveland, 303 records) used exclusively for model training, offline validation, and calibration.
-    - **Category B (Synthetic Application Data):** 100% synthetically generated personas, UI fixtures, and mock clinical records (`scripts/generate_synthetic_patients.py`). Plausible physiological distributions with zero link to real individuals. Used for all application development, integration testing, demonstrations, and staging.
+    - **Category A (Public Historical Human-Origin Research Data):** Publicly accessible, historical human-origin clinical research data (UCI Cleveland, 303 records) with documented privacy limitations. Omitted direct identifiers historically (dummy 0 for SSN/ccf), but lacks modern formal statutory de-identification certification (HIPAA Safe Harbor / Expert Determination) or verified GDPR anonymization. Requires documented dataset provenance, licensing terms, permitted research use, and privacy risk assessment prior to model training in Milestone 09. Confined strictly to offline model research.
+    - **Category B (Synthetic Application Data):** 100% synthetically generated personas, UI fixtures, and mock clinical records (`scripts/generate_synthetic_patients.py`). Purely algorithmic generation with zero human origin and zero link to real individuals. Used for all application development, integration testing, demonstrations, and staging.
     - **Category C (Real Patient Information):** Real PHI/PII. **Strictly prohibited** across all MVP milestones (01–20).
-  - *Pros:* Eliminates real patient health information (PHI/PII) exposure, regulatory non-compliance liabilities, and privacy breach liabilities concerning patient data during development. (General software and infrastructure cybersecurity risks such as credentials, session hijacking, and server vulnerabilities remain active and are mitigated by standard DevSecOps controls.)
-  - *Cons:* Real clinical usability studies must wait for a subsequent protocol phase under institutional governance.
+  - *Pros:* Prohibiting Category C real patient data in the application avoids ingesting live clinical patient records into the web platform, eliminating clinical HIPAA/GDPR patient data breach notification obligations for runtime application operations. Establishes explicit research governance for Category A before training.
+  - *Cons:* Category A carries residual historical human-origin research-data risks that must be assessed before training; standard software and infrastructure cybersecurity risks remain active across the platform and require continuous DevSecOps controls.
 - **Option B: Authorize Real Patient Pilot Data in Staging (Permit Category C)**
   - *Policy:* Allow beta testing with real patient health data during Milestone 20 staging acceptance.
   - *Pros:* Tests system with live clinical records.

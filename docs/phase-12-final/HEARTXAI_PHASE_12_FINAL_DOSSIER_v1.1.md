@@ -120,9 +120,12 @@ All architectural and quality claims have been audited against tangible reposito
   In the primary research paper (Detrano et al., 1989), coronary disease is defined as *"greater than 50% reduction in luminal diameter of at least 1 of the major coronary arteries on selective coronary arteriography."*
   *Precision Finding:* The source documentation explicitly defines positive CAD as strictly **greater than 50% diameter narrowing** ($>50\%$), NOT $\ge 50\%$. Borderline $50\%$ stenosis is not categorized as positive in the source documentation.
 - **Absence of Longitudinal Follow-up:** The dataset contains **zero follow-up data**. Any claim that Cleveland data predicts future heart attack risk is scientifically invalid.
-- **Privacy & De-Identification Limitations (Known vs. Unknown):**
+- **Privacy & Research-Data Reclassification (Known vs. Unknown):**
+  - *Formal Reclassification:* The UCI Cleveland dataset is formally reclassified as **public, historical, human-origin health research data with documented privacy limitations**.
   - *Documented / Known Facts:* In the original primary documentation (`heart-disease.names`), attribute 2 (`ccf: social security number`) is documented as having had a dummy value of 0 inserted. In the processed 14-attribute file (`processed.cleveland.data`), identifying fields (patient ID and CCF) are completely omitted. No patient names, phone numbers, or residential addresses are present in the repository files.
-  - *Unknown / Unverifiable Facts:* The primary paper (Detrano et al., *Am J Cardiol* 1989) documents data collection from 1981–1984 but contains no explicit mention of informed consent protocols, institutional review board (IRB) review, or formal ethics committee approval for subsequent public web deposition. Furthermore, HIPAA was enacted in 1996 and GDPR in 2016; the dataset has **never been formally evaluated or certified under modern statutory de-identification standards** (such as HIPAA Safe Harbor / Expert Determination, or GDPR anonymization).
+  - *Unknown / Unverifiable Facts & Absence of Certification:* The primary paper (Detrano et al., *Am J Cardiol* 1989) documents data collection from 1981–1984 but contains no explicit mention of informed consent protocols, institutional review board (IRB) review, or formal ethics committee approval for subsequent public web deposition. Furthermore, HIPAA was enacted in 1996 and GDPR in 2016; the dataset has **never been formally evaluated or certified under modern statutory de-identification standards** (such as HIPAA Safe Harbor 45 CFR § 164.514(b) or Expert Determination § 164.514(a), or GDPR Recital 26 / Article 4(1) anonymization). HeartXAI 2.0 makes no claims of formal anonymization or blanket exclusion from privacy laws.
+  - *Mandatory Pre-Training Assessment (Milestone 09 Gate):* A documented assessment of dataset provenance, licensing terms, permitted research use, and privacy risk must be completed and approved before Category A data is ingested for model training in Milestone 09.
+  - *Separation of Data Risks & Retraction of Blanket Claims:* Claims that data classification policies eliminate all PHI/PII exposure or statutory breach notification liabilities are retracted. Category A carries historical human-origin research-data risks (e.g. potential linkage/re-identification risks, historical consent ambiguity), while Category B carries synthetic generation and standard application/infrastructure cybersecurity risks. Category C real patient data is **strictly prohibited across all MVP milestones (01–20)**.
 
 ### 6.2 ACC/AHA PCE vs. AHA PREVENT Evaluation (Task B Research)
 - **Guideline Adoption (2026):** The **2026 ACC/AHA Multisociety Dyslipidemia Guideline** formally adopted the **AHA PREVENT equations** (published late 2023 / early 2024) to replace the 2013 Pooled Cohort Equations (PCE) for primary prevention in US adults aged 30–79.
@@ -133,17 +136,19 @@ All architectural and quality claims have been audited against tangible reposito
 ### 6.3 Independent Jurisdictional Regulatory Analysis & Four-Pillar Clinical Governance
 Regulatory frameworks differ fundamentally across borders and cannot be treated under a single statutory test:
 1. **United States (US FDA):** Governed by Section 520(o)(1)(E) of the FD&C Act (21 U.S.C. § 360j(o)(1)(E)) as amended by the 21st Century Cures Act, and interpreted by the FDA's updated *Clinical Decision Support Software* guidance (January 2026). Non-device CDS exemption requires satisfying four cumulative criteria (Criterion 1: non-medical device image input; Criterion 2: display/analyze medical info; Criterion 3: provide recommendations rather than specific diagnosis/treatment; Criterion 4: enable independent review of recommendations).
-2. **European Union (EU MDR 2017/745):** Software qualification is governed by EU MDR Rule 11 (Annex VIII) and MDCG 2019-11 guidance. Under Rule 11, software intended to provide information used to take decisions with diagnosis or therapeutic purposes is classified as at least **Class IIa** (or Class IIb/III for serious deterioration or death). The EU MDR contains no statutory non-device exemption equivalent to FDA § 520(o)(1)(E).
+2. **European Union (EU MDR 2017/745):** Regulated under EU MDR 2017/745 Annex VIII, Chapter III, Rule 11 and MDCG guidance (MDCG 2019-11 & MDCG 2020-1). Rule 11 verbatim states:
+   > *"Software intended to provide information which is used to take decisions with diagnosis or therapeutic purposes is classified as class IIa, except if such decisions have an impact that may cause: death or an irreversible deterioration of a person’s state of health, in which case it is in class III; or a serious deterioration of a person’s state of health or a surgical intervention, in which case it is classified as class IIb. Software intended to monitor physiological processes is classified as class IIa, except if it is intended for monitoring of vital physiological parameters, where the nature of variations of those parameters is such that it could result in immediate danger to the patient, in which case it is classified as class IIb. All other software is classified as class I."*
+   The EU MDR contains no statutory non-device CDS exemption equivalent to FDA § 520(o)(1)(E); diagnostic predictive algorithms default to Class IIa or higher.
 3. **United Kingdom (MHRA):** Software as a Medical Device (SaMD) is regulated under the UK Medical Devices Regulations 2002 (as amended). Classification follows rules broadly aligned with EU MDD/MDR concepts, with ongoing policy developments under the MHRA Software and AI as a Medical Device Change Programme.
-4. **India (CDSCO):** Regulated under the Medical Device Rules, 2017 (MDR 2017). Software intended for diagnosis, prevention, monitoring, treatment, or alleviation of any disease is classified across Risk Classes A, B, C, or D based on intended use and risk to patient health.
+4. **India (CDSCO):** Regulated under the Medical Devices Rules, 2017 (MDR 2017) and the **Guidance Document on Medical Device Software (MDSW)**, Document No. **CDSCO/MD/GD/MDSW/01/2026**, published on **July 21, 2026** by the Central Drugs Standard Control Organisation (CDSCO), Directorate General of Health Services, Ministry of Health & Family Welfare, Government of India. Software intended to inform clinical management for serious cardiovascular conditions is categorized under Risk Class B or Class C; requires registration on the CDSCO SUGAM portal and CLA licensing under MDR 2017.
 
 > **LEGAL NOTICE:** Regulatory applicability remains strictly undetermined for HeartXAI 2.0. HeartXAI shall NOT be classified as non-device, exempt, or definitively educational CDS pending formal assessment of intended use, intended users, functionality, and jurisdiction. All statutory and regulatory interpretations presented herein are architectural risk evaluations and **require formal review and confirmation by qualified healthcare regulatory legal counsel in each respective target jurisdiction**.
 
 #### Four-Pillar Clinical Governance Framework:
 1. **Physician Advisory Review:** Independent practicing clinicians audit clinical logic, contraindications, and threshold plausibility.
 2. **Clinical Content Review:** Qualified medical reviewers audit patient-facing educational language, lifestyle tips, and emergency triggers.
-3. **Institutional Ethics / IRB Determination:** Research ethics determination for human subjects evaluation.
-4. **Regulatory Applicability Assessment:** Systematic evaluation under medical device rules (FDA CDS guidance, EU MDR, UK MHRA, CDSCO).
+3. **Institutional Ethics / Determination Gate:** Formal documented determination obtained from the applicable Institutional Review Board (IRB), Research Ethics Committee (REC), or institutional authority before initiating any human-participant usability or research activities, applying appropriate review and consent rules based on jurisdiction and activity.
+4. **Regulatory Applicability Assessment:** Systematic evaluation under medical device rules (FDA CDS guidance, EU MDR Rule 11 & MDCG, UK MHRA, CDSCO MDR 2017 & MDSW Guidance 2026). Real patient data (Category C) remains strictly prohibited across the MVP.
 
 ### 6.4 Mandatory Clinical Disclaimer
 > **MANDATORY NOTICE:** HeartXAI 2.0 is an experimental educational tool demonstrating explainable machine learning on historical research data. It **DOES NOT** provide medical diagnoses, prognoses, or treatment plans. If you are experiencing chest pain, tightness, shortness of breath, or acute discomfort, **IMMEDIATELY CALL EMERGENCY SERVICES (911 in US, 999 in UK, 112 in India)** or go to the nearest emergency room.
@@ -185,7 +190,7 @@ The arbitrary 65/25/10 testing pyramid has been replaced with a 10-tier risk-wei
 2. **Tier 2 (Critical):** Healthcare safety bounds & emergency red-flag triggers.
 3. **Tier 3 (Critical):** Authentication session integrity & Redis fail-closed behavior.
 4. **Tier 4 (High):** Real PostgreSQL 16 container integration & Alembic migrations (SQLite prohibited for integration).
-5. **Tier 5 (High):** ML probability calibration (provisional engineering heuristic targets: Brier $\le 0.12$, ECE $\le 0.05$; evaluated against uninformative 46% prevalence baseline $\approx 0.248$) & subgroup fairness.
+5. **Tier 5 (High):** ML probability calibration (leakage-safe out-of-fold predictions; training-only calibration fitting; 95% bootstrap CIs; provisional targets: Brier $\le 0.12$, ECE $\le 0.05$; baseline $\approx 0.248$; exploratory DCA) & subgroup fairness.
 6. **Tier 6 (High):** TreeSHAP efficiency axiom verification ($\sum \phi_i + \phi_0 = f(\mathbf{x})$).
 7. **Tier 7 (High):** Counterfactual constraint invariance (Age/Sex/History frozen).
 8. **Tier 8 (High):** WCAG 2.2 AA accessibility conformance testing.
@@ -248,8 +253,8 @@ flowchart TD
 6. **Milestone 06: Authentication, Sessions & RBAC:** Argon2id, JWT, Redis token-family rotation, and fail-closed Redis handling.
 7. **Milestone 07: Frontend Shell, Routing & Auth State:** React Router v6 shell, Zustand auth store, silent token refresh.
 8. **Milestone 08: Clinical Intake Wizard & Input Validation:** 14-biomarker multi-step form, unit conversion ($\text{mg/dL} \leftrightarrow \text{mmol/L}$), emergency alerts.
-9. **Milestone 09: ML Data Verification & Stratification:** Ingest Cleveland data, verify target semantics, generate leakage-free 5-fold CV split.
-10. **Milestone 10: Task A Model Training & Calibration:** Train XGBoost 2.0, apply Platt/Isotonic calibration against provisional engineering targets (Brier $\le 0.12$, ECE $\le 0.05$; baseline $\approx 0.248$).
+9. **Milestone 09: ML Data Governance, Provenance Verification & Stratification:** Ingest Category A Cleveland data; execute documented provenance, license, permitted research use, and privacy risk assessment; verify target semantics ($>50\%$); generate leakage-free 5-fold CV split.
+10. **Milestone 10: Task A Model Training & Rigorous Calibration:** Train XGBoost 2.0; compute leakage-safe out-of-fold (OOF) predictions; fit calibration transformers strictly on training folds; report 95% bootstrap CIs for Brier ($\le 0.12$), ECE ($\le 0.05$), and slope/intercept; external validation required before clinical claims; DCA labeled exploratory.
 11. **Milestone 11: In-Process ML Model Serving Pipeline:** Sub-20ms C++ inference worker in FastAPI; non-diagnostic output schema.
 12. **Milestone 12: TreeSHAP Local Explanation Engine:** Exact local Shapley feature attributions; interactive waterfall chart.
 13. **Milestone 13: Constrained Counterfactual Engine:** DiCE-ML lifestyle optimization with Age/Sex/History strictly frozen.
@@ -315,9 +320,9 @@ heartxai-2.0/
 - **R4 (IDOR PHI Breach):** Mitigated via `verify_patient_access` dependency pattern (RPN = 10).
 - **R5 (Token Theft / XSS):** Mitigated via in-memory access tokens, HttpOnly refresh cookies, and CSP (RPN = 8).
 - **R6 (SQLite Mismatch):** Mitigated via real PostgreSQL 16 container mandate in Milestone 04 (RPN = 8).
-- **R11 (Real PHI Exposure):** Mitigated via Three-Tier Data Classification (Category C strictly prohibited; eliminates patient PHI exposure; general cybersecurity risks actively managed) (RPN = 5).
+- **R11 (Real PHI Exposure & Research Data Governance):** Mitigated via Three-Tier Data Classification (Category C strictly prohibited; Category A research provenance/licensing/privacy review in M09; Category B synthetic data; general cybersecurity risks actively managed) (RPN = 5).
 - **R12 (Accessibility Gaps):** Mitigated via WCAG 2.2 AA target and automated axe-core gates (RPN = 6).
-- **R13 (Blanket Regulatory Exemption):** Mitigated via 4-pillar clinical governance and independent jurisdictional evaluation (RPN = 8).
+- **R13 (Blanket Regulatory Exemption):** Mitigated via 4-pillar clinical governance, documented ethics determination gate, and independent jurisdictional evaluation (RPN = 8).
 - **R14 (Unverified VPS Capacity):** Mitigated via Milestone 19 empirical load testing across 8 variables (RPN = 6).
 
 ---
@@ -334,11 +339,10 @@ heartxai-2.0/
 +---------+--------------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
 | **DEC-  | **Clinical Governance    | A: Multi-Track Phased | **Option A: Multi-    | Establishes distinct    | Requires strict    | Milestones    | **PENDING |
 | 002**   | Implementation Scope**   |    Governance (MVP     | Track Phased          | physician and content   | enforcement of     | 08, 14, 16    | USER      |
-|         | (4 Distinct Tracks)      |    Advisory/Content;   | Governance**          | review in MVP while     | prohibited clinical|               | DECISION**|
-|         |                          |    Ethics/Reg in par.) |                       | preparing ethics & reg  | claims ledger.     |               |           |
-|         |                          | B: Upfront Inst. Gate |                       | assessments; lifecycle  |                    |               |           |
-|         |                          |    (distinguishing     |                       | stages distinguished.   |                    |               |           |
-|         |                          |    proto/human/trial)  |                       |                         |                    |               |           |
+|         | (4 Distinct Tracks)      |    Advisory/Content;   | Governance**          | review in MVP; ethics/  | prohibited clinical|               | DECISION**|
+|         |                          |    Ethics/Reg in par.) |                       | regulatory determ-      | claims ledger;     |               |           |
+|         |                          | B: Upfront Inst. Gate |                       | ination gate before     | Cat C prohibited.  |               |           |
+|         |                          |    (pre-dev IRB/Q-Sub) |                       | human-participant study.|                    |               |           |
 +---------+--------------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
 | **DEC-  | **Cardiovascular         | A: Task A MVP only    | **Option A: Task A      | Preserves clinical | Milestones    | **PENDING |
 | 003**   | Prediction Scope**       | B: Implement Task B   | MVP Only**              | integrity; PREVENT | 09, 10, 11,   | USER      |
@@ -349,10 +353,11 @@ heartxai-2.0/
 |         | Localization Scope**     |    (US/IN/UK Synth)   | Goal (US/IN/UK Synth)*| without claiming global | must be verified per|              | DECISION**|
 |         |                          | B: US-Only Baseline   |                       | operational readiness.  | jurisdiction.      |               |           |
 +---------+--------------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
-| **DEC-  | **Data Classification &  | A: Three-Tier Class-  | **Option A: Three-    | Eliminates patient PHI  | Any future live use| All           | **PENDING |
-| 005**   | Patient Data Policy**    |    ification (Cat A/B;| Tier Classification   | exposure; general cyber | depends on local   | Milestones    | USER      |
-|         |                          |    Cat C Prohibited)  | (Cat C Prohibited)**  | risks actively managed; | laws (HIPAA/GDPR/  | (01–20)       | DECISION**|
-|         |                          | B: Real PHI Pilot     |                       | Category C prohibited.  | DPA/IRB/REC/IEC).  |               |           |
+| **DEC-  | **Data Classification &  | A: Three-Tier Class-  | **Option A: Three-    | Prohibits Category C in | Cat A carries      | All           | **PENDING |
+| 005**   | Patient Data Policy**    |    ification (Cat A/B;| Tier Classification   | MVP; separates Cat A    | historical research| Milestones    | USER      |
+|         |                          |    Cat C Prohibited)  | (Cat C Prohibited)**  | human research risk from| risks; Cat B synth | (01–20)       | DECISION**|
+|         |                          | B: Real PHI Pilot     |                       | Cat B synthetic data;   | requires AppSec;   |               |           |
+|         |                          |                       |                       | mandates M09 review.    | cyber risks managed|               |           |
 +---------+--------------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
 ```
 

@@ -117,10 +117,12 @@ The table below reconciles all open governance questions into a single authorita
 +---------+--------------------------+-----------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
 | **DEC-  | **Clinical Governance    | A: Multi-Track Phased | **Option A: Multi-    | Enables synthetic-data  | Requires strict    | Milestones    | **PENDING |
 | 002**   | Implementation Scope**   |    Governance for MVP | Track Phased          | prototyping with active | enforcement of     | 08, 14, 16    | USER      |
-|         | (4 Distinct Tracks)      |    (Advisory/Content  | Governance**          | clinical review; ethics | prohibited clinical|               | DECISION**|
-|         |                          |    active in MVP)     |                       | & regulatory formal-    | claims ledger.     |               |           |
-|         |                          | B: Institutional Gate |                       | ized before human study |                    |               |           |
-|         |                          |    Prior to Coding    |                       | or clinical deployment. |                    |               |           |
+|         | (4 Distinct Tracks)      |    (Advisory/Content  | Governance**          | clinical review; docu-  | prohibited clinical|               | DECISION**|
+|         |                          |    active in MVP;     |                       | mented ethics/reg deter-| claims ledger;     |               | DECISION**|
+|         |                          |    ethics/reg deter-  |                       | mination required before| Category C strictly|               |           |
+|         |                          |    mination gate)     |                       | human-participant study.| prohibited.        |               |           |
+|         |                          | B: Institutional Gate |                       |                         |                    |               |           |
+|         |                          |    Prior to Coding    |                       |                         |                    |               |           |
 +---------+--------------------------+-----------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
 | **DEC-  | **Cardiovascular         | A: Task A MVP only    | **Option A: Task A    | Preserves scientific    | Users cannot get   | Milestones    | **PENDING |
 | 003**   | Prediction Scope**       |    (Task B to research| MVP Only**            | integrity; eliminates   | 10-year risk % in  | 09, 10, 11,   | USER      |
@@ -132,10 +134,11 @@ The table below reconciles all open governance questions into a single authorita
 |         | Localization Scope**     |    (US/IN/UK Synth)   | Goal (US/IN/UK Synth)*| without claiming global | must be verified per|              | DECISION**|
 |         |                          | B: US-Only Baseline   |                       | operational readiness.  | jurisdiction.      |               |           |
 +---------+--------------------------+-----------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
-| **DEC-  | **Data Classification &  | A: Three-Tier Class-  | **Option A: Three-    | Eliminates patient PHI  | Standard cyber-    | All           | **PENDING |
-| 005**   | Patient Data Policy**    |    ification (Cat A/B;| Tier Classification   | exposure; contextual    | security risks     | Milestones    | USER      |
-|         |                          |    Cat C Prohibited)  | (Cat C Prohibited)**  | ethics/privacy laws     | remain; requires   | (01–20)       | DECISION**|
-|         |                          | B: Real PHI Pilot     |                       | noted; Category C out.  | robust AppSec.     |               |           |
+| **DEC-  | **Data Classification &  | A: Three-Tier Class-  | **Option A: Three-    | Prohibits Category C in | Cat A research data| All           | **PENDING |
+| 005**   | Patient Data Policy**    |    ification (Cat A/B;| Tier Classification   | MVP; distinguishes Cat A| carries historical | Milestones    | USER      |
+|         |                          |    Cat C Prohibited)  | (Cat C Prohibited)**  | human research risk from| privacy risks;     | (01–20)       | DECISION**|
+|         |                          | B: Real PHI Pilot     |                       | Cat B synthetic data;   | Cat B requires App-|               |           |
+|         |                          |                       |                       | mandates M09 review.    | Sec/cyber defenses.|               |           |
 +---------+--------------------------+-----------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
 ```
 
