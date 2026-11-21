@@ -1,9 +1,9 @@
 # HeartXAI 2.0 — Security & Privacy Readiness Audit
 **Document ID:** HX-PR-007  
-**Version:** 2.0.0 (Phase 12.1 Revision)  
-**Phase:** 12.1 — Final Audit Corrections, Clinical Scope Resolution & Implementation Authorization  
+**Version:** 2.2.0 (Phase 12.2 Revision)  
+**Phase:** 12.2 — Final Governance Resolution & Evidence Reconciliation  
 **Author:** Principal Application Security Architect & DevSecOps Lead  
-**Status:** Architecture Evaluated — Implementation-Time Security Gates Defined  
+**Status:** Architecture Evaluated — Implementation-Time Security Gates & Three Data Categories Defined  
 **Date:** November 2026  
 
 ---
@@ -12,11 +12,41 @@
 
 Healthcare applications handling patient accounts, health questionnaires, and machine learning inferences require uncompromising application security. Rather than claiming that an unbuilt application has "zero security vulnerabilities," this audit rigorously distinguishes between security controls that are **Designed**, **Implemented**, **Tested**, and **Independently Reviewed**.
 
-This document evaluates the complete security posture of HeartXAI 2.0, defines Redis failure behavior, articulates cryptographic key management, and establishes implementation-time security gates and release blockers.
+This document evaluates the complete security posture of HeartXAI 2.0, codifies the **Three-Category Data Classification Policy**, establishes the **Fail-Closed Redis Policy**, defines cryptographic key management, and establishes implementation-time security gates and release blockers.
 
 ---
 
-## 2. Granular Security Controls Status Matrix
+## 2. Three-Category Data Classification Policy
+
+```
++-------------------------------------------------------------------------------------------------------------------------------+
+|                                            HEARTXAI 2.0 DATA CLASSIFICATION POLICY                                            |
++-----------------------+-----------------------------------------------+-------------------------------------------------------+
+| Category              | Scope, Definition & Source                    | Permitted System Usage & Mandatory Safeguards         |
++-----------------------+-----------------------------------------------+-------------------------------------------------------+
+| **Category A**        | Retrospective, open-access, de-identified     | - Permitted **only** for offline ML research, training|
+| **Public Research**   | academic clinical datasets.                   |   and calibration (Milestones 09-10).                 |
+| **Datasets**          | *Primary Source:* UCI Cleveland Heart Disease | - Subject to explicit dataset provenance verification.|
+|                       | Catheterization Cohort ($N=303$, 1981-1984).  | - Documented limitations: symptomatic referral bias,  |
+|                       | Open-access research license.                 |   small sample size, zero longitudinal follow-up.     |
++-----------------------+-----------------------------------------------+-------------------------------------------------------+
+| **Category B**        | Artificially generated test fixtures, mock    | - Used for **all** frontend UI demonstrations, test   |
+| **Synthetic**         | patient personas (Sarah, Marcus, Elena), and  |   fixtures, intake form tests, and integration tests. |
+| **Application Data**  | integration testing records.                  | - Generated via `scripts/generate_synthetic_patients`|
+|                       | Derived from parameterized distributions.      | - Contains **zero real human data**; zero PHI/PII.    |
++-----------------------+-----------------------------------------------+-------------------------------------------------------+
+| **Category C**        | Personally Identifiable Information (PII) or  | - **STRICTLY PROHIBITED** during initial development, |
+| **Real Patient**      | Personal Health Information (PHI) collected   |   demonstration, testing, and staging (Milestones 01- |
+| **Information**       | from live human users or clinical systems.    |   20).                                                |
+|                       |                                               | - Requires separate authorization, security review,   |
+|                       |                                               |   privacy assessment, and applicable ethics review    |
+|                       |                                               |   prior to any future collection or processing.       |
++-----------------------+-----------------------------------------------+-------------------------------------------------------+
+```
+
+---
+
+## 3. Granular Security Controls Status Matrix
 
 ```
 +-------------------------------------------------------------------------------------------------------------------------------+
@@ -61,14 +91,14 @@ This document evaluates the complete security posture of HeartXAI 2.0, defines R
 
 ---
 
-## 3. High-Priority Security Control Details
+## 4. High-Priority Security Control Details
 
-### 3.1 Redis Session Failure Behavior: Strict Fail-Closed Policy
+### 4.1 Redis Session Failure Behavior: Strict Fail-Closed Policy
 In token-family rotation architectures, if the Redis session cache fails or experiences network partitioning, systems face a critical tradeoff:
 - *Fail-Open (Dangerous):* Allow refresh tokens to be exchanged without verifying against the revocation blacklist, opening a window for replayed stolen tokens.
 - *Fail-Closed (Secure — Mandated by HeartXAI):* If Redis is unreachable after exponential retry (3 attempts over 500ms), the authentication service **immediately rejects the token refresh request** with an RFC 7807 error (HTTP 503 Service Unavailable / Cache Unavailable) and logs a critical security alert. The user is prompted to re-authenticate. **Under no circumstances shall an unvalidated refresh token issue a new access JWT.**
 
-### 3.2 Anti-IDOR Authorization Controls
+### 4.2 Anti-IDOR Authorization Controls
 Insecure Direct Object References (IDOR) are the primary vector for unauthorized PHI access in healthcare APIs. 
 - **Mandatory FastAPI Dependency:** Every endpoint with a path parameter (`/patients/{patient_id}`, `/assessments/{assessment_id}`) must declare `Depends(verify_patient_access)`.
 - **Validation Rule:**
@@ -77,14 +107,14 @@ Insecure Direct Object References (IDOR) are the primary vector for unauthorized
   3. If `current_user.role == UserRole.ADMIN`: Access granted with mandatory audit logging.
   4. Otherwise: **Return HTTP 404 Not Found** (obfuscating whether the resource exists to prevent ID enumeration).
 
-### 3.3 Cryptographic Key Management & Envelope Encryption
+### 4.3 Cryptographic Key Management & Envelope Encryption
 - **Master Encryption Key (MEK):** Stored outside the application codebase in environment secrets or cloud KMS.
 - **Data Encryption Keys (DEK):** Generated per-record or per-column using AES-256-GCM.
 - **Zero Plaintext Secrets in Repository:** Mandatory `.gitignore` enforcement; automated pre-commit hook scanning with `detect-secrets` or Gitleaks.
 
 ---
 
-## 4. Implementation-Time Security Release Blockers
+## 5. Implementation-Time Security Release Blockers
 
 The following criteria represent **mandatory release blockers** that must be resolved before any deployment to staging or production:
 

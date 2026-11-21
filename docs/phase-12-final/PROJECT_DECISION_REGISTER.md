@@ -1,8 +1,8 @@
 # HeartXAI 2.0 — Project Decision Register
 **Document ID:** HX-PR-016  
-**Version:** 2.0.0 (Phase 12.1 Revision)  
-**Phase:** 12.1 — Final Audit Corrections, Clinical Scope Resolution & Implementation Authorization  
-**Author:** Principal Software Architect & Technical Program Manager  
+**Version:** 2.2.0 (Phase 12.2 Final Governance Resolution)  
+**Phase:** 12.2 — Final Governance Resolution & Evidence Reconciliation  
+**Author:** Principal Software Architect, Technical Program Manager & Clinical Safety Reviewer  
 **Status:** Authoritative Reconciled Register — Governance Decisions Pending User Selection  
 **Date:** November 2026  
 
@@ -12,10 +12,10 @@
 
 This register serves as the authoritative single source of truth for all architectural, clinical, security, and governance decisions across HeartXAI 2.0.
 
-In accordance with Phase 12.1 requirements, all discrepancies between prior question lists and summary dossiers have been resolved. Decisions are strictly categorized into:
-- **Confirmed Decisions:** Architectural Decision Records (ADRs 001–012) confirmed during technical architecture design.
-- **Rejected Decisions:** Proposals evaluated and explicitly rejected with documented rationale.
-- **Governance Decisions Awaiting User Selection:** Core strategic decisions required prior to implementation, marked strictly as **PENDING USER DECISION** (never falsely marked approved).
+In accordance with Phase 12.2 requirements:
+- **Confirmed Architectural Decisions (ADRs 001–012):** Locked technical decisions confirmed during architectural design.
+- **Rejected Proposals Register (REJ 001–006):** Proposals evaluated and explicitly rejected with documented technical rationale.
+- **Authoritative Governance Decisions (DEC-001–005):** Core strategic decisions requiring explicit user selection and approval prior to Milestone 01 authorization. Each is strictly marked **PENDING USER DECISION** (never falsely marked approved).
 
 ---
 
@@ -50,7 +50,8 @@ In accordance with Phase 12.1 requirements, all discrepancies between prior ques
 |         | Nginx, FastAPI, PostgreSQL 16, Redis 7.2     | without premature Kubernetes overhead for MVP. |
 +---------+----------------------------------------------+------------------------------------------------+
 | ADR-008 | **Strict Non-Diagnostic CDS Boundary**       | Educational clinical decision support under    |
-|         | Mandatory disclaimers & physician advisory   | FDA 21st Century Cures Act Sec 520(o)(1)(E).   |
+|         | Mandatory disclaimers & 4-pillar governance  | FDA 21st Century Cures Act Sec 520(o)(1)(E) &  |
+|         |                                              | FDA January 2026 CDS Software Guidance.        |
 +---------+----------------------------------------------+------------------------------------------------+
 | ADR-009 | **Mandatory Unit Normalization Layer**       | Transparent bi-directional conversions for     |
 |         | mg/dL <-> mmol/L before ML feature injection | international users; audited via unit tests.   |
@@ -58,8 +59,8 @@ In accordance with Phase 12.1 requirements, all discrepancies between prior ques
 | ADR-010 | **Nginx 1.26 as Edge Reverse Proxy**         | Handles TLS 1.3 termination, HSTS, CSP headers,|
 |         | SSL, rate limiting, and static file delivery | and upstream routing to FastAPI backend.       |
 +---------+----------------------------------------------+------------------------------------------------+
-| ADR-011 | **Global Country Configuration Architecture**| Decouples core platform from localized units,  |
-|         | Pluggable adapters for US, IN, and UK        | emergency hotlines (911/112/999), directories. |
+| ADR-011 | **Universal Country Configuration Adapter**  | Extensible adapter pattern supporting any ISO  |
+|         | Pluggable adapters; initial US, IN, UK demos | 3166-1 country; units, hotlines, directories.  |
 +---------+----------------------------------------------+------------------------------------------------+
 | ADR-012 | **AES-256-GCM Authenticated Offsite Backups**| Nightly pg_dump piped through OpenSSL AEAD     |
 |         | Encrypted at rest before cloud object push   | with SHA-256 integrity checksums (ADR-012).    |
@@ -86,13 +87,13 @@ In accordance with Phase 12.1 requirements, all discrepancies between prior ques
 |         |                                   | patients and clinicians. Calibration is mandatory.        |
 +---------+-----------------------------------+-----------------------------------------------------------+
 | REJ-004 | SQLite for Integration Testing    | SQLite lacks PostgreSQL UUIDv7, JSONB operators, and row  |
-|         |                                   | locks; real PostgreSQL 16 container is required.          |
+|         |                                   | locks; real PostgreSQL 16 container is required in M04.   |
 +---------+-----------------------------------+-----------------------------------------------------------+
 | REJ-005 | Client-Side Model Execution (JS)  | Exposes model weights, prevents centralized audit logging,|
 |         |                                   | and creates browser compatibility variance.               |
 +---------+-----------------------------------+-----------------------------------------------------------+
 | REJ-006 | Deterministic Task B in MVP       | Conflates cross-sectional classification with prospective |
-|         | (ACC/AHA PCE or PREVENT in MVP)   | risk; guidelines are transitioning; deferred to research. |
+|         | (ACC/AHA PCE or PREVENT in MVP)   | risk; guidelines transitioning; deferred to research.     |
 +---------+-----------------------------------+-----------------------------------------------------------+
 ```
 
@@ -108,30 +109,32 @@ The table below reconciles all open governance questions into a single authorita
 +---------+--------------------------+-----------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
 | ID      | Decision Description     | Available Options     | Recommended Option    | Selection Rationale     | Primary Risks      | Dependencies  | Status    |
 +---------+--------------------------+-----------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
-| **DEC-  | **Hosting Profile &      | A: Tier A Minimal VPS | **Option A: Tier A    | Lowest cost for dev and | VPS single point   | Milestone 01, | **PENDING |
-| 001**   | Infrastructure Budget**  |    (~$25-$55/mo)      | Minimal VPS**         | synthetic testing; no   | of failure; manual | Milestone 20  | USER      |
-|         |                          | B: Tier B AWS Cloud   |                       | cloud lock-in; handles  | failover during    |               | DECISION**|
-|         |                          |    (~$250/mo)         |                       | 500+ daily assessments. | hardware outage.   |               |           |
+| **DEC-  | **Hosting Profile &      | A: Tier A Minimal VPS | **Option A: Tier A    | Lowest cost baseline for| VPS single point   | Milestone 01, | **PENDING |
+| 001**   | Infrastructure Budget**  |    (~$25-$55/mo)      | Minimal VPS**         | dev, testing, synthetic | of failure; manual | Milestone 20  | USER      |
+|         |                          | B: Tier B AWS Cloud   |                       | demos; capacity sizing  | failover during    |               | DECISION**|
+|         |                          |    (~$250/mo)         |                       | ('500+ assessments') is | hardware outage.   |               |           |
+|         |                          |                       |                       | unverified estimate.    |                    |               |           |
 +---------+--------------------------+-----------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
-| **DEC-  | **Clinical Governance &  | A: Physician Advisory | **Option A: Physician | Appropriate for non-    | Requires strict    | Milestones    | **PENDING |
-| 002**   | Review Framework**       |    Review & Disclaimers| Advisory Review**     | diagnostic educational  | enforcement of     | 08, 14, 16    | USER      |
-|         |                          | B: Institutional IRB  |                       | CDS under FDA 21st      | prohibited clinical|               | DECISION**|
-|         |                          |    Ethics Protocol    |                       | Century Cures Act.      | claims ledger.     |               |           |
+| **DEC-  | **Clinical Governance &  | A: Four-Pillar        | **Option A: Four-     | Provides structured     | Requires strict    | Milestones    | **PENDING |
+| 002**   | Review Framework**       |    Governance & CDS   | Pillar Governance &   | clinical oversight and  | enforcement of     | 08, 14, 16    | USER      |
+|         |                          |    Assessment         | CDS Assessment**      | transparent compliance  | prohibited clinical|               | DECISION**|
+|         |                          | B: Institutional IRB  |                       | under FDA Jan 2026 CDS  | claims ledger.     |               |           |
+|         |                          |    Protocol (Device)  |                       | guidance & Sec 520(o).  |                    |               |           |
 +---------+--------------------------+-----------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
 | **DEC-  | **Cardiovascular         | A: Task A MVP only    | **Option A: Task A    | Preserves scientific    | Users cannot get   | Milestones    | **PENDING |
 | 003**   | Prediction Scope**       |    (Task B to research| MVP Only**            | integrity; eliminates   | 10-year risk % in  | 09, 10, 11,   | USER      |
 |         |                          | B: Implement Task B   |                       | confusion between CAD   | MVP; must wait for | 14            | DECISION**|
 |         |                          |    calculator in MVP  |                       | detection & future risk.| future research.   |               |           |
 +---------+--------------------------+-----------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
-| **DEC-  | **Geographic Launch &    | A: Tri-Country US/IN/ | **Option A: Tri-      | Validates global unit   | Requires seeding   | Milestones    | **PENDING |
-| 004**   | Localization Scope**     |    UK Architecture    | Country Architecture  | conversions (mg/dL <->  | emergency contacts | 08, 15        | USER      |
-|         |                          | B: US-Only Launch     | with Synthetic Demo** | mmol/L) and emergency   | across three       |               | DECISION**|
-|         |                          |                       |                       | hotlines in MVP.        | national regions.  |               |           |
+| **DEC-  | **Geographic Launch &    | A: Universal Country  | **Option A: Universal | Validates multi-unit    | Requires seeding   | Milestones    | **PENDING |
+| 004**   | Localization Scope**     |    Adapter (US/IN/UK) | Country Adapter       | engine (mg/dL <-> mmol) | emergency contacts | 08, 15        | USER      |
+|         |                          | B: US-Only Launch     | with Synthetic Demo** | and internationalization| across three       |               | DECISION**|
+|         |                          |                       |                       | in MVP without lock-in. | national regions.  |               |           |
 +---------+--------------------------+-----------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
-| **DEC-  | **Data Classification &  | A: 100% Synthetic Data| **Option A: 100%      | Eliminates HIPAA/GDPR   | Demonstrations use | All           | **PENDING |
-| 005**   | Patient Data Policy**    | B: Real Patient PHI   | Synthetic Data**      | breach liability during | synthetic patient  | Milestones    | USER      |
-|         |                          |    Pilot              |                       | development; protects   | personas rather    | (01–20)       | DECISION**|
-|         |                          |                       |                       | patient confidentiality.| than live records. |               |           |
+| **DEC-  | **Data Classification &  | A: Three-Tier Class-  | **Option A: Three-    | Eliminates HIPAA/GDPR   | Demonstrations use | All           | **PENDING |
+| 005**   | Patient Data Policy**    |    ification (Cat A/B;| Tier Classification   | breach liability during | synthetic patient  | Milestones    | USER      |
+|         |                          |    Cat C Prohibited)  | (Cat C Prohibited)**  | development; protects   | personas rather    | (01–20)       | DECISION**|
+|         |                          | B: Real PHI Pilot     |                       | patient confidentiality.| than live records. |               |           |
 +---------+--------------------------+-----------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
 ```
 

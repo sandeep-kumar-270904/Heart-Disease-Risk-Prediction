@@ -1,9 +1,9 @@
 # HeartXAI 2.0 — Project Definition of Done (DoD)
 **Document ID:** HX-PR-014  
-**Version:** 2.0.0 (Phase 12.1 Revision)  
-**Phase:** 12.1 — Final Audit Corrections, Clinical Scope Resolution & Implementation Authorization  
-**Author:** Principal QA Architect, Healthcare Safety Consultant & Security Architect  
-**Status:** Approved for Implementation Planning — Mandatory Invariants  
+**Version:** 2.2.0 (Phase 12.2 Revision)  
+**Phase:** 12.2 — Final Governance Resolution & Evidence Reconciliation  
+**Author:** Principal QA Architect, Healthcare Safety Reviewer & Security Lead  
+**Status:** Approved for Implementation Planning — Mandatory Invariants & Data Categories  
 **Date:** November 2026  
 
 ---
@@ -16,9 +16,9 @@ This document establishes the binding Definition of Done (DoD) for HeartXAI 2.0.
 
 ---
 
-## 2. The 8 Mandatory Healthcare Safety Invariants
+## 2. The Nine Mandatory Healthcare Safety Invariants
 
-Before any feature involving machine learning, clinical data intake, risk scoring, health information, or patient profile management can be considered **DONE**, it must strictly verify these eight non-negotiable healthcare safety invariants:
+Before any feature involving machine learning, clinical data intake, risk scoring, health information, or patient profile management can be considered **DONE**, it must strictly verify these nine non-negotiable healthcare safety invariants:
 
 ```
 +-------------------------------------------------------------------------------------------------------------------------------+
@@ -47,8 +47,11 @@ Before any feature involving machine learning, clinical data intake, risk scorin
 | 07 | **No Cross-Patient Data Access             | Automated anti-IDOR tests must verify that users cannot access records of   |
 |    | (Strict Anti-IDOR)**                       | other patients. Unauthorized requests must return 403 or obfuscated 404.    |
 +----+--------------------------------------------+-----------------------------------------------------------------------------+
-| 08 | **No Real Patient Data in Non-Production   | All development, testing, staging, and demo environments must strictly use  |
-|    | Environments**                             | **100% synthetic data**. Zero real patient PHI/PII permitted without ethics.|
+| 08 | **Strict Category B Synthetic Data Mandate | All development, testing, staging, and demo environments must strictly use  |
+|    | in Non-Production Environments**           | **Category B synthetic data**. Category C real patient PHI is PROHIBITED.   |
++----+--------------------------------------------+-----------------------------------------------------------------------------+
+| 09 | **No Blanket Claims of Regulatory          | The platform shall make no blanket claims that it is exempt from FDA or     |
+|    | Exemption or Compliance**                  | medical device regulation, nor claim formal certification or validation.   |
 +----+--------------------------------------------+-----------------------------------------------------------------------------+
 ```
 

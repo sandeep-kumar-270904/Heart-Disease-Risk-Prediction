@@ -1,26 +1,26 @@
 # HeartXAI 2.0 — Traceability & Evidence Index
 **Document ID:** HX-DOC-TRC-001  
-**Version:** 1.1.0  
-**Phase:** 12 / 12.1 Final Pre-Implementation Audit Handover  
-**Author:** Technical Program Manager, QA Architect & Independent Technical Auditor  
-**Status:** Complete Handover Traceability Baseline  
+**Version:** 2.2.0 (Phase 12.2 Final Governance Resolution)  
+**Phase:** 12.2 — Final Governance Resolution & Evidence Reconciliation  
+**Author:** Technical Program Manager, QA Architect, Application Security Architect & Clinical Safety Reviewer  
+**Status:** Authoritative Handover Traceability Baseline  
 **Date:** November 2026  
 
 ---
 
 ## 1. Executive Summary
 
-This index provides end-to-end traceability across all layers of HeartXAI 2.0. It maps functional and non-functional requirements to architectural specifications, implementation milestones, automated verification test suites, and Architecture Decision Records (ADRs).
+This index provides end-to-end traceability across all architectural, engineering, and clinical layers of HeartXAI 2.0 following the Phase 12.2 governance resolution. It maps functional and non-functional requirements to architectural specifications, implementation milestones, automated verification test suites, Architecture Decision Records (ADRs), and empirical evidence.
 
 Crucially, this document strictly differentiates:
-- **Implemented & Tested Work:** Code and tests that currently exist and execute in the repository.
-- **Implemented but Mock-Tested Work:** Baseline scaffolding operating against temporary fixtures (e.g., SQLite).
-- **Designed & Specified Work:** Architectural plans to be engineered during Milestones 01–20.
-- **Unverified Claims & Unresolved Decisions:** Items requiring empirical testing or user sign-off.
+- **Verified Code & Automated Test Evidence:** 15 backend tests currently passing on disk against an in-memory SQLite fixture (`backend/tests/conftest.py:19`).
+- **Pending Live Database Validation:** Real PostgreSQL 16 container testing is strictly mandated in Milestone 04 and has NOT yet been run.
+- **Architectural Plans & Specifications:** Complete specifications across Phases 01–11 to be engineered during Milestones 01–20.
+- **Unverified Claims & Unresolved Decisions:** Items requiring empirical testing (e.g. VPS capacity) or explicit user governance sign-off (DEC-001–005).
 
 ---
 
-## 2. Requirement-to-Document & Milestone Traceability
+## 2. Requirement-to-Document & Milestone Traceability (RTM)
 
 ```
 +-------------------------------------------------------------------------------------------------------------------------------+
@@ -67,8 +67,8 @@ Crucially, this document strictly differentiates:
 | **NFR-03**| Accessibility (WCAG 2.2 AA)     | `docs/design/A11Y.md`       | Milestone 03, 19   | Automated axe-core CI scan;   |
 |         | Keyboard & screen-reader support | `docs/quality/A11Y_TEST.md` |                    | zero critical/serious issues  |
 +---------+----------------------------------+-----------------------------+--------------------+-------------------------------+
-| **NFR-04**| 100% Synthetic Data Invariant    | `docs/security/DATA_PROT.md`| All Milestones     | Assertion in test harness:    |
-|         | Zero real PHI in non-production  | `scripts/gen_synthetic.py`  | (01–20)            | `SYNTHETIC_DATA_ONLY == True` |
+| **NFR-04**| Three-Tier Data Classification  | `docs/security/DATA_PROT.md`| All Milestones     | Cat A (Research), Cat B       |
+|         | Category C Strictly Prohibited   | `scripts/gen_synthetic.py`  | (01–20)            | (Synthetic), Cat C Prohibited |
 +---------+----------------------------------+-----------------------------+--------------------+-------------------------------+
 ```
 
@@ -90,7 +90,7 @@ Crucially, this document strictly differentiates:
 | ADR-008 | Strict Non-Diagnostic CDS Boundary    | UI Disclaimers & Safety     | Enforced in Specs     |
 | ADR-009 | Mandatory Unit Normalization Layer    | Biomarker Translation       | Designed; Test in M08 |
 | ADR-010 | Nginx 1.26 as Edge Reverse Proxy      | TLS 1.3, CSP, Rate Limits   | Configuration Verified|
-| ADR-011 | Global Country Configuration Adapters | Pluggable US/IN/UK Adapters | Designed; Test in M15 |
+| ADR-011 | Universal Country Adapters (US/IN/UK) | Localized Units & Hotlines  | Designed; Test in M15 |
 | ADR-012 | AES-256-GCM Authenticated Backups     | Offsite WORM Backup Script  | Script Verified       |
 +---------+---------------------------------------+-----------------------------+-----------------------+
 ```
@@ -99,14 +99,13 @@ Crucially, this document strictly differentiates:
 
 ## 4. Test Evidence References (Existing Working Code)
 
-The following automated test evidence was executed and verified during the Phase 12.1 audit:
+The following automated test evidence was executed and verified during the pre-implementation audit:
 
 ```
-Test Run Timestamp: 2026-11-21T16:10:34Z
-Working Directory:  heartxai-2.0/backend/
-Execution Command:  pytest -v
-Platform:           win32 -- Python 3.11.9, pytest-9.0.3, pluggy-1.6.0
-Plugins:            anyio-4.10.0, langsmith-0.4.59, asyncio-1.4.0, cov-7.1.0
+Test Run Platform: win32 -- Python 3.11.9, pytest-9.0.3, pluggy-1.6.0
+Plugins:           anyio-4.10.0, langsmith-0.4.59, asyncio-1.4.0, cov-7.1.0
+Working Directory: heartxai-2.0/backend/
+Execution Command: pytest -v
 
 Tests Executed & Verified:
 1.  tests/test_api_health.py::test_root_endpoint                     PASSED
@@ -126,8 +125,10 @@ Tests Executed & Verified:
 15. tests/test_security.py::test_tampered_jwt_token                  PASSED
 
 Result: 15 passed in 4.56s.
-Underlying Test Fixture: SQLite In-Memory (backend/tests/conftest.py:19).
-PostgreSQL 16 Migration Gate: Milestone 04.
+CRITICAL EVIDENCE NOTE:
+- Underlying Test Fixture: SQLite In-Memory (backend/tests/conftest.py:19).
+- PostgreSQL 16 Live Container Testing: Has NOT yet been executed.
+- Mandatory Verification Gate: Milestone 04 will deploy a live PostgreSQL 16 Docker container to validate UUIDv7 generation, native JSONB querying, cascading foreign keys, and row-level locks.
 ```
 
 ---
@@ -145,6 +146,8 @@ PostgreSQL 16 Migration Gate: Milestone 04.
 | U5 | Anti-IDOR Authorization        | End-to-end multi-user HTTP boundary isolation      | Milestone 18 Test Suite  |
 | U6 | WCAG 2.2 AA Conformance        | Automated axe-core and screen reader audit on live UI| Milestone 19 Test Suite|
 | U7 | Disaster Recovery Restore      | End-to-end database restore from AES-256-GCM cipher| Milestone 20 Drill       |
+| U8 | VPS 500+ Daily Assessments     | Throughput claim is an unverified planning estimate| Milestone 19 Load Test   |
+|    | Throughput Capacity            | requiring testing across 8 performance variables   |                          |
 +----+--------------------------------+----------------------------------------------------+--------------------------+
 ```
 
@@ -157,9 +160,11 @@ PostgreSQL 16 Migration Gate: Milestone 04.
 | ID | Decision Title        | Available Options                | Recommended Option      | Current Status     |
 +----+-----------------------+----------------------------------+-------------------------+--------------------+
 | D1 | Hosting Profile       | Tier A VPS vs Tier B AWS Cloud   | Tier A Minimal VPS      | PENDING USER CHOICE|
-| D2 | Clinical Governance   | Advisory Review vs Formal IRB    | Advisory Review for CDS | PENDING USER CHOICE|
-| D3 | Prediction Scope      | Task A MVP Only vs Task B in MVP | Task A MVP Only         | PENDING USER CHOICE|
-| D4 | Geographic Launch     | Tri-Country vs US-Only           | Tri-Country (Synthetic) | PENDING USER CHOICE|
-| D5 | Data Classification   | 100% Synthetic vs Real PHI Pilot | 100% Synthetic Data     | PENDING USER CHOICE|
+| D2 | Clinical Governance   | 4-Pillar Governance vs Formal SaMD| 4-Pillar CDS Framework | PENDING USER CHOICE|
+| D3 | Prediction Scope      | Task A MVP Only vs Task B in MVP | Task A MVP Only (PREVENT| PENDING USER CHOICE|
+|    |                       |                                  | 2026 noted; B excluded) |                    |
+| D4 | Geographic Launch     | Universal Adapters vs US-Only    | Universal (US/IN/UK)    | PENDING USER CHOICE|
+| D5 | Data Classification   | Three-Tier (Cat C Prohibited) vs | Three-Tier (Category C  | PENDING USER CHOICE|
+|    |                       | Real PHI Pilot in Staging        | strictly prohibited)    |                    |
 +----+-----------------------+----------------------------------+-------------------------+--------------------+
 ```

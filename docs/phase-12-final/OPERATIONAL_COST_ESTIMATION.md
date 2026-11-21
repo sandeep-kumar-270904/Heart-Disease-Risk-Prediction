@@ -1,9 +1,9 @@
 # HeartXAI 2.0 — Operational Cost Estimation
 **Document ID:** HX-PR-020  
-**Version:** 1.0.0  
-**Phase:** 12.1 — Final Audit Corrections, Clinical Scope Resolution & Implementation Authorization  
+**Version:** 2.0.0 (Phase 12.2 Revision)  
+**Phase:** 12.2 — Final Governance Resolution & Evidence Reconciliation  
 **Author:** Principal DevOps Architect & SRE Lead  
-**Status:** Financial Blueprint — Pending Stakeholder Profile Selection  
+**Status:** Financial Planning Model — Performance & Capacity Claims Formally Unverified  
 **Date:** November 2026  
 **Pricing Access Date:** November 21, 2026  
 
@@ -11,12 +11,14 @@
 
 ## 1. Executive Summary
 
-A deployable, maintainable, and reliable software system requires transparent infrastructure budgeting. This document establishes an itemized operational cost comparison between:
-- **Tier A (Minimal-Budget VPS):** Proposed for local development, demonstrations, synthetic data, and non-production testing.
+This document establishes an itemized operational cost comparison between:
+- **Tier A (Minimal-Budget VPS):** Proposed for local development, demonstrations, Category B synthetic data testing, and non-production CI workflows.
 - **Tier B (Managed Cloud Infrastructure - AWS):** Proposed for future multi-region, enterprise production evaluation.
 
-### Mandatory Compliance & Governance Caveat
-> **CRITICAL POSTURE STATEMENT:** Selecting or provisioning either hosting tier **DOES NOT authorize the collection, storage, or processing of real patient health information (PHI)**. All initial implementation, testing, demonstration, and staging milestones are restricted strictly to **100% synthetic data**. Migration to real patient processing requires separate clinical advisory sign-off, regulatory review, and institutional ethics determination.
+### Mandatory Compliance & Governance Caveats
+> **CRITICAL POSTURE STATEMENT 1 (Data Prohibition):** Selecting or provisioning either hosting tier **DOES NOT authorize the collection, storage, or processing of Category C real patient information**. All initial implementation, testing, demonstration, and staging milestones are restricted strictly to **Category B synthetic application data**.
+
+> **CRITICAL POSTURE STATEMENT 2 (Capacity Unverified):** Any throughput or capacity figures (such as "handling 500+ daily assessments") are **unverified planning estimates only**. There is currently zero load-test evidence. Definitive capacity claims cannot be made until empirical stress testing is executed in Milestone 19 across the eight performance variables defined in Section 3.3.
 
 ---
 
@@ -69,14 +71,13 @@ A deployable, maintainable, and reliable software system requires transparent in
 
 ---
 
-## 3. Detailed Cost Breakdown & Assumptions
+## 3. Detailed Cost Breakdown & Performance Variables
 
 ### 3.1 Tier A: Minimal-Budget VPS (Recommended for Milestones 01–20)
-- **Primary Use Case:** Prototyping, functional testing, local integration, CI test runners, synthetic data demonstrations.
+- **Primary Use Case:** Prototyping, functional testing, local integration, CI test runners, Category B synthetic data demonstrations.
 - **Provider Options:**
-  - *Option 1 (Hetzner Cloud CPX31):* 4 vCPU (AMD EPYC), 8 GB RAM, 160 GB NVMe SSD, located in Ashburn, VA (US) or Falkenstein (DE). Billed at €13.90/month ($\approx \$15.00$).
+  - *Option 1 (Hetzner Cloud CPX31):* 4 vCPU (AMD EPYC), 8 GB RAM, 160 GB NVMe SSD. Billed at €13.90/month ($\approx \$15.00$).
   - *Option 2 (DigitalOcean Droplet):* 4 vCPU, 8 GB RAM, 160 GB SSD. Billed at $\$48.00/\text{month}$.
-- **Performance Envelope:** Capable of sustaining 50–100 concurrent requests/second and serving up to 500 daily synthetic assessments with sub-50ms latency.
 - **Backup Strategy:** Automated cron runs `backup_encrypted.sh` nightly, encrypts database dump with OpenSSL AES-256-GCM, and streams the ciphertext to Cloudflare R2 (zero egress fees, $\$0.015/\text{GB-month}$).
 - **Limitations:** Single point of failure (no automatic hardware failover); requires manual VPS reboot or rebuild during hypervisor failure.
 
@@ -92,18 +93,20 @@ A deployable, maintainable, and reliable software system requires transparent in
   - Third-party SaaS APM tools (Datadog: $\approx \$15/\text{host-month}$; Sentry: $\approx \$26/\text{month}$).
   - Penetration testing professional services ($\approx \$5,000\text{--}\$15,000$ one-time).
 
+### 3.3 The Eight Performance Variables Requiring Empirical Testing
+Before making definitive capacity or throughput claims, the following eight performance variables must be measured during Milestone 19 performance testing:
+1. **Concurrent Active Users:** Maximum concurrent HTTP connections before request queueing occurs.
+2. **API Request Throughput:** Sustained requests per second (RPS) across CPU-bound and I/O-bound endpoints.
+3. **Database Workload:** PostgreSQL connection pool saturation, query latency under connection contention, and disk I/O.
+4. **ML Inference Latency:** Wall-clock time ($p50$, $p95$, $p99$) for in-process XGBoost prediction execution.
+5. **TreeSHAP Overhead:** Memory allocation spikes and CPU time during local TreeSHAP tree traversal.
+6. **Counterfactual Optimization Search:** Execution duration of DiCE-ML or constrained gradient search.
+7. **Report Generation Spikes:** CPU and memory utilization during WeasyPrint / headless PDF compilation.
+8. **Host Resource Headroom:** Idle vs. peak RAM and CPU utilization of Docker containers on a 4 vCPU / 8 GB RAM instance.
+
 ---
 
-## 4. Cost Escalation & Migration Triggers
-
-Migration from Tier A (VPS) to Tier B (AWS Managed Cloud) should be triggered **only when measurable operational criteria are met**:
-1. **Traffic Threshold:** Assessment volume consistently exceeds 1,000 assessments/day or peak CPU utilization on VPS exceeds 75% for 3 consecutive days.
-2. **High Availability Requirement:** Stakeholders mandate a formal Service Level Agreement (SLA) with $<0.1\%$ downtime (requiring Multi-AZ automated failover).
-3. **Data Classification Transition:** Stakeholders complete clinical ethics determination and approve real patient PHI onboarding, requiring enterprise Business Associate Agreements (BAAs) and managed KMS envelope encryption.
-
----
-
-## 5. Technical Recommendation
+## 4. Technical Recommendation
 
 **Adopt Tier A (Minimal-Budget VPS) for Milestones 01 through 20.**  
-Budgeting $\approx \$25\text{--}\$55/\text{month}$ fully supports all development, synthetic data testing, end-to-end user journeys, and demonstration needs without incurring premature cloud infrastructure overhead.
+Budgeting $\approx \$21\text{--}\$55/\text{month}$ fully supports all development, Category B synthetic data testing, end-to-end user journeys, and demonstration needs without incurring premature cloud infrastructure overhead.

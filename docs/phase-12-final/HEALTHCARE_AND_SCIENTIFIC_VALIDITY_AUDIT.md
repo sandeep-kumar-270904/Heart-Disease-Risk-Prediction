@@ -1,24 +1,22 @@
 # HeartXAI 2.0 — Healthcare & Scientific Validity Audit
 **Document ID:** HX-PR-004  
-**Version:** 2.0.0 (Phase 12.1 Revision)  
-**Phase:** 12.1 — Final Audit Corrections, Clinical Scope Resolution & Implementation Authorization  
-**Author:** Healthcare AI Research Reviewer & Clinical Safety Consultant  
-**Status:** Scientifically Reconciled — Task B Removed from MVP Scope  
+**Version:** 2.2.0 (Phase 12.2 Revision)  
+**Phase:** 12.2 — Final Governance Resolution & Evidence Reconciliation  
+**Author:** Healthcare AI Research Reviewer & Clinical Safety Reviewer  
+**Status:** Scientifically Reconciled — 2026 ACC/AHA PREVENT Guidelines & Data Categories Formalized  
 **Date:** November 2026  
 
 ---
 
 ## 1. Executive Summary
 
-Healthcare applications integrating machine learning require uncompromising epistemological clarity. Conflating retrospective statistical classification on a small, symptomatic referral cohort with prospective clinical risk prediction or diagnostic decision-making creates severe patient safety hazards and regulatory liability.
+Healthcare software integrating machine learning requires strict scientific and epistemological validity. Conflating retrospective statistical classification on a small, symptomatic referral cohort with prospective clinical risk prediction or diagnostic decision-making creates severe clinical hazards and regulatory non-compliance.
 
-This audit establishes the definitive scientific boundaries for HeartXAI 2.0, provides a verified analysis of the UCI Cleveland dataset, evaluates the predictive targets, presents an evidence-based reassessment of prospective cardiovascular risk equations (ACC/AHA PCE vs. AHA PREVENT), defines clinical governance boundaries, and enforces an unambiguous ledger of prohibited clinical claims.
+This audit establishes the definitive scientific boundaries for HeartXAI 2.0, provides a verified analysis of the UCI Cleveland dataset, formally evaluates the **2026 ACC/AHA Multisociety Dyslipidemia Guideline** and the **AHA PREVENT equations**, codifies the **Three-Category Data Classification Policy**, establishes a **Four-Pillar Clinical Governance Framework** incorporating the **FDA January 2026 Clinical Decision Support (CDS) Software Guidance**, and enforces an unambiguous ledger of prohibited clinical claims.
 
 ---
 
 ## 2. Epistemological Ground Truth: Task A (MVP) vs. Task B (Future Research)
-
-The previous Phase 12 draft discussed both heart disease classification and prospective risk estimation. The Phase 12.1 audit establishes a strict, non-negotiable structural separation:
 
 ```
 +---------------------------------------------------------------------------------------------------------+
@@ -46,7 +44,7 @@ The previous Phase 12 draft discussed both heart disease classification and pros
 
 ---
 
-## 3. Dataset Verification: The UCI Cleveland Catheterization Cohort
+## 3. Dataset Verification: The UCI Cleveland Catheterization Cohort (Category A Data)
 
 ### 3.1 Primary Literature and Provenance
 - **Primary Citation:** Detrano R, Janosi A, Steinbrunn W, Pfisterer M, Schmid JJ, Sandhu S, Guppy KH, Lee S, Froelicher V. *International application of a new probability algorithm for the diagnosis of coronary artery disease.* American Journal of Cardiology. 1989;64(5):304–310. doi:10.1016/0002-9149(89)90524-9.
@@ -81,11 +79,10 @@ The model trained on this dataset must be classified strictly as an **Experiment
 
 ---
 
-## 4. Reassessment of Prospective Risk: PCE vs. PREVENT (Task B Research)
+## 4. Reassessment: 2026 ACC/AHA Dyslipidemia Guideline & AHA PREVENT
 
-The Phase 12 dossier proposed implementing the ACC/AHA 2013 Pooled Cohort Equations (PCE) in Milestone 14. This proposal has been **reassessed and rejected for the MVP**. Task B is deferred to the future research roadmap.
-
-To guide future Task B research, the two primary prospective methodologies were evaluated against official clinical sources:
+### 4.1 The 2026 Clinical Practice Guideline Transition
+In 2026, the American College of Cardiology (ACC), American Heart Association (AHA), and collaborating multisociety organizations published the **2026 Guideline on the Management of Dyslipidemia and Cardiovascular Risk**. This guideline formally evaluated and adopted the **AHA PREVENT equations** (Khan et al., *Circulation* 2024;149:430–449) as the recommended cardiovascular disease risk estimation tool for primary prevention clinical decision-making, officially superseding the 2013 Pooled Cohort Equations (PCE) for those applicable decisions.
 
 ```
 +-------------------------------------------------------------------------------------------------------------------------------+
@@ -93,8 +90,9 @@ To guide future Task B research, the two primary prospective methodologies were 
 +---------------------+---------------------------------------------------+-----------------------------------------------------+
 | Dimension           | ACC/AHA Pooled Cohort Equations (PCE)             | AHA PREVENT Equations                               |
 +---------------------+---------------------------------------------------+-----------------------------------------------------+
-| **Primary Source**  | Goff DC Jr, et al. *2013 ACC/AHA Risk Guideline.* | Khan SS, et al. *Development & Validation of PREVENT|
-|                     | Circulation. 2014;129(suppl 2):S49–S73.           | Equations.* Circulation. 2024;149:430–449.          |
+| **Primary Sources** | Goff DC Jr, et al. *2013 ACC/AHA Risk Guideline.* | 1. Khan SS, et al. *Development & Validation of     |
+|                     | Circulation. 2014;129(suppl 2):S49–S73.           |    PREVENT.* Circulation. 2024;149:430–449.         |
+|                     |                                                   | 2. 2026 ACC/AHA Multisociety Dyslipidemia Guideline.|
 +---------------------+---------------------------------------------------+-----------------------------------------------------+
 | **Derivation Base** | 4 historical US cohorts (ARIC, CHS, CARDIA, FHS). | 25+ contemporary datasets (EHR, Optum, health sys); |
 |                     | Total $N \approx 24,000$ participants.            | Total $N > 6.6\text{ million}$ diverse US adults.   |
@@ -104,8 +102,8 @@ To guide future Task B research, the two primary prospective methodologies were 
 +---------------------+---------------------------------------------------+-----------------------------------------------------+
 | **Outcomes & Horizon**| 10-year risk of first "hard" ASCVD (nonfatal MI, | 10-year and 30-year risk of:                        |
 |                     | coronary heart disease death, fatal/nonfatal CVA).| 1. Total CVD (ASCVD + Heart Failure)                |
-|                     |                                                   | 2. ASCVD (CHD death, nonfatal MI, stroke)           |
-|                     |                                                   | 3. Heart Failure (HF)                               |
+|                     |                                                   | 2. ASCVD alone (CHD death, nonfatal MI, stroke)     |
+|                     |                                                   | 3. Heart Failure (HF) alone                         |
 +---------------------+---------------------------------------------------+-----------------------------------------------------+
 | **Predictor Matrix**| Age, sex, race (White vs African American),       | Base: Age, sex, total chol, HDL, systolic BP,       |
 |                     | total cholesterol, HDL-C, treated/untreated SBP,  | antihypertensive meds, statin use, diabetes,        |
@@ -115,64 +113,109 @@ To guide future Task B research, the two primary prospective methodologies were 
 | **Treatment of Race**| Includes explicit race coefficients (White/Black);| **Deliberately removes race coefficients** to avoid |
 |                     | unvalidated for Asian, Hispanic, global cohorts.  | race-based medicine; substitutes eGFR and SDI.      |
 +---------------------+---------------------------------------------------+-----------------------------------------------------+
-| **Known Limitations**| Systematic risk overestimation (20% to 50%+) in   | Calibrated lower than PCE, potentially reclassifying|
-|                     | contemporary cohorts; omits renal function;       | millions below statin thresholds before guidelines  |
-|                     | dichotomizes diabetes without glycemic context.   | update clinical cutoffs; derived primarily from US. |
+| **Known Limitations**| Systematic risk overestimation (20% to 50%+) in   | Calibrated lower than PCE; derived exclusively from |
+|                     | contemporary cohorts; omits renal function;       | US health systems and claims data; uncalibrated for |
+|                     | dichotomizes diabetes without glycemic context.   | non-US populations and international health systems.|
 +---------------------+---------------------------------------------------+-----------------------------------------------------+
-| **Clinical Guideline| Formally codified in 2018 AHA/ACC Cholesterol and | Released by AHA in late 2023 / early 2024; formal   |
-| Status**            | 2019 Prevention Guidelines (current standards).   | multi-society clinical practice guideline updates   |
-|                     |                                                   | incorporating PREVENT are currently in development. |
+| **Guideline Status**| Replaced by PREVENT in 2026 ACC/AHA Multisociety  | Adopted in 2026 ACC/AHA Dyslipidemia Guideline for  |
+|                     | Dyslipidemia Guideline for primary prevention.    | applicable primary prevention risk decisions.       |
 +---------------------+---------------------------------------------------+-----------------------------------------------------+
 ```
 
-### Recommendation for Future Task B Research:
-1. **Exclude from MVP:** Neither PCE nor PREVENT shall be implemented in the initial release. Implementing unvalidated calculators creates clinical confusion.
-2. **Future Research Prerequisites:** Before reconsidering Task B, the team must:
-   - Define the specific target population and clinical setting (primary care vs. specialist).
-   - Review the forthcoming official joint ACC/AHA guideline updates that will establish validated clinical decision thresholds for PREVENT.
-   - Investigate jurisdiction-specific calculators (e.g., QRISK3 in the UK under NICE CG181/NG238; WHO cardiovascular risk charts for India/LMIC).
-   - Obtain formal clinical advisory board review and establish institutional review board (IRB) determinations.
+### 4.2 International Guideline Specificity & Non-Applicability of PREVENT Outside the US
+While PREVENT represents the current clinical standard in the United States under the 2026 ACC/AHA guideline:
+- **United Kingdom:** The National Institute for Health and Care Excellence (NICE) officially mandates **QRISK3** (NICE Clinical Guideline CG181 / NG238) for NHS cardiovascular risk assessment. PREVENT is neither approved nor calibrated for NHS clinical pathways.
+- **Europe:** The European Society of Cardiology (ESC) mandates **SCORE2** and **SCORE2-OP** (stratified across 4 European cardiovascular risk regions).
+- **India / LMIC:** The Cardiological Society of India (CSI) and Indian Council of Medical Research (ICMR) reference the **WHO CVD risk charts (South Asia)** or recalibrated risk scores due to the premature onset and distinct phenotype of CAD in South Asians.
+
+### 4.3 Task B Policy Confirmation
+**Task B remains strictly excluded from the HeartXAI 2.0 MVP.** No prospective risk calculator (PCE, PREVENT, QRISK3, or SCORE2) shall be implemented during Milestones 01–20. Reconsidering Task B post-MVP requires formal clinical advisory review, country-specific guideline evaluation, and institutional ethics determinations.
 
 ---
 
-## 5. Clinical Governance Boundaries: Advisory vs. Ethics Review
+## 5. Authoritative Three-Category Data Classification Policy
 
-To ensure legal, regulatory, and ethical integrity, HeartXAI 2.0 establishes a strict distinction between two separate governance mechanisms:
+```
++-------------------------------------------------------------------------------------------------------------------------------+
+|                                            HEARTXAI 2.0 DATA CLASSIFICATION POLICY                                            |
++-----------------------+-----------------------------------------------+-------------------------------------------------------+
+| Category              | Scope, Definition & Source                    | Permitted System Usage & Mandatory Safeguards         |
++-----------------------+-----------------------------------------------+-------------------------------------------------------+
+| **Category A**        | Retrospective, open-access, de-identified     | - Permitted **only** for offline ML research, training|
+| **Public Research**   | academic clinical datasets.                   |   and calibration (Milestones 09-10).                 |
+| **Datasets**          | *Primary Source:* UCI Cleveland Heart Disease | - Subject to explicit dataset provenance verification.|
+|                       | Catheterization Cohort ($N=303$, 1981-1984).  | - Documented limitations: symptomatic referral bias,  |
+|                       | Open-access research license.                 |   small sample size, zero longitudinal follow-up.     |
++-----------------------+-----------------------------------------------+-------------------------------------------------------+
+| **Category B**        | Artificially generated test fixtures, mock    | - Used for **all** frontend UI demonstrations, test   |
+| **Synthetic**         | patient personas (Sarah, Marcus, Elena), and  |   fixtures, intake form tests, and integration tests. |
+| **Application Data**  | integration testing records.                  | - Generated via `scripts/generate_synthetic_patients`|
+|                       | Derived from parameterized distributions.      | - Contains **zero real human data**; zero PHI/PII.    |
++-----------------------+-----------------------------------------------+-------------------------------------------------------+
+| **Category C**        | Personally Identifiable Information (PII) or  | - **STRICTLY PROHIBITED** during initial development, |
+| **Real Patient**      | Personal Health Information (PHI) collected   |   demonstration, testing, and staging (Milestones 01- |
+| **Information**       | from live human users or clinical systems.    |   20).                                                |
+|                       |                                               | - Requires separate authorization, security review,   |
+|                       |                                               |   privacy assessment, and applicable ethics review    |
+|                       |                                               |   prior to any future collection or processing.       |
++-----------------------+-----------------------------------------------+-------------------------------------------------------+
+```
+
+---
+
+## 6. Four-Pillar Clinical Governance & Regulatory Boundaries
+
+Clinical governance is not an informal advisory checkbox. HeartXAI 2.0 establishes four independent governance pillars:
 
 ```
 +---------------------------------------------------------------------------------------------------------+
-|                                    CLINICAL GOVERNANCE BOUNDARIES                                       |
+|                                  FOUR-PILLAR CLINICAL GOVERNANCE FRAMEWORK                              |
 +------------------------------------+--------------------------------------------------------------------+
-| Physician Advisory Review          | Institutional Ethics / IRB Determination                           |
+| Governance Pillar                  | Mandate, Authority & Operational Boundaries                        |
 +------------------------------------+--------------------------------------------------------------------+
-| - Expert review of medical language| - Formal determination by an Institutional Review Board (IRB) or   |
-|   and educational copy.            |   Research Ethics Committee (REC).                                 |
-| - Review of symptom guidance and   | - Legally required if conducting human subjects research, clinical |
-|   emergency red-flag rules.        |   interventions, or processing identifiable private health data.   |
-| - Review of stated scientific and  | - Determines whether formal protocol review, informed consent, or |
-|   clinical limitations.            |   an official waiver of oversight applies.                         |
-| - Recommendations for future clinical| - Cannot be substituted by an informal advisory relationship.      |
-|   research and evaluation.         | - Must be obtained prior to any real-world patient pilot.          |
+| **1. Physician Advisory Review**   | Independent review by practicing physicians of patient-facing      |
+|                                    | language, clinical limitations, educational context, and safety copy.|
+|                                    | *Boundary:* Does NOT constitute regulatory clearance or ethics pass.|
++------------------------------------+--------------------------------------------------------------------+
+| **2. Clinical Content Review**     | Systematic review and verification of clinical educational content,|
+|                                    | emergency red-flag thresholds (e.g., SBP > 180), and directory listings|
+|                                    | against published national cardiology society guidelines.          |
++------------------------------------+--------------------------------------------------------------------+
+| **3. Institutional Ethics / IRB    | Formal determination by an Institutional Review Board (IRB) or     |
+|    Determination**                 | Research Ethics Committee (REC). Mandatory if conducting research  |
+|                                    | involving human participants or processing Category C real PHI.    |
++------------------------------------+--------------------------------------------------------------------+
+| **4. Regulatory Applicability      | Formal legal and regulatory assessment under medical device rules. |
+|    Assessment**                    | *US Reference:* **FDA January 2026 Clinical Decision Support (CDS)**|
+|                                    | **Software Guidance** and Section 520(o)(1)(E) of the FD&C Act.    |
+|                                    | *Boundary:* Software generating patient-facing predictive outputs is|
+|                                    | scrutinized; HeartXAI makes **no blanket claims of exemption**     |
+|                                    | and **no claims of formal certification or clinical validation**.  |
 +------------------------------------+--------------------------------------------------------------------+
 ```
 
-### 5.1 Non-Diagnostic Product Positioning
-HeartXAI 2.0 is positioned exclusively as an **informational, educational clinical decision support (CDS) exploration tool** under Section 520(o)(1)(E) of the US FDA 21st Century Cures Act. It does not provide medical diagnoses, treatment decisions, or automated prescriptions.
+### 6.1 Regulatory Applicability under FDA January 2026 CDS Guidance
+Under the FDA January 2026 Final Guidance on Clinical Decision Support Software:
+- Non-device CDS status under Section 520(o)(1)(E) requires that the software be intended for healthcare professionals (HCPs) who can independently review the basis for the recommendations.
+- **Patient-directed or consumer-facing software** that analyzes patient-specific medical data to predict risk or output clinical classifications is **not exempt** under Criterion 3/4 and may be regulated as a device (Software as a Medical Device - SaMD).
+- **HeartXAI 2.0 Posture:** HeartXAI 2.0 does NOT claim an automatic statutory exemption from medical device oversight. For MVP, it is developed strictly as an educational technology demonstration operating on synthetic data. Formal regulatory classification (513(g) or pre-market submission) will be required before any clinical or commercial deployment.
 
-### 5.2 Mandatory Medical Disclaimer (Required on All Assessment Views)
-> **MANDATORY CLINICAL NOTICE:** HeartXAI 2.0 is an experimental educational tool designed to demonstrate explainable machine learning concepts using retrospective research data. It **DOES NOT** provide medical diagnoses, clinical prognoses, or treatment recommendations. The assessment reflects statistical patterns observed in historical research datasets and cannot substitute for an evaluation by a licensed healthcare professional. If you are experiencing chest pain, tightness, shortness of breath, radiating arm or jaw pain, or acute discomfort, **IMMEDIATELY CALL EMERGENCY SERVICES (911 in the US, 999 in the UK, 112 in India)** or visit the nearest hospital emergency room.
+### 6.2 Mandatory Medical Disclaimer (Required on All Assessment Views)
+> **MANDATORY CLINICAL NOTICE:** HeartXAI 2.0 is an experimental educational tool designed to demonstrate explainable machine learning concepts using historical research data. It **DOES NOT** provide medical diagnoses, clinical prognoses, or treatment recommendations. The assessment reflects statistical patterns observed in historical research datasets and cannot substitute for an evaluation by a licensed healthcare professional. If you are experiencing chest pain, tightness, shortness of breath, radiating arm or jaw pain, or acute discomfort, **IMMEDIATELY CALL EMERGENCY SERVICES (911 in the US, 999 in the UK, 112 in India)** or visit the nearest hospital emergency room.
 
 ---
 
-## 6. Prohibited & Unsupported Clinical Claims Ledger
+## 7. Prohibited & Unsupported Clinical Claims Ledger
 
 The following claims are strictly **PROHIBITED** across all user interfaces, API responses, PDF exports, and documentation:
 
 1. ❌ *"HeartXAI diagnoses coronary artery disease, heart attacks, or cardiovascular conditions."*
 2. ❌ *"The system calculates your exact 10-year risk of having a heart attack."*
-3. ❌ *"HeartXAI replaces the need for a cardiologist, physician consultation, or angiogram."*
-4. ❌ *"The model detects whether you are currently having a heart attack."*
-5. ❌ *"You can adjust, start, or stop prescribed medications based on these results."*
-6. ❌ *"HeartXAI is an FDA-approved or CE-marked diagnostic medical device."*
-7. ❌ *"SHAP values prove the exact biological cause of your cardiovascular condition."*
-8. ❌ *"Achieving the counterfactual values guarantees you will not develop heart disease."*
+3. ❌ *"HeartXAI is exempt from FDA or medical device regulation."*
+4. ❌ *"HeartXAI replaces the need for a cardiologist, physician consultation, or angiogram."*
+5. ❌ *"The model detects whether you are currently having a heart attack."*
+6. ❌ *"You can adjust, start, or stop prescribed medications based on these results."*
+7. ❌ *"HeartXAI is an FDA-approved or CE-marked diagnostic medical device."*
+8. ❌ *"SHAP values prove the exact biological cause of your cardiovascular condition."*
+9. ❌ *"Achieving the counterfactual values guarantees you will not develop heart disease."*
+10. ❌ *"HeartXAI has been clinically validated in the US, UK, India, or any other country."*

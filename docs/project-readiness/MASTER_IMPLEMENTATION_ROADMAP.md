@@ -1,7 +1,7 @@
 # HeartXAI 2.0 — Master Implementation Roadmap (20 Milestones)
 **Document ID:** HX-PR-011  
-**Version:** 2.0.0 (Phase 12.1 Revision)  
-**Phase:** 12.1 — Final Audit Corrections, Clinical Scope Resolution & Implementation Authorization  
+**Version:** 2.2.0 (Phase 12.2 Revision)  
+**Phase:** 12.2 — Final Governance Resolution & Evidence Reconciliation  
 **Author:** Principal Software Architect, Staff Systems Engineer & Technical Program Manager  
 **Status:** Approved for Implementation Planning — Conditioned on User Governance Sign-Off  
 **Date:** November 2026  
@@ -10,8 +10,8 @@
 
 ## 1. Executive Summary
 
-This roadmap defines the authoritative 20-milestone engineering plan for HeartXAI 2.0. In accordance with the Phase 12.1 audit:
-1. **100% Synthetic Data Mandate:** All development, unit testing, integration testing, demonstration, and staging milestones are restricted strictly to synthetic patient personas. Real patient health information (PHI) is strictly prohibited.
+This roadmap defines the authoritative 20-milestone engineering plan for HeartXAI 2.0. In accordance with the Phase 12.2 audit:
+1. **Category B Synthetic Data Mandate:** All development, unit testing, integration testing, demonstration, and staging milestones are restricted strictly to Category B synthetic patient personas. Category C real patient health information (PHI) is strictly prohibited.
 2. **Task A Only (MVP):** Machine learning is restricted strictly to experimental dataset classification of the heart-disease target on the UCI Cleveland cohort (Task A). Task B (prospective 10-year risk estimation) has been removed from the MVP and deferred to the future research roadmap.
 3. **External Integrations Disabled:** Live hospital EHR and third-party commercial APIs remain disabled/mocked.
 4. **Execution Invariant:** Antigravity must execute **exactly one milestone at a time**, verify automated tests, and pause for explicit user approval before proceeding.
@@ -53,7 +53,7 @@ This roadmap defines the authoritative 20-milestone engineering plan for HeartXA
 
 ### Milestone 01: Repository & Development Environment Foundation
 - **Objective:** Establish reproducible, containerized local development and automated CI environments with zero production infrastructure provisioning and zero patient data processing.
-- **Prerequisites:** Explicit user approval of Phase 12.1 governance decisions.
+- **Prerequisites:** Explicit user approval of Phase 12.2 governance decisions.
 - **Key Tasks:** Configure `.editorconfig`, `.gitignore`, `docker-compose.yml` (PostgreSQL 16, Redis 7.2 alpine), pre-commit hooks (Ruff, ESLint), GitHub Actions CI workflows. Set `SYNTHETIC_DATA_ONLY=true`.
 - **Deliverables:** Working local multi-container stack; automated CI workflow passing on baseline commit.
 - **Files Affected:** `.gitignore`, `.editorconfig`, `docker-compose.yml`, `.github/workflows/ci.yml`, `README.md`.
@@ -65,10 +65,10 @@ This roadmap defines the authoritative 20-milestone engineering plan for HeartXA
 ### Milestone 02: Core Scaffolding, Canonical Types & Synthetic Data Generator
 - **Objective:** Synchronize frontend TypeScript types and backend Pydantic v2 schemas from the single source of truth, and provide a synthetic patient data generator for testing.
 - **Prerequisites:** Milestone 01.
-- **Key Tasks:** Implement `shared/data-dictionary.json`; generate Pydantic v2 schemas; generate TypeScript interfaces; author `scripts/generate_synthetic_patients.py` to produce test cohorts with zero PHI.
+- **Key Tasks:** Implement `shared/data-dictionary.json`; generate Pydantic v2 schemas; generate TypeScript interfaces; author `scripts/generate_synthetic_patients.py` to produce Category B test cohorts with zero PHI.
 - **Deliverables:** Typed schema contracts in `backend/app/schemas/` and `frontend/src/types/`; synthetic data generator.
 - **Files Affected:** `shared/data-dictionary.json`, `backend/app/schemas/*`, `frontend/src/types/*`, `scripts/generate_synthetic_patients.py`.
-- **Tests Required:** `mypy --strict` passes on schemas; `tsc --noEmit` passes on frontend types; synthetic generator outputs 50 valid test records.
+- **Tests Required:** `mypy --strict` passes on schemas; `tsc --noEmit` passes on frontend types; synthetic generator outputs 50 valid Category B test records.
 - **Acceptance Criteria:** 100% parity across schemas; zero type warnings.
 - **Risks:** Schema field name mismatches. Mitigation: Pydantic field aliases and automated contract tests.
 - **Approval Gate:** User review of generated schemas and synthetic test data sample.
@@ -90,8 +90,8 @@ This roadmap defines the authoritative 20-milestone engineering plan for HeartXA
 - **Key Tasks:** Write Alembic migration scripts for `users`, `patients`, `assessments`, `consent_grants`, `audit_logs`, and `directory_providers`. Implement UUIDv7 generation. Create synthetic database seed script.
 - **Deliverables:** `backend/alembic/versions/*`; migration test harness against PostgreSQL 16.
 - **Files Affected:** `backend/alembic/*`, `backend/app/models/*`, `backend/tests/conftest.py`.
-- **Tests Required:** Update `conftest.py` to spin up a PostgreSQL 16 container for integration tests; execute `alembic upgrade head` and `alembic downgrade base`.
-- **Acceptance Criteria:** 15 existing baseline tests pass against real PostgreSQL 16; foreign key cascades verified.
+- **Tests Required:** Update `conftest.py` to spin up a real PostgreSQL 16 container for integration tests; execute `alembic upgrade head` and `alembic downgrade base`.
+- **Acceptance Criteria:** 15 baseline tests re-verified and pass against real PostgreSQL 16; foreign key cascades verified.
 - **Risks:** PostgreSQL version-specific extensions. Mitigation: Standardize on built-in `gen_random_uuid()` and native types.
 - **Approval Gate:** User review of migration execution log against real PostgreSQL 16.
 
@@ -109,7 +109,7 @@ This roadmap defines the authoritative 20-milestone engineering plan for HeartXA
 ### Milestone 06: Authentication, Sessions & RBAC
 - **Objective:** Implement identity management, Argon2id password hashing, in-memory access JWTs (15 min), HttpOnly refresh cookies with Redis token-family rotation, and fail-closed Redis handling.
 - **Prerequisites:** Milestone 05.
-- **Key Tasks:** Endpoints `/api/v1/auth/register`, `/login`, `/refresh`, `/logout`. Role-based dependencies (`require_role(UserRole.PATIENT)`). Redis token family rotation; if Redis is down, fail closed.
+- **Key Tasks:** Endpoints `/api/v1/auth/register`, `/login`, `/refresh`, `/logout`. Role-based dependencies (`require_role(UserRole.PATIENT)`). Redis token family rotation; if Redis is down, fail closed immediately.
 - **Deliverables:** `backend/app/services/auth_service.py`, `backend/app/api/v1/routes/auth.py`.
 - **Files Affected:** `backend/app/services/auth_service.py`, `backend/app/api/v1/routes/auth.py`, `backend/tests/test_auth.py`.
 - **Tests Required:** Test Argon2id verify/hash; test access token expiration; test refresh token rotation and replay detection; test Redis fail-closed behavior.
@@ -139,7 +139,7 @@ This roadmap defines the authoritative 20-milestone engineering plan for HeartXA
 - **Risks:** Floating point rounding errors in unit conversions. Mitigation: Rounding helpers locked to standard clinical tolerances.
 - **Approval Gate:** User review of intake wizard test logs and validation test cases.
 
-### Milestone 09: ML Data Verification & Stratification
+### Milestone 09: ML Data Verification & Stratification (Category A Data)
 - **Objective:** Verify provenance of the UCI Cleveland dataset, audit target semantics (`num`), establish leakage-free preprocessing, and generate a reproducible stratified split.
 - **Prerequisites:** Milestone 02.
 - **Key Tasks:** Script `ml/pipelines/prepare_data.py` to ingest raw Cleveland data, verify 14 features, document 6 missing records (`ca`, `thal`), map binary target ($0$ vs $1$), and perform stratified 5-fold cross-validation split with fixed seed.
@@ -206,9 +206,9 @@ This roadmap defines the authoritative 20-milestone engineering plan for HeartXA
 - **Approval Gate:** User review of sample exported PDF dossier and results screen layout.
 
 ### Milestone 15: Localized Healthcare Directory & Emergency Hotlines
-- **Objective:** Deploy searchable, filterable directory of verified cardiac care providers and hospitals for US, IN, and UK, with emergency hotline quick-dial buttons (external commercial APIs disabled/mocked).
+- **Objective:** Deploy searchable, filterable directory of verified cardiac care providers and hospitals for initial demonstration hubs (US, IN, UK), with emergency hotline quick-dial buttons (external commercial APIs disabled/mocked).
 - **Prerequisites:** Milestone 05, Milestone 07.
-- **Key Tasks:** Directory database tables; seed with 150+ verified academic medical centers and hospitals across US, IN, UK; implement city and specialty filtering; emergency hotline quick-dial buttons (911, 112, 999).
+- **Key Tasks:** Directory database tables; seed with verified academic medical centers across US, IN, UK; implement city and specialty filtering; emergency hotline quick-dial buttons (911, 112, 999).
 - **Deliverables:** Directory service in `backend/app/services/directory_service.py`; search UI in `frontend/src/features/directory/`.
 - **Files Affected:** `backend/app/services/directory_service.py`, `backend/app/api/v1/routes/directory.py`, `frontend/src/features/directory/*`.
 - **Tests Required:** Filter query unit tests; emergency phone link mobile tap tests; verify zero external unverified API calls.
@@ -249,13 +249,13 @@ This roadmap defines the authoritative 20-milestone engineering plan for HeartXA
 - **Risks:** Overly restrictive CSP breaking chart rendering. Mitigation: Strict whitelist of self-hosted assets and inline SVGs.
 - **Approval Gate:** User review of security test reports and vulnerability scan logs.
 
-### Milestone 19: Accessibility (WCAG 2.2 AA Conformance Testing) & Performance Validation
-- **Objective:** Execute comprehensive accessibility audits targeting WCAG 2.2 AA and validate sub-100ms API response times under simulated load.
+### Milestone 19: Accessibility (WCAG 2.2 AA Conformance) & Empirical Performance Testing
+- **Objective:** Execute comprehensive accessibility audits targeting WCAG 2.2 AA and empirically measure the eight performance variables to establish verified capacity baselines.
 - **Prerequisites:** Milestone 18.
-- **Key Tasks:** Run automated axe-core audits across all frontend routes; execute full keyboard-only traversal; test screen reader compatibility (NVDA / VoiceOver); run K6 / Locust load testing on API endpoints.
-- **Deliverables:** WCAG 2.2 AA accessibility scorecard; API performance benchmark report.
+- **Key Tasks:** Run automated axe-core audits across all frontend routes; execute full keyboard-only traversal; test screen reader compatibility (NVDA / VoiceOver); run K6 / Locust load testing measuring concurrent users, RPS, DB workload, inference latency, TreeSHAP overhead, counterfactual search time, PDF generation, and host CPU/RAM headroom.
+- **Deliverables:** WCAG 2.2 AA accessibility scorecard; empirical performance and capacity benchmark report.
 - **Files Affected:** `frontend/tests/a11y.spec.ts`, `infra/scripts/load_test.js`.
-- **Tests Required:** Zero critical or serious axe-core violations; $p95$ API latency $<100\text{ ms}$ under 50 concurrent virtual users.
+- **Tests Required:** Zero critical or serious axe-core violations; empirical measurement of the eight performance variables under load.
 - **Acceptance Criteria:** Accessibility conformance verified; performance criteria met.
 - **Risks:** Chart SVG accessibility gaps. Mitigation: Provide accessible HTML table alternatives for all charts.
 - **Approval Gate:** User review of accessibility and performance reports.
