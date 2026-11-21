@@ -1,76 +1,79 @@
 # HeartXAI 2.0 — Testing Readiness Audit
 **Document ID:** HX-PR-008  
-**Version:** 1.0.0  
-**Phase:** 12 — Final Pre-Implementation Audit, Architecture Consolidation & Master Development Roadmap  
-**Author:** Principal QA Architect & Application Reliability Engineer  
-**Status:** Approved for Implementation Planning  
+**Version:** 2.0.0 (Phase 12.1 Revision)  
+**Phase:** 12.1 — Final Audit Corrections, Clinical Scope Resolution & Implementation Authorization  
+**Author:** Principal QA Architect & Healthcare Reliability Lead  
+**Status:** Risk-Based Quality Strategy Approved — Execution Pending Implementation  
 **Date:** November 2026  
 
 ---
 
 ## 1. Executive Summary
 
-Quality assurance in healthcare applications is not merely about finding software bugs; it is about verifying clinical boundaries, guaranteeing mathematical reproducibility, safeguarding patient privacy, and preventing algorithmic bias.
+In healthcare software, arbitrary percentage distributions (such as 65% unit / 25% integration / 10% E2E) do not guarantee software safety. A system can achieve 90% unit test coverage while remaining vulnerable to cross-patient data leaks, mathematical calculation errors, or database dialect failures.
 
-This audit evaluates the testing strategy established in Phase 11. It verifies that every functional, non-functional, security, and machine learning requirement is paired with a concrete, automated verification harness.
+In accordance with Phase 12.1 requirements, HeartXAI 2.0 decommissions rigid testing pyramid percentages and institutes an **authoritative, Risk-Based Testing Strategy**. Testing effort is distributed based on clinical risk, security exposure, and data integrity.
 
 ---
 
-## 2. The Comprehensive Testing Pyramid
-
-The testing framework establishes a balanced distribution of testing effort, maximizing automated verification speed while minimizing brittle end-to-end overhead:
+## 2. The 10-Tier Risk-Based Testing Strategy
 
 ```
-                  / \
-                 /   \
-                / E2E \       --> 10% (Playwright automated user journeys)
-               /-------\
-              / Integr. \     --> 25% (FastAPI TestClient + Real PostgreSQL 16)
-             /-----------\
-            / Unit Tests  \   --> 65% (Pytest isolated logic + Vitest UI components)
-           /---------------\
++-------------------------------------------------------------------------------------------------------------------------------+
+|                                            RISK-BASED TESTING PRIORITY MATRIX                                                 |
++------+-----------------------------+----------+---------------------------------------+---------------------------------------+
+| Tier | Risk Dimension              | Severity | Verification Scope & Test Harness     | Mandatory Quality Requirement         |
++------+-----------------------------+----------+---------------------------------------+---------------------------------------+
+| **01**| **Patient Data Isolation    | CRITICAL | Automated anti-IDOR test suite        | 100% path coverage. Zero cross-tenant |
+|      | & Anti-IDOR Security**      |          | (Pytest + TestClient).                | access permitted. Return 404 on leak. |
++------+-----------------------------+----------+---------------------------------------+---------------------------------------+
+| **02**| **Healthcare Safety &       | CRITICAL | Physiological biomarker bounds checks | 100% boundary value test coverage.    |
+|      | Emergency Triggers**        |          | and emergency alert trigger tests.    | BP > 180 trips emergency banner.      |
++------+-----------------------------+----------+---------------------------------------+---------------------------------------+
+| **03**| **Authentication & Session  | CRITICAL | Argon2id verification, JWT expiry,    | 100% test coverage. Replayed token    |
+|      | Integrity**                 |          | refresh rotation, Redis fail-closed.  | revokes token family immediately.     |
++------+-----------------------------+----------+---------------------------------------+---------------------------------------+
+| **04**| **Database Integrity & ACID | HIGH     | Alembic migrations, foreign keys,     | 100% executed against real PostgreSQL |
+|      | Transactions**              |          | JSONB constraints, UUIDv7 generation. | 16 container. (SQLite PROHIBITED).    |
++------+-----------------------------+----------+---------------------------------------+---------------------------------------+
+| **05**| **ML Mathematical           | HIGH     | Stratified split checks, XGBoost      | Brier score <= 0.12; ECE <= 0.05.     |
+|      | Calibration & Fairness**    |          | calibration, Brier score, sex parity. | Disaggregated subgroup evaluation.    |
++------+-----------------------------+----------+---------------------------------------+---------------------------------------+
+| **06**| **Prediction-to-Explanation | HIGH     | TreeSHAP efficiency axiom tests:      | Mathematical identity must hold:      |
+|      | Consistency**               |          | sum of phi_i + phi_0 == f(x).         | delta < 1e-5 on all test predictions. |
++------+-----------------------------+----------+---------------------------------------+---------------------------------------+
+| **07**| **Counterfactual Constraint | HIGH     | Optimizer test freezing Age, Sex,     | 100% test pass asserting immutable   |
+|      | Invariance**                |          | history; testing physiological floors.| features are never perturbed.         |
++------+-----------------------------+----------+---------------------------------------+---------------------------------------+
+| **08**| **Accessibility Target     | HIGH     | Automated axe-core scans, keyboard    | Zero critical/serious axe-core flags. |
+|      | Conformance (WCAG 2.2 AA)** |          | traversal, contrast, target sizes.    | Screen reader compatibility verified. |
++------+-----------------------------+----------+---------------------------------------+---------------------------------------+
+| **09**| **Critical Patient User     | MEDIUM   | Playwright automated end-to-end user  | 100% pass on synthetic patient flow   |
+|      | Journeys (Synthetic)**      |          | journeys (register -> intake -> PDF). | in multi-browser test harness.        |
++------+-----------------------------+----------+---------------------------------------+---------------------------------------+
+| **10**| **Disaster Recovery &       | MEDIUM   | Nightly backup decryption drill       | Successful restore of synthetic DB    |
+|      | Backup Restoration**        |          | (`restore_encrypted.sh`).             | using AES-256-GCM authenticated cipher.|
++------+-----------------------------+----------+---------------------------------------+---------------------------------------+
 ```
 
 ---
 
-## 3. Requirement-to-Test Verification Matrix
+## 3. Database Integration Test Infrastructure Mandate
 
-| Requirement Area | Critical Acceptance Criteria | Automated Verification Harness | Target Coverage |
-| :--- | :--- | :--- | :---: |
-| **User Authentication** | Argon2id verification; JWT expiration (15m); token refresh rotation; Redis revocation. | `tests/backend/test_security.py` | **100%** |
-| **Anti-IDOR Isolation** | Non-owners and unauthorized doctors receive 404/403 when requesting foreign assessment IDs. | `tests/backend/test_patient_isolation.py` | **100%** |
-| **Biomarker Input Parsing** | Unit conversions ($\text{mg/dL} \leftrightarrow \text{mmol/L}$) accurate to 4 decimal places; reject physiologically impossible values. | `tests/backend/test_unit_conversions.py` | **100%** |
-| **PostgreSQL Schema Integrity** | Enforce UUIDv7 primary keys, UTC timestamps, JSONB constraints, cascading deletes. | `tests/backend/test_database_models.py` *(15 passing)* | **95%** |
-| **ML Inference & Serving** | In-process C++ inference latency $<20\text{ ms}$; outputs bounded in $[0, 1]$; zero memory leaks. | `tests/ml/test_inference_pipeline.py` | **95%** |
-| **Probability Calibration** | Brier score $\le 0.12$; Expected Calibration Error (ECE) $\le 0.05$ across 10 reliability bins. | `tests/ml/test_model_calibration.py` | **100%** |
-| **TreeSHAP Explainability** | Sum of local SHAP attributions plus expected value equals model margin ($\sum \phi_i + \phi_0 = f(\mathbf{x})$). | `tests/ml/test_shap_axioms.py` | **100%** |
-| **Counterfactual Realism** | Age and Sex remain strictly immutable; BP/cholesterol changes are non-increasing and bounded. | `tests/ml/test_counterfactual_bounds.py` | **100%** |
-| **Emergency Safety Gate** | Entering resting $\text{BP} > 180\text{ mmHg}$ or chest pain with severe shortness triggers emergency red-flag UI banner. | `tests/frontend/emergency_banner.test.tsx` | **100%** |
-| **Accessibility (a11y)** | Zero axe-core critical or serious violations; full keyboard navigation; WCAG 2.1 AA compliance. | `tests/frontend/accessibility.test.ts` | **100%** |
-| **End-to-End User Flow** | Patient completes registration, fills clinical intake, views SHAP chart, generates PDF report. | `tests/e2e/patient_journey.spec.ts` | **100%** |
+### Strict Prohibition of SQLite for Integration Testing
+During the Phase 12.1 audit, inspection of `backend/tests/conftest.py` revealed that the 15 baseline unit tests currently execute against an in-memory SQLite database (`sqlite:///:memory:`). While acceptable for rapid unit verification of pure Pydantic/SQLAlchemy logic:
+- SQLite does **NOT** support native PostgreSQL 16 UUIDv7 generation, native `JSONB` path operators, row-level locks (`SELECT FOR UPDATE`), or PostgreSQL foreign key cascade mechanics.
+- **Mandatory Policy for Milestone 04 Onwards:** All integration, repository, and migration tests must run against a dedicated, isolated **PostgreSQL 16 container** managed via Docker or testcontainers. Testing against SQLite is strictly prohibited for database integration tests.
 
 ---
 
-## 4. Test Infrastructure Mandates
+## 4. Evidentiary Test Reporting Rule
 
-### 4.1 Prohibition of SQLite for Database Integration Tests
-A historical flaw in testing PostgreSQL applications is using SQLite in memory for test speed. SQLite lacks support for PostgreSQL-specific types (`UUID`, `JSONB`, `TIMESTAMPTZ`, row-level locks, and table partitioning).
-- **Mandate:** All integration tests must execute against a dedicated, isolated PostgreSQL 16 container spun up via Docker or testcontainers. SQLite is strictly forbidden for integration testing.
-
-### 4.2 Machine Learning Invariance & Robustness Testing
-To ensure clinical safety, the ML subsystem must pass automated stress-testing before deployment:
-- **Perturbation Testing:** Adding Gaussian noise ($\epsilon \sim \mathcal{N}(0, 0.01)$) to continuous biomarkers must not cause abrupt risk score discontinuities ($|\Delta P| < 0.05$).
-- **Fairness & Disaggregated Evaluation:** Model recall and specificity must not diverge by more than $10\%$ between male and female sub-cohorts.
-
----
-
-## 5. Definition of Test Pass for CI/CD Gates
-
-Before any pull request can be merged into `main` during implementation:
-1. All unit and integration test suites must pass (100% pass rate).
-2. Code coverage must meet or exceed defined thresholds:
-   - Backend Core & Security: $\ge 90\%$
-   - ML Inference & Calibration: $\ge 95\%$
-   - Frontend Presentation: $\ge 80\%$
-3. Zero static analysis errors reported by Ruff, ESLint, TypeScript compiler (`tsc --noEmit`), and Bandit security scanner.
-4. Total test execution time in GitHub Actions CI must remain under 8 minutes.
+In accordance with strict project rules:
+1. No test shall ever be reported as "passing" without real terminal execution evidence.
+2. Every milestone completion report must include:
+   - The exact test execution command (e.g., `pytest tests/test_security.py -v`).
+   - The test runner platform and Python/Node version.
+   - The duration and total passed/failed count.
+   - Any warnings or deprecation notices observed.
+3. Fabricating terminal outputs, mock test logs, or synthetic passing commits is strictly prohibited.
