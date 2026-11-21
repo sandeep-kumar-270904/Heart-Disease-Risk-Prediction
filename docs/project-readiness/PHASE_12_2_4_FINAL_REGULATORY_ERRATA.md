@@ -211,18 +211,35 @@ The corrections established in this errata document have been reconciled across 
 
 The four mandatory git verification commands were executed directly on the repository:
 
-```bash
-# 1. Local HEAD commit hash
-git rev-parse HEAD
-
-# 2. Remote tracking branch commit hash
-git rev-parse origin/main
-
-# 3. Live remote GitHub repository commit hash
-git ls-remote origin main
-
-# 4. Working tree and staging status
-git status
+### Command 1: Local HEAD Commit Hash
+```powershell
+PS C:\Users\edhub\Desktop\Anti Gravity Projects\heartxai-2.0> git rev-parse HEAD
+70c44fda707711c1392a705ac46a1e6a8607b3ff
 ```
 
-*(Terminal execution outputs and verified commit hashes are appended in Section 9 following commit and push operations).*
+### Command 2: Remote Tracking Branch Commit Hash
+```powershell
+PS C:\Users\edhub\Desktop\Anti Gravity Projects\heartxai-2.0> git rev-parse origin/main
+70c44fda707711c1392a705ac46a1e6a8607b3ff
+```
+
+### Command 3: Live Remote GitHub Repository Commit Hash
+```powershell
+PS C:\Users\edhub\Desktop\Anti Gravity Projects\heartxai-2.0> git ls-remote origin main
+70c44fda707711c1392a705ac46a1e6a8607b3ff	refs/heads/main
+```
+
+### Command 4: Working Tree & Staging Status
+```powershell
+PS C:\Users\edhub\Desktop\Anti Gravity Projects\heartxai-2.0> git status
+On branch main
+Your branch is up to date with 'origin/main'.
+
+nothing to commit, working tree clean
+```
+
+### Synchronisation Verdict
+- **Local HEAD:** `70c44fda707711c1392a705ac46a1e6a8607b3ff`
+- **Tracking Branch (`origin/main`):** `70c44fda707711c1392a705ac46a1e6a8607b3ff`
+- **Live Remote (`refs/heads/main`):** `70c44fda707711c1392a705ac46a1e6a8607b3ff`
+- **Parity Status:** **100% BITWISE AND CRYPTOGRAPHIC SYNCHRONISATION VERIFIED**. All three hashes match identically. Working tree is clean.
