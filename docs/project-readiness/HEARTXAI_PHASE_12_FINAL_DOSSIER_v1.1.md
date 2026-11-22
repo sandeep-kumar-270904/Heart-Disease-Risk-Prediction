@@ -308,7 +308,7 @@ heartxai-2.0/
 6. **No Counterfactual Described as Treatment:** Lifestyle scenarios presented as exploratory simulations, never as prescriptions.
 7. **No Cross-Patient Data Access (Anti-IDOR):** 100% path coverage on anti-IDOR tests; unauthorized requests return 404.
 8. **No Blanket Regulatory Exemption Claims:** Evaluated independently across jurisdictions (FDA Jan 2026 CDS guidance, EU MDR 2017/745 with MDCG 2019-11 rev.1 June 2025, UK MHRA, and CDSCO MDSW Guidance 21 July 2026 Table 2 matrix); governed by 4 independent pillars with regulatory status formally undetermined.
-9. **Category B Synthetic Data Invariant:** 100% statistically derived synthetic demonstration data across dev, test, and staging (parameterized from Cleveland distributions, with differential privacy bounded noise and zero Category C real patient data).
+9. **Category B Synthetic Data Invariant:** 100% statistically derived synthetic demonstration data across dev, test, and staging (parameterized from Cleveland distributions with documented privacy limitations; formal differential privacy is NOT implemented, and synthetic fixtures remain strictly separate from all model evaluation datasets; zero Category C real patient data).
 
 ---
 

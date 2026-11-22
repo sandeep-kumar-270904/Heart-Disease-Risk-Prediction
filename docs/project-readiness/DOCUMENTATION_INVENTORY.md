@@ -1,7 +1,7 @@
 # HeartXAI 2.0 — Comprehensive Documentation Inventory
 **Document ID:** HX-DOC-INV-001  
-**Version:** 2.2.4 (Phase 12.2.4 Final Regulatory Errata Baseline)  
-**Phase:** 12.2.4 — Final Regulatory Factual Errata  
+**Version:** 2.2.5 (Phase 12.2.5 Final Dataset & Evidence Baseline)  
+**Phase:** 12.2.5 — Final Dataset, Synthetic Data and Git Evidence Verification  
 **Author:** Technical Program Manager & Principal Software Architect  
 **Status:** Authoritative Reconciled Inventory Baseline  
 **Date:** November 2026  
@@ -25,15 +25,15 @@ This document provides the exhaustive, verified inventory of all technical, scie
 9. Phase 11 Comprehensive Quality Assurance:              21 unique files (docs/quality/)
 -----------------------------------------------------------------------------------------
 SUBTOTAL Unique Pre-Audit Specifications (Phase 01–11):   168 unique markdown files
-10. Phase 12 Master Governance & Audit Blueprints:        28 unique files (docs/phase-12-final/)
+10. Phase 12 Master Governance & Audit Blueprints:        29 unique files (docs/phase-12-final/)
 -----------------------------------------------------------------------------------------
-TOTAL UNIQUE DOCUMENTATION SPECIFICATIONS IN PROJECT:     196 UNIQUE MARKDOWN FILES
+TOTAL UNIQUE DOCUMENTATION SPECIFICATIONS IN PROJECT:     197 UNIQUE MARKDOWN FILES
 
 Mirrored Copies & Supporting Artifacts:
-- docs/project-readiness/ Mirrored Working Copy:          28 duplicate files (mirrors of phase-12-final/)
+- docs/project-readiness/ Mirrored Working Copy:          29 duplicate files (mirrors of phase-12-final/)
 - backend/.pytest_cache/ Internal Tool Cache:             1 cache file   (README.md)
 -----------------------------------------------------------------------------------------
-TOTAL PHYSICAL MARKDOWN PATHS ON DISK:                    225 MARKDOWN FILES
+TOTAL PHYSICAL MARKDOWN PATHS ON DISK:                    227 MARKDOWN FILES
 
 PlantUML Diagram Source Files (.puml):
 - docs/diagrams/ (Phases 01-11 Architecture Diagrams):    21 PlantUML files
@@ -259,22 +259,22 @@ TOTAL PLANTUML DIAGRAM SOURCE FILES:                      45 PLANTUML FILES
 | 21 | docs/quality/TEST_DATA_AND_PRIVACY_STRATEGY.md | TEST DATA MANAGEMENT AND PRIVACY PRESERVATION S... | 1.0.0 | 11 — Comprehensive | Approved Technical Architecture |
 
 
-## Phase 12 / 12.1 / 12.2 / 12.2.1 / 12.2.2 / 12.2.3 / 12.2.4: Master Pre-Implementation Audit & Governance Blueprints (28 Documents)
+## Phase 12 / 12.1 / 12.2 / 12.2.1 / 12.2.2 / 12.2.3 / 12.2.4 / 12.2.5: Master Pre-Implementation Audit & Governance Blueprints (29 Documents)
 
 | No | Relative Path | Document Title | Version | Phase | Status |
 | :---: | :--- | :--- | :---: | :--- | :--- |
 | 01 | docs/phase-12-final/ANTIGRAVITY_EXECUTION_RULES.md | HeartXAI 2.0 — Antigravity Execution Rules | 1.0.0 | 12 — Final Pre-Imp | Approved for Implementation Plan... |
 | 02 | docs/phase-12-final/CONSOLIDATED_PRODUCT_SCOPE.md | HeartXAI 2.0 — Consolidated Product Scope | 2.2.0 (Phase 12.2 Revision) | 12.2 — Final Gover | Approved for Implementation Plan... |
-| 03 | docs/phase-12-final/CONSOLIDATED_PROJECT_RISK_REGISTER.md | HeartXAI 2.0 — Consolidated Project Risk Register | 2.2.4 (Phase 12.2.4 Final Revision) | 12.2.4 — Final Reg | Authoritative Reconciled Risk Re... |
-| 04 | docs/phase-12-final/DOCUMENTATION_INVENTORY.md | HeartXAI 2.0 — Comprehensive Documentation Inve... | 2.2.4 (Phase 12.2.4 Final Regulatory Errata Baseline) | 12.2.4 — Final Reg | Authoritative Reconciled Invento... |
+| 03 | docs/phase-12-final/CONSOLIDATED_PROJECT_RISK_REGISTER.md | HeartXAI 2.0 — Consolidated Project Risk Register | 2.2.5 (Phase 12.2.5 Revision) | 12.2.5 — Final Dat | Authoritative Reconciled Risk Re... |
+| 04 | docs/phase-12-final/DOCUMENTATION_INVENTORY.md | HeartXAI 2.0 — Comprehensive Documentation Inve... | 2.2.5 (Phase 12.2.5 Final Dataset Baseline) | 12.2.5 — Final Dat | Authoritative Reconciled Invento... |
 | 05 | docs/phase-12-final/ENGINEERING_STANDARDS_AND_CONVENTIONS.md | HeartXAI 2.0 — Engineering Standards & Conventions | 1.0.0 | 12 — Final Pre-Imp | Approved for Implementation Plan... |
 | 06 | docs/phase-12-final/FINAL_ARCHITECTURE_CONSISTENCY_AUDIT.md | HeartXAI 2.0 — Final Architecture Consistency A... | 1.0.0 | 12 — Final Pre-Imp | Approved for Implementation Plan... |
 | 07 | docs/phase-12-final/FINAL_PROJECT_READINESS_REPORT.md | HeartXAI 2.0 — Final Project Readiness Report | 2.0.0 (Phase 12.1 Revision) | 12.1 — Final Audit | Audit Complete — Governance Appr... |
 | 08 | docs/phase-12-final/FINAL_REPOSITORY_STRUCTURE.md | HeartXAI 2.0 — Final Repository Structure | 1.0.0 | 12 — Final Pre-Imp | Approved for Implementation Plan... |
 | 09 | docs/phase-12-final/FINAL_TECHNOLOGY_STACK.md | HeartXAI 2.0 — Final Technology Stack | 1.0.0 | 12 — Final Pre-Imp | Approved for Implementation Plan... |
 | 10 | docs/phase-12-final/GLOBAL_ARCHITECTURE_READINESS.md | HeartXAI 2.0 — Global Architecture Readiness | 2.2.4 (Phase 12.2.4 Revision) | 12.2.4 — Final Reg | Approved for Implementation Plan... |
-| 11 | docs/phase-12-final/HEALTHCARE_AND_SCIENTIFIC_VALIDITY_AUDIT.md | HeartXAI 2.0 — Healthcare & Scientific Validity... | 2.2.4 (Phase 12.2.4 Revision) | 12.2.4 — Final Reg | Scientifically Reconciled — 2026... |
-| 12 | docs/phase-12-final/HEARTXAI_PHASE_12_FINAL_DOSSIER_v1.1.md | HeartXAI 2.0 — Phase 12 Final Master Dossier (v... | 1.2.4 (Phase 12.2.4 Errata Revision) | 12.2.4 — Final Reg | Audit Complete — Ready for Miles... |
+| 11 | docs/phase-12-final/HEALTHCARE_AND_SCIENTIFIC_VALIDITY_AUDIT.md | HeartXAI 2.0 — Healthcare & Scientific Validity... | 2.2.5 (Phase 12.2.5 Revision) | 12.2.5 — Final Dat | Scientifically Reconciled — 2026... |
+| 12 | docs/phase-12-final/HEARTXAI_PHASE_12_FINAL_DOSSIER_v1.1.md | HeartXAI 2.0 — Phase 12 Final Master Dossier (v... | 1.2.5 (Phase 12.2.5 Errata Revision) | 12.2.5 — Final Dat | Audit Complete — Ready for Miles... |
 | 13 | docs/phase-12-final/IMPLEMENTATION_DEPENDENCY_GRAPH.md | HeartXAI 2.0 — Implementation Dependency Graph | 1.0.0 | 12 — Final Pre-Imp | Approved for Implementation Plan... |
 | 14 | docs/phase-12-final/MASTER_IMPLEMENTATION_ROADMAP.md | HeartXAI 2.0 — Master Implementation Roadmap (2... | 2.2.0 (Phase 12.2 Revision) | 12.2 — Final Gover | Approved for Implementation Plan... |
 | 15 | docs/phase-12-final/OPERATIONAL_COST_ESTIMATION.md | HeartXAI 2.0 — Operational Cost Estimation | 2.0.0 (Phase 12.2 Revision) | 12.2 — Final Gover | Financial Planning Model — Perfo... |
@@ -283,12 +283,13 @@ TOTAL PLANTUML DIAGRAM SOURCE FILES:                      45 PLANTUML FILES
 | 18 | docs/phase-12-final/PHASE_12_2_2_FINAL_PRECISION_REVIEW.md | HeartXAI 2.0 — Phase 12.2.2 Final Precision Rev... | 1.0.0 (Phase 12.2.2 Precision Review Baseline) | 12.2.2 — Final Prec | Precision Audit Complete — Readi... |
 | 19 | docs/phase-12-final/PHASE_12_2_3_FINAL_DATA_AND_RESEARCH_GOVERNANCE_REVIEW.md | HeartXAI 2.0 — Phase 12.2.3 Final Data Privacy ... | 1.0.0 (Phase 12.2.3 Authoritative Baseline) | 12.2.3 — Final Gover| Authoritative Governance Review ... |
 | 20 | docs/phase-12-final/PHASE_12_2_4_FINAL_REGULATORY_ERRATA.md | HeartXAI 2.0 — Phase 12.2.4 Final Regulatory Er... | 1.0.0 (Phase 12.2.4 Baseline) | 12.2.4 — Final Reg | Authoritative Errata Baseline    |
-| 21 | docs/phase-12-final/PHASE_12_2_FINAL_GOVERNANCE_RECONCILIATION_REPORT.md | HeartXAI 2.0 — Phase 12.2 Final Governance Reco... | 1.0.0 | 12.2 — Final Gover | Audit & Governance Reconciliatio... |
-| 22 | docs/phase-12-final/PHASE_12_FINAL_OPEN_QUESTIONS.md | HeartXAI 2.0 — Phase 12.2 Final Open Governance... | 2.2.4 (Phase 12.2.4 Errata Revision) | 12.2.4 — Final Reg | Awaiting Explicit Stakeholder Se... |
-| 23 | docs/phase-12-final/PHASE_APPROVAL_AND_DEPENDENCY_MATRIX.md | HeartXAI 2.0 — Phase Approval & Dependency Matrix | 2.0.0 (Phase 12.1 Revision) | 12.1 — Final Audit | Reconciled Matrix — Conditioned ... |
-| 24 | docs/phase-12-final/PROJECT_DECISION_REGISTER.md | HeartXAI 2.0 — Project Decision Register | 2.2.2 (Phase 12.2.3 Final Precision Revision) | 12.2.3 — Final Gover| Authoritative Reconciled Registe... |
-| 25 | docs/phase-12-final/PROJECT_DEFINITION_OF_DONE.md | HeartXAI 2.0 — Project Definition of Done (DoD) | 2.2.0 (Phase 12.2 Revision) | 12.2 — Final Gover | Approved for Implementation Plan... |
-| 26 | docs/phase-12-final/SECURITY_AND_PRIVACY_READINESS_AUDIT.md | HeartXAI 2.0 — Security & Privacy Readiness Audit | 2.2.0 (Phase 12.2 Revision) | 12.2 — Final Gover | Architecture Evaluated — Impleme... |
-| 27 | docs/phase-12-final/TESTING_READINESS_AUDIT.md | HeartXAI 2.0 — Testing Readiness Audit | 2.2.0 (Phase 12.2 Revision) | 12.2 — Final Gover | Risk-Based Quality Strategy Appr... |
-| 28 | docs/phase-12-final/TRACEABILITY_AND_EVIDENCE_INDEX.md | HeartXAI 2.0 — Traceability & Evidence Index | 2.2.0 (Phase 12.2 Final Governance Resolution) | 12.2 — Final Gover | Authoritative Handover Traceabil... |
+| 21 | docs/phase-12-final/PHASE_12_2_5_FINAL_DATASET_VERIFICATION_REPORT.md | HeartXAI 2.0 — Phase 12.2.5 Final Dataset Ver... | 1.0.0 (Phase 12.2.5 Baseline) | 12.2.5 — Final Dat | Authoritative Verification Bas...|
+| 22 | docs/phase-12-final/PHASE_12_2_FINAL_GOVERNANCE_RECONCILIATION_REPORT.md | HeartXAI 2.0 — Phase 12.2 Final Governance Reco... | 1.0.0 | 12.2 — Final Gover | Audit & Governance Reconciliatio... |
+| 23 | docs/phase-12-final/PHASE_12_FINAL_OPEN_QUESTIONS.md | HeartXAI 2.0 — Phase 12.2 Final Open Governance... | 2.2.5 (Phase 12.2.5 Revision) | 12.2.5 — Final Dat | Awaiting Explicit Stakeholder Se... |
+| 24 | docs/phase-12-final/PHASE_APPROVAL_AND_DEPENDENCY_MATRIX.md | HeartXAI 2.0 — Phase Approval & Dependency Matrix | 2.0.0 (Phase 12.1 Revision) | 12.1 — Final Audit | Reconciled Matrix — Conditioned ... |
+| 25 | docs/phase-12-final/PROJECT_DECISION_REGISTER.md | HeartXAI 2.0 — Project Decision Register | 2.2.2 (Phase 12.2.3 Final Precision Revision) | 12.2.3 — Final Gover| Authoritative Reconciled Registe... |
+| 26 | docs/phase-12-final/PROJECT_DEFINITION_OF_DONE.md | HeartXAI 2.0 — Project Definition of Done (DoD) | 2.2.0 (Phase 12.2 Revision) | 12.2 — Final Gover | Approved for Implementation Plan... |
+| 27 | docs/phase-12-final/SECURITY_AND_PRIVACY_READINESS_AUDIT.md | HeartXAI 2.0 — Security & Privacy Readiness Audit | 2.2.0 (Phase 12.2 Revision) | 12.2 — Final Gover | Architecture Evaluated — Impleme... |
+| 28 | docs/phase-12-final/TESTING_READINESS_AUDIT.md | HeartXAI 2.0 — Testing Readiness Audit | 2.2.0 (Phase 12.2 Revision) | 12.2 — Final Gover | Risk-Based Quality Strategy Appr... |
+| 29 | docs/phase-12-final/TRACEABILITY_AND_EVIDENCE_INDEX.md | HeartXAI 2.0 — Traceability & Evidence Index | 2.2.0 (Phase 12.2 Final Governance Resolution) | 12.2 — Final Gover | Authoritative Handover Traceabil... |
 

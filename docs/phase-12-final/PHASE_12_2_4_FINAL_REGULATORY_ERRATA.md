@@ -15,7 +15,7 @@ Phase 12.2.4 represents a targeted regulatory and statistical errata resolution 
 
 1. **India CDSCO Software as a Medical Device (SaMD) Classification & Portal Correction:** Correcting previous assertions regarding automatic Class B or Class C classification, detailing the official Table 2 risk matrix from Document No. `CDSCO/MD/GD/MDSW/01/2026` (published 21 July 2026), correcting submission portals to the National Single Window System (NSWS) and the Online System for Medical Devices, and maintaining HeartXAI's regulatory classification as strictly undetermined.
 2. **European Union Medical Device Guidance Revision Update:** Formally updating references from the initial 2019 publication to **MDCG 2019-11 rev.1 (June 2025 Revision)** (*Guidance on Qualification and Classification of Software in Regulation (EU) 2017/745 and Regulation (EU) 2017/746*), alongside verbatim analysis of EU MDR Annex VIII Rule 11.
-3. **Synthetic Patient Generator Data Provenance & Memorization Risk Audit:** Investigating the true provenance of `scripts/generate_synthetic_patients.py`, establishing that continuous biomarker distributions and conditional categorical parameters are derived from the human-origin UCI Cleveland benchmark, retracting claims of "zero-human-origin synthetic data", and specifying differential privacy bounded noise and truncation safeguards.
+3. **Synthetic Patient Generator Data Provenance & Memorization Risk Audit:** Investigating the true provenance of `scripts/generate_synthetic_patients.py`, establishing that continuous biomarker distributions and conditional categorical parameters are derived from the human-origin UCI Cleveland benchmark, retracting claims of "zero-human-origin synthetic data", clarifying that formal differential privacy is not implemented, and establishing separation between application fixtures and model evaluation datasets.
 4. **Calibration Confidence Intervals & Decision Curve Analysis (DCA) Status:** Reclassifying 95% bootstrap confidence intervals and DCA net-benefit curves as strictly exploratory internal statistical metrics, clarifying that small cohort size ($N=303$), 1,000 bootstrap resamples, and provisional engineering thresholds ($\text{Brier} \le 0.12$, $\text{ECE} \le 0.05$) do not constitute proof of reliable clinical performance.
 5. **Preservation of Core Governance Invariants:** Confirming that all five strategic governance decisions (DEC-001 through DEC-005) remain strictly **`PENDING USER DECISION`** and that implementation authorization remains gated until explicit stakeholder sign-off.
 
@@ -67,7 +67,7 @@ Section 4.3 of the MDSW guidance explicitly stipulates that where standalone sof
 Prior documentation inaccurately referenced legacy portal workflows. The correct statutory submission architecture comprises two dedicated systems:
 1. **National Single Window System (NSWS) (`https://www.nsws.gov.in`):**  
    Mandatory unified portal for test-licence applications (e.g., Form MD-12 application for Form MD-13 test licence to manufacture or import for testing, clinical investigation, or development).
-2. **Online System for Medical Devices (`https://cdscomdonline.gov.in` / SUGAM):**  
+2. **Online System for Medical Devices (`https://cdscomdonline.gov.in`):**  
    Dedicated portal for all other regulatory filings, including medical device manufacturing licences (Form MD-7/MD-8), import licences (Form MD-14/MD-15), registration certificates, and post-market vigilance reporting.
 
 ### 2.5 Formally Undetermined Classification Status
@@ -121,11 +121,11 @@ Because the source Cleveland benchmark contains only 303 human patient records, 
 2. **Membership Inference Attacks:** A motivated adversary with auxiliary knowledge could query synthetic records to infer whether an individual was part of the original Cleveland clinical study.
 3. **Data Linkage:** Correlated feature tuples could theoretically be linked to external public clinical registries.
 
-### 4.4 Mandated Milestone 02 Technical Mitigations
-To eliminate these residual privacy risks during synthetic data generation in Milestone 02:
-- **Differential Privacy Bounds:** The generator must implement $(\epsilon, \delta)$-differential privacy bounds or Gaussian noise perturbation on continuous covariance parameters.
-- **Parametric Truncation:** Synthetic records must be generated from truncated parametric distributions rather than non-parametric empirical bootstrap resampling, preventing exact row replication.
-- **Deduplication Check:** An automated automated unit test must verify that no synthetic patient record matches any row in the Category A Cleveland dataset across all 13 features simultaneously ($L_1 \text{ distance} > 0$).
+### 4.4 Technical Safeguards & Absence of Differential Privacy Guarantee
+Because `scripts/generate_synthetic_patients.py` has not yet been implemented (scheduled for Milestone 02), the following architectural baselines are established:
+- **Absence of Formal Differential Privacy:** Formal differential privacy is **NOT implemented**, and HeartXAI makes **no claims of a differential privacy guarantee** ($\epsilon$-DP).
+- **Application Fixture Separation:** Category B synthetic patient records are strictly intended as application test fixtures (UI forms, API integration tests, and demonstration profiles) and **must remain completely separate from all ML model training, validation, and evaluation datasets**.
+- **Documented Limitations:** Statistically derived synthetic data carries documented limitations regarding memorization and outlier replication; exploratory duplication checks ($L_1 \text{ distance} > 0$) remain engineering safeguards rather than mathematical privacy guarantees.
 
 ---
 
@@ -133,7 +133,7 @@ To eliminate these residual privacy risks during synthetic data generation in Mi
 
 ### 5.1 Exploratory Status of Calibration Metrics
 In predictive machine learning, reporting point estimates of calibration metrics without explicit characterization of statistical power and variance is clinically misleading. In HeartXAI 2.0:
-- **Small Cohort Limitation ($N=303$):** With only 303 total samples and 138 positive events (prevalence $\approx 45.5\%$), the effective sample size for evaluating probability calibration across deciles is severely constrained (approximately 14 positive events per decile).
+- **Small Cohort Limitation ($N=303$):** With 303 total samples and 139 positive events (prevalence $\approx 45.87\%$), the effective sample size for evaluating probability calibration across deciles is severely constrained (approximately 14 positive events per decile).
 - **Internal Resampling vs. External Generalizability:** 95% bootstrap confidence intervals computed via 1,000 resamples quantify *internal resampling stability* under the Cleveland distribution. They **do not** prove transportability, domain adaptation, or clinical validity across external hospitals or contemporary populations.
 - **Engineering Targets as Heuristics:** The target calibration metrics ($\text{Brier} \le 0.12$, $\text{ECE} \le 0.05$) are **provisional engineering heuristics** established to ensure that calibration post-processing (Platt scaling or isotonic regression) improves upon raw uncalibrated baseline probabilities ($\text{Brier} \approx 0.248$). Achieving these targets on internal cross-validation folds does not constitute clinical validation.
 
@@ -187,7 +187,7 @@ All five strategic governance decisions remain strictly **`PENDING USER DECISION
 
 The corrections established in this errata document have been reconciled across all master blueprint documents:
 1. `HEALTHCARE_AND_SCIENTIFIC_VALIDITY_AUDIT.md`:
-   - Updated Section 3.3 Item 6 with generator provenance, retraction of zero-human-origin claim, and differential privacy checks.
+   - Updated Section 3.3 Item 6 with generator provenance, retraction of zero-human-origin claim, and statement that formal differential privacy is not implemented.
    - Updated Section 3.5 designating calibration CIs and DCA as exploratory internal metrics.
    - Updated Section 5.1 data classification table.
    - Updated Section 6.1: EU MDR citing MDCG 2019-11 rev.1 (June 2025 Revision); CDSCO SaMD citing Document No. `CDSCO/MD/GD/MDSW/01/2026` (21 July 2026), Table 2 matrix, NSWS for test-licences, and Online System for Medical Devices for other licences.
@@ -195,10 +195,10 @@ The corrections established in this errata document have been reconciled across 
    - Updated Section 1 Category B definition to statistically derived synthetic data.
    - Updated Section 5 Item 5 citing MDCG 2019-11 rev.1 (June 2025) and CDSCO MDSW (21 July 2026) with NSWS and Online System portals.
 3. `CONSOLIDATED_PROJECT_RISK_REGISTER.md`:
-   - Risk R11: Reclassified synthetic data provenance and residual memorization risk.
+   - Risk R11: Reclassified synthetic data provenance, documented privacy limitations, and absence of formal DP guarantee.
    - Risk R13: Reclassified regulatory classification across EU MDR MDCG 2019-11 rev.1 and CDSCO MDSW 2026 Table 2 matrix.
 4. `PHASE_12_FINAL_OPEN_QUESTIONS.md`:
-   - Reconciled DEC-005 to specify statistically derived synthetic data and differential privacy bounds.
+   - Reconciled DEC-005 to specify statistically derived synthetic data with documented limitations and absence of formal DP guarantee.
 5. `HEARTXAI_PHASE_12_FINAL_DOSSIER_v1.1.md`:
    - Section 6.3: Updated EU MDR (MDCG 2019-11 rev.1 June 2025) and CDSCO MDSW Table 2 matrix with NSWS / Online System portals.
    - Section 10: Updated Tier 5 testing to note exploratory status of bootstrap CIs and DCA.
