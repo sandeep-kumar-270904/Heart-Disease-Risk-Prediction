@@ -35,20 +35,23 @@ This document articulates the **five strategic governance decisions** that requi
 ---
 
 ### Question 2 (DEC-002): Clinical Governance Implementation Scope (Four Distinct Tracks)
-*Governance Principle:* Physician advisory review, clinical content review, institutional ethics / IRB determination, and regulatory assessment are four distinct, concurrent governance tracks. Human-participant activities exist on a spectrum (from internal formative usability evaluations with mock synthetic fixtures to formal clinical user studies with clinicians or patients); they do not all require identical review pathways. However, before initiating any human-participant usability or research activities, a **documented determination from the applicable institutional ethics committee (IRB/REC/IEC) or regulatory authority** is strictly required. Furthermore, regulatory applicability remains undetermined pending formal classification, and real patient data (Category C) remains strictly prohibited across the MVP.
+*Governance Principle:* Physician advisory review, clinical content review, institutional ethics / IRB determination, and regulatory assessment are four distinct, concurrent governance tracks across the software lifecycle. Explicit distinctions govern each activity tier:
+1. **Ordinary Synthetic-Data Software Development:** Developing prototype software using 100% Category B synthetic fixtures does NOT automatically require IRB/REC approval merely because the software is healthcare-related, provided it complies with applicable institutional policies, software safety standards, and legal requirements. An IRB protocol or FDA Q-Submission is NOT a universal prerequisite for ordinary synthetic-data prototype development.
+2. **Human Participant Research & Usability Studies:** Any activities involving live human participants (e.g., clinician usability studies, cognitive walkthroughs, patient interaction evaluations) require an appropriate **documented institutional ethics determination** from the applicable Institutional Review Board (IRB), Research Ethics Committee (REC), or institutional authority. The project team shall not assume every usability activity is automatically regulated human-subject research, nor assume every activity is exempt without documented institutional determination.
+3. **Clinical Evaluation & Deployment:** Formal clinical evaluation, diagnostic validation, and prospective deployment require separate clinical governance, patient privacy safeguards, safety risk management, and formal regulatory clearance appropriate to the intended use and target jurisdiction.
 
 - **Option A (Recommended): Multi-Track Phased Governance for MVP**
-  - *Structure:* Maintain all four governance tracks as distinct workflows:
+  - *Structure:* Maintain all four governance tracks as distinct, concurrent workflows:
     1. *Physician Advisory Review:* Active during MVP to audit clinical features, boundary conditions, and emergency triggers.
     2. *Clinical Content Review:* Active during MVP to verify health literacy, educational copy, and patient communication.
-    3. *Institutional Ethics / Determination Gate:* Documented determination obtained from applicable institutional ethics authority (IRB/REC/IEC) before initiating any human-participant usability or research activities, applying the relevant review, consent, privacy, and data protection rules based on jurisdiction and activity.
-    4. *Regulatory Applicability Assessment:* Systematic review under FDA guidance (including Jan 2026 CDS guidance), EU MDR Rule 11 & MDCG guidance, UK MHRA, and CDSCO MDR 2017 & MDSW Guidance (July 2026); regulatory status remains formally undetermined during MVP development.
-  - *Intended Purpose:* Ensures rigorous clinical safety and content oversight during development while establishing formal ethics determinations and regulatory mappings in parallel without making unverified exemption claims.
+    3. *Institutional Ethics / Determination Gate:* Documented determination obtained from applicable institutional ethics authority (IRB/REC) prior to initiating any human-participant usability or research activities, calibrated to the activity tier.
+    4. *Regulatory Applicability Assessment:* Systematic review under FDA guidance (including Jan 2026 CDS guidance), EU MDR Rule 11 & MDCG 2019-11 rev.1 (June 2025), UK MHRA, and CDSCO MDR 2017 & MDSW Guidance (21 July 2026 Table 2 matrix); regulatory status remains formally undetermined during MVP development.
+  - *Intended Purpose:* Ensures clinical safety and content oversight during development while establishing formal ethics determinations and regulatory mappings in parallel without making unverified exemption claims.
   - *Pros:* High clinical rigor; zero premature claims of device exemption or certification; appropriate governance calibrated by activity.
   - *Cons:* Requires coordinating four distinct oversight workflows.
 - **Option B: Upfront Institutional Sponsorship Gate (Pre-Development IRB & Pre-Submission)**
   - *Structure:* Require formal institutional sponsorship, institutional ethics / IRB approval, and an official FDA pre-submission (Q-Submission) to be fully approved before any software engineering begins.
-  - *Lifecycle Distinction:* Note that developing early prototype software on synthetic data does not universally or legally require an FDA Pre-Submission or IRB approval under healthcare regulations. A formal IRB protocol applies specifically to human-subject research or usability testing with live subjects; an FDA Q-Submission or regulatory clearance applies to formal clinical evaluation, diagnostic trials, and clinical or commercial deployment.
+  - *Scope Distinction:* Conflates prototype software development with formal human-subject trials; introduces multi-month delays for early synthetic-data scaffolding.
   - *Pros:* Complete institutional and regulatory alignment prior to writing code.
   - *Cons:* 6 to 12-month institutional lead time; high upfront financial cost; introduces premature compliance gates for an early-stage synthetic-data prototype.
 - **Recommendation:** **Option A for MVP software release.**
@@ -91,11 +94,16 @@ This document articulates the **five strategic governance decisions** that requi
     - **Category C (Real Patient Information):** Real PHI/PII. **Strictly prohibited** across all MVP milestones (01–20).
   - *Pros:* Prohibiting Category C real patient data in the application avoids ingesting live clinical patient records into the web platform, eliminating clinical HIPAA/GDPR patient data breach notification obligations for runtime application operations. Establishes explicit research governance for Category A before training.
   - *Cons:* Category A carries residual historical human-origin research-data risks that must be assessed before training; standard software and infrastructure cybersecurity risks remain active across the platform and require continuous DevSecOps controls.
-- **Option B: Authorize Real Patient Pilot Data in Staging (Permit Category C)**
-  - *Policy:* Allow beta testing with real patient health data during Milestone 20 staging acceptance.
-  - *Pros:* Tests system with live clinical records.
-  - *Cons:* Severe regulatory, legal, and privacy exposure. Applicable ethics, privacy, contractual, and regulatory requirements depend on the jurisdiction and institutional context (e.g., HIPAA BAAs for US covered entities, GDPR Article 28 DPAs in the EU/UK, DPDP compliance in India, and local institutional ethics review). Attempting to ingest Category C real patient data during MVP would introduce complex cross-jurisdictional compliance burdens before core functionality is verified.
-- **Recommendation:** **Option A.**
+- **Option B: Real Patient Data Pilot (Outside Current MVP Scope — Requires Approved Scope Change)**
+  - *Status & Scope Boundary:* **Strictly outside the current MVP scope.** Option B represents a theoretical future path and **cannot be activated** while the project's Category C prohibition remains in force.
+  - *Prerequisites for Future Activation:* Selecting Option B cannot occur casually and would require:
+    1. A formally approved scope change by project leadership.
+    2. Separate privacy, security, clinical governance, ethics, and jurisdiction-specific regulatory assessments.
+    3. Formal institutional ethics / IRB protocol review and approval for human-subject data collection.
+    4. Execution of mandatory statutory data protection agreements (e.g., HIPAA BAAs for US covered entities, GDPR Article 28 DPAs in the EU/UK, DPDP compliance frameworks in India).
+    5. Comprehensive third-party security audits for production PHI/PII handling.
+  - *Strict Legal Invariant:* No implementation involving real patient information is authorized by this documentation correction. Category C real patient health information remains **strictly prohibited** across all MVP milestones (01–20).
+- **Recommendation:** **Option A (Category C Strictly Prohibited in MVP).**
 
 ---
 

@@ -225,7 +225,7 @@ The following five strategic decisions remain strictly **`PENDING USER DECISION`
    - *Options:* Option A (Universal Country Adapter Pattern Extensibility Goal with US/IN/UK synthetic demonstration profiles), Option B (US-Only Baseline).  
    - *Status:* **PENDING USER DECISION** (Architectural recommendation: Option A).
 5. **DEC-005 (Data Classification & Patient Data Policy):**  
-   - *Options:* Option A (Three-Tier Classification: Category A research data reviewed in M09; Category B synthetic test data with documented privacy limitations and no DP claim; Category C real patient data strictly prohibited), Option B (Real PHI Pilot).  
+   - *Options:* Option A (Three-Tier Classification: Category A research data reviewed in M09; Category B synthetic test data with documented privacy limitations and no DP claim; Category C real patient data strictly prohibited across MVP), Option B (Real PHI Pilot — Outside current MVP scope; requires formally approved scope change and separate regulatory/ethics assessments).  
    - *Status:* **PENDING USER DECISION** (Architectural recommendation: Option A).
 
 ### 6.2 Pre-Implementation Invariants

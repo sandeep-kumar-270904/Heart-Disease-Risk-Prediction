@@ -147,7 +147,7 @@ Regulatory frameworks differ fundamentally across borders and cannot be treated 
 #### Four-Pillar Clinical Governance Framework:
 1. **Physician Advisory Review:** Independent practicing clinicians audit clinical logic, contraindications, and threshold plausibility.
 2. **Clinical Content Review:** Qualified medical reviewers audit patient-facing educational language, lifestyle tips, and emergency triggers.
-3. **Institutional Ethics / Determination Gate:** Formal documented determination obtained from the applicable Institutional Review Board (IRB), Research Ethics Committee (REC), or institutional authority before initiating any human-participant usability or research activities, applying appropriate review and consent rules based on jurisdiction and activity.
+3. **Institutional Ethics / Determination Gate:** Formal documented determination obtained from the applicable Institutional Review Board (IRB), Research Ethics Committee (REC), or institutional authority before initiating any human-participant usability or research activities, applying appropriate review and consent rules based on jurisdiction and activity (ordinary synthetic-data software development does not automatically require IRB/REC approval).
 4. **Regulatory Applicability Assessment:** Systematic evaluation under medical device rules (FDA CDS guidance, EU MDR Rule 11 & MDCG, UK MHRA, CDSCO MDR 2017 & MDSW Guidance 2026). Real patient data (Category C) remains strictly prohibited across the MVP.
 
 ### 6.4 Mandatory Clinical Disclaimer
@@ -253,7 +253,7 @@ flowchart TD
 6. **Milestone 06: Authentication, Sessions & RBAC:** Argon2id, JWT, Redis token-family rotation, and fail-closed Redis handling.
 7. **Milestone 07: Frontend Shell, Routing & Auth State:** React Router v6 shell, Zustand auth store, silent token refresh.
 8. **Milestone 08: Clinical Intake Wizard & Input Validation:** 14-biomarker multi-step form, unit conversion ($\text{mg/dL} \leftrightarrow \text{mmol/L}$), emergency alerts.
-9. **Milestone 09: ML Data Governance, Provenance Verification & Stratification:** Ingest Category A Cleveland data; execute documented provenance, license, permitted research use, and privacy risk assessment; verify target semantics ($>50\%$); generate leakage-free 5-fold CV split.
+9. **Milestone 09: ML Data Governance, Provenance Verification & Stratification:** Ingest Category A Cleveland data; execute documented provenance, license, permitted research use, and privacy risk assessment; verify target semantics ($>50\%$, 164 negative vs 139 positive); establish training-fold-only median/mode imputation baseline ($N=303$) and complete-case sensitivity benchmark ($N=297$); generate leakage-free 5-fold CV split.
 10. **Milestone 10: Task A Model Training & Rigorous Calibration:** Train XGBoost 2.0; compute leakage-safe out-of-fold (OOF) predictions; fit calibration transformers strictly on training folds; report 95% bootstrap CIs for Brier ($\le 0.12$), ECE ($\le 0.05$), and slope/intercept; external validation required before clinical claims; both DCA and bootstrap CIs labeled exploratory.
 11. **Milestone 11: In-Process ML Model Serving Pipeline:** Sub-20ms C++ inference worker in FastAPI; non-diagnostic output schema.
 12. **Milestone 12: TreeSHAP Local Explanation Engine:** Exact local Shapley feature attributions; interactive waterfall chart.
@@ -356,8 +356,8 @@ heartxai-2.0/
 | **DEC-  | **Data Classification &  | A: Three-Tier Class-  | **Option A: Three-    | Prohibits Category C in | Cat A carries      | All           | **PENDING |
 | 005**   | Patient Data Policy**    |    ification (Cat A/B;| Tier Classification   | MVP; separates Cat A    | historical research| Milestones    | USER      |
 |         |                          |    Cat C Prohibited)  | (Cat C Prohibited)**  | human research risk from| risks; Cat B synth | (01–20)       | DECISION**|
-|         |                          | B: Real PHI Pilot     |                       | Cat B synthetic data;   | requires AppSec;   |               |           |
-|         |                          |                       |                       | mandates M09 review.    | cyber risks managed|               |           |
+|         |                          | B: Real PHI Pilot     |                       | Cat B synthetic data;   | Option B outside   |               |           |
+|         |                          |    (Outside MVP Scope)|                       | mandates M09 review.    | MVP scope.         |               |           |
 +---------+--------------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
 ```
 

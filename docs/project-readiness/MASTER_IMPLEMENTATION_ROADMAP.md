@@ -140,14 +140,23 @@ This roadmap defines the authoritative 20-milestone engineering plan for HeartXA
 - **Approval Gate:** User review of intake wizard test logs and validation test cases.
 
 ### Milestone 09: ML Data Verification & Stratification (Category A Data)
-- **Objective:** Verify provenance of the UCI Cleveland dataset, audit target semantics (`num`), establish leakage-free preprocessing, and generate a reproducible stratified split.
+- **Objective:** Verify provenance of the UCI Cleveland dataset, audit target semantics (`num`), establish leakage-free preprocessing baseline, and generate a reproducible stratified split.
 - **Prerequisites:** Milestone 02.
-- **Key Tasks:** Script `ml/pipelines/prepare_data.py` to ingest raw Cleveland data, verify 14 features, document 6 missing records (`ca`, `thal`), map binary target ($0$ vs $1$), and perform stratified 5-fold cross-validation split with fixed seed.
+- **Documented Preprocessing Baseline:**
+  - *Authoritative Dataset Baseline:* Imputed Cohort ($N=303$, 164 negative vs 139 positive, positive prevalence $\pi = 0.458746$, null-model Brier score $= 0.248298$).
+  - *Target Conversion:* `num = 0` $\rightarrow$ Negative ($0$); `num \in \{1, 2, 3, 4\}` $\rightarrow$ Positive ($1$). Retrospective cross-sectional CAD classification; zero prospective risk claims.
+  - *Column-Specific Imputation Rules:*
+    - `ca` (major fluoroscopy vessels; 4 missing values in rows 167, 193, 288, 303): Imputed using cohort median (integer 0.0) fitted strictly on the training partition of each CV fold.
+    - `thal` (thallium defect; 2 missing values in rows 88, 267): Imputed using cohort mode (level 3.0 / Normal) fitted strictly on the training partition of each CV fold.
+  - *Strict Anti-Leakage Invariant:* Imputation transformers and standardizers must be fitted strictly inside the training partition of each cross-validation fold; fitting across full datasets or test folds constitutes data leakage and is prohibited.
+  - *Complete-Case Sensitivity Analysis:* The complete-case cohort ($N=297$, dropping the 6 missing rows: 160 negative, 137 positive; prevalence $\pi = 0.461279$, null Brier $= 0.248501$) is executed as a secondary sensitivity analysis benchmark.
+  - *Raw Data Integrity:* Original raw file (`data/raw/cleveland_heart_disease_raw.csv`) is preserved unmodified with SHA-256 hash.
+- **Key Tasks:** Script `ml/pipelines/prepare_data.py` to ingest raw Cleveland data, execute documented provenance and permitted-use assessment, apply training-fold-only median/mode imputation, map binary target ($0$ vs $1$), and perform stratified 5-fold cross-validation split with fixed seed.
 - **Deliverables:** `ml/pipelines/prepare_data.py`; versioned, hashed train/test splits (`train.parquet`, `test.parquet`).
 - **Files Affected:** `ml/pipelines/prepare_data.py`, `ml/data/processed/*`, `ml/tests/test_data_preparation.py`.
-- **Tests Required:** Assert zero index overlap between train and test splits; assert exact class distributions across folds.
+- **Tests Required:** Assert zero index overlap between train and test splits; assert exact class distributions across folds (164 negative / 139 positive in full cohort; 160 negative / 137 positive in complete-case sensitivity run).
 - **Acceptance Criteria:** Pipeline is 100% deterministic given seed; target distribution verified (164 negative / 139 positive).
-- **Risks:** Data leakage during feature scaling. Mitigation: Fit scalers exclusively on training folds within cross-validation loop.
+- **Risks:** Data leakage during preprocessing. Mitigation: Fit imputers and scalers exclusively on training folds within cross-validation loop.
 - **Approval Gate:** User review of dataset verification report and split audit.
 
 ### Milestone 10: Task A Model Training & Probability Calibration

@@ -177,7 +177,8 @@ All five strategic governance decisions remain strictly **`PENDING USER DECISION
 | DEC-    | Data Classification &    | A: Three-Tier Class-  | **Option A: Three-      | Prohibits Cat C in | All           | **PENDING |
 | 005     | Patient Data Policy      |    ification (Cat A/B;| Tier Classification     | MVP; separates Cat | Milestones    | USER      |
 |         |                          |    Cat C Prohibited)  | (Cat C Prohibited)**    | A research risks   | (01–20)       | DECISION**|
-|         |                          | B: Real PHI Pilot     |                         | from Cat B synth.  |               |           |
+|         |                          | B: Real PHI Pilot     |                         | Option B outside   |               |           |
+|         |                          |    (Outside MVP Scope)|                         | MVP scope.         |               |           |
 +---------+--------------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
 ```
 

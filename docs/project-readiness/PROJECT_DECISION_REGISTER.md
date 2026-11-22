@@ -137,8 +137,8 @@ The table below reconciles all open governance questions into a single authorita
 | **DEC-  | **Data Classification &  | A: Three-Tier Class-  | **Option A: Three-    | Prohibits Category C in | Cat A research data| All           | **PENDING |
 | 005**   | Patient Data Policy**    |    ification (Cat A/B;| Tier Classification   | MVP; distinguishes Cat A| carries historical | Milestones    | USER      |
 |         |                          |    Cat C Prohibited)  | (Cat C Prohibited)**  | human research risk from| privacy risks;     | (01–20)       | DECISION**|
-|         |                          | B: Real PHI Pilot     |                       | Cat B synthetic data;   | Cat B requires App-|               |           |
-|         |                          |                       |                       | mandates M09 review.    | Sec/cyber defenses.|               |           |
+|         |                          | B: Real PHI Pilot     |                       | Cat B synthetic data;   | Option B outside   |               |           |
+|         |                          |    (Outside MVP Scope)|                       | mandates M09 review.    | MVP scope.         |               |           |
 +---------+--------------------------+-----------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
 ```
 
