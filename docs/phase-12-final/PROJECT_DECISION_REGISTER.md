@@ -99,44 +99,44 @@ In accordance with Phase 12.2 requirements:
 
 ---
 
-## 4. Authoritative Governance Decisions Awaiting User Selection
+## 4. Authoritative Governance Decisions Approved by User
 
-The table below reconciles all open governance questions into a single authoritative register. Every decision is pending explicit user selection and approval:
+The table below records the authoritative decisions approved by the user on 23 November 2026, officially unlocking Milestone 01:
 
 ```
 +---------------------------------------------------------------------------------------------------------------------------------------------------------------+
-|                                                     GOVERNANCE DECISIONS REQUIRING USER SELECTION                                                             |
+|                                                     GOVERNANCE DECISIONS APPROVED BY USER                                                                      |
 +---------+--------------------------+-----------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
-| ID      | Decision Description     | Available Options     | Recommended Option    | Selection Rationale     | Primary Risks      | Dependencies  | Status    |
+| ID      | Decision Description     | Available Options     | Selected Option       | Selection Rationale     | Primary Risks      | Dependencies  | Status    |
 +---------+--------------------------+-----------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
-| **DEC-  | **Hosting Profile &      | A: Tier A Minimal VPS | **Option A: Tier A    | Lowest cost baseline for| VPS single point   | Milestone 01, | **PENDING |
-| 001**   | Infrastructure Budget**  |    (~$25-$55/mo)      | Minimal VPS**         | dev, testing, synthetic | of failure; manual | Milestone 20  | USER      |
-|         |                          | B: Tier B AWS Cloud   |                       | demos; capacity sizing  | failover during    |               | DECISION**|
+| **DEC-  | **Hosting Profile &      | A: Tier A Minimal VPS | **Option A: Tier A    | Lowest cost baseline for| VPS single point   | Milestone 01, | **APPROVED|
+| 001**   | Infrastructure Budget**  |    (~$25-$55/mo)      | Minimal VPS**         | dev, testing, synthetic | of failure; manual | Milestone 20  | BY USER** |
+|         |                          | B: Tier B AWS Cloud   |                       | demos; capacity sizing  | failover during    |               |           |
 |         |                          |    (~$250/mo)         |                       | ('500+ assessments') is | hardware outage.   |               |           |
 |         |                          |                       |                       | unverified estimate.    |                    |               |           |
 +---------+--------------------------+-----------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
-| **DEC-  | **Clinical Governance    | A: Multi-Track Phased | **Option A: Multi-    | Enables synthetic-data  | Requires strict    | Milestones    | **PENDING |
-| 002**   | Implementation Scope**   |    Governance for MVP | Track Phased          | prototyping with active | enforcement of     | 08, 14, 16    | USER      |
-|         | (4 Distinct Tracks)      |    (Advisory/Content  | Governance**          | clinical review; docu-  | prohibited clinical|               | DECISION**|
-|         |                          |    active in MVP;     |                       | mented ethics/reg deter-| claims ledger;     |               | DECISION**|
+| **DEC-  | **Clinical Governance    | A: Multi-Track Phased | **Option A: Multi-    | Enables synthetic-data  | Requires strict    | Milestones    | **APPROVED|
+| 002**   | Implementation Scope**   |    Governance for MVP | Track Phased          | prototyping with active | enforcement of     | 08, 14, 16    | BY USER** |
+|         | (4 Distinct Tracks)      |    (Advisory/Content  | Governance**          | clinical review; docu-  | prohibited clinical|               |           |
+|         |                          |    active in MVP;     |                       | mented ethics/reg deter-| claims ledger;     |               |           |
 |         |                          |    ethics/reg deter-  |                       | mination required before| Category C strictly|               |           |
 |         |                          |    mination gate)     |                       | human-participant study.| prohibited.        |               |           |
 |         |                          | B: Institutional Gate |                       |                         |                    |               |           |
 |         |                          |    Prior to Coding    |                       |                         |                    |               |           |
 +---------+--------------------------+-----------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
-| **DEC-  | **Cardiovascular         | A: Task A MVP only    | **Option A: Task A    | Preserves scientific    | Users cannot get   | Milestones    | **PENDING |
-| 003**   | Prediction Scope**       |    (Task B to research| MVP Only**            | integrity; eliminates   | 10-year risk % in  | 09, 10, 11,   | USER      |
-|         |                          | B: Implement Task B   |                       | confusion between CAD   | MVP; must wait for | 14            | DECISION**|
+| **DEC-  | **Cardiovascular         | A: Task A MVP only    | **Option A: Task A    | Preserves scientific    | Users cannot get   | Milestones    | **APPROVED|
+| 003**   | Prediction Scope**       |    (Task B to research| MVP Only**            | integrity; eliminates   | 10-year risk % in  | 09, 10, 11,   | BY USER** |
+|         |                          | B: Implement Task B   |                       | confusion between CAD   | MVP; must wait for | 14            |           |
 |         |                          |    calculator in MVP  |                       | detection & future risk.| future research.   |               |           |
 +---------+--------------------------+-----------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
-| **DEC-  | **Geographic Adapter     | A: Adapter Pattern as | **Option A: Adapter   | Proves architectural    | Operational and    | Milestones    | **PENDING |
-| 004**   | Extensibility Goal &     |    Extensibility Goal | Pattern Extensibility | decoupling for units    | regulatory readiness| 08, 15       | USER      |
-|         | Localization Scope**     |    (US/IN/UK Synth)   | Goal (US/IN/UK Synth)*| without claiming global | must be verified per|              | DECISION**|
+| **DEC-  | **Geographic Adapter     | A: Adapter Pattern as | **Option A: Adapter   | Proves architectural    | Operational and    | Milestones    | **APPROVED|
+| 004**   | Extensibility Goal &     |    Extensibility Goal | Pattern Extensibility | decoupling for units    | regulatory readiness| 08, 15       | BY USER** |
+|         | Localization Scope**     |    (US/IN/UK Synth)   | Goal (US/IN/UK Synth)*| without claiming global | must be verified per|              |           |
 |         |                          | B: US-Only Baseline   |                       | operational readiness.  | jurisdiction.      |               |           |
 +---------+--------------------------+-----------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
-| **DEC-  | **Data Classification &  | A: Three-Tier Class-  | **Option A: Three-    | Prohibits Category C in | Cat A research data| All           | **PENDING |
-| 005**   | Patient Data Policy**    |    ification (Cat A/B;| Tier Classification   | MVP; distinguishes Cat A| carries historical | Milestones    | USER      |
-|         |                          |    Cat C Prohibited)  | (Cat C Prohibited)**  | human research risk from| privacy risks;     | (01–20)       | DECISION**|
+| **DEC-  | **Data Classification &  | A: Three-Tier Class-  | **Option A: Three-    | Prohibits Category C in | Cat A research data| All           | **APPROVED|
+| 005**   | Patient Data Policy**    |    ification (Cat A/B;| Tier Classification   | MVP; distinguishes Cat A| carries historical | Milestones    | BY USER** |
+|         |                          |    Cat C Prohibited)  | (Cat C Prohibited)**  | human research risk from| privacy risks;     | (01–20)       |           |
 |         |                          | B: Real PHI Pilot     |                       | Cat B synthetic data;   | Option B outside   |               |           |
 |         |                          |    (Outside MVP Scope)|                       | mandates M09 review.    | MVP scope.         |               |           |
 +---------+--------------------------+-----------------------+-----------------------+-------------------------+--------------------+---------------+-----------+
@@ -144,8 +144,15 @@ The table below reconciles all open governance questions into a single authorita
 
 ---
 
-## 5. Approval Tracking Policy
+## 5. Approval Tracking Log
 
 In accordance with strict project rules:
-- Antigravity shall **never mark decisions DEC-001 through DEC-005 as "Approved"** until the user explicitly inputs their choice in chat.
-- Implementation shall not proceed on assumed defaults.
+- Antigravity shall never mark decisions DEC-001 through DEC-005 as "Approved" until the user explicitly inputs their choice.
+- **Approval Timestamp:** 23 November 2026.
+- **User Selection:** The user explicitly selected and approved all architectural recommendations:
+  - **DEC-001:** Option A (Tier A Minimal VPS, ~$25–$55/mo).
+  - **DEC-002:** Option A (Multi-Track Phased Governance).
+  - **DEC-003:** Option A (Task A MVP Only).
+  - **DEC-004:** Option A (Universal Country Adapter Extensibility Goal).
+  - **DEC-005:** Option A (Three-Tier Data Classification; Category C Strictly Prohibited in MVP).
+- **Milestone 01 Authorization:** Granted by user on 23 November 2026. All gates for Milestone 01 initiation are fully satisfied.

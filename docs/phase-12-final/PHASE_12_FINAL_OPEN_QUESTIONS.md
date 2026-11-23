@@ -1,10 +1,10 @@
 # HeartXAI 2.0 — Phase 12.2 Final Open Governance Questions
 **Document ID:** HX-PR-018  
-**Version:** 2.2.0 (Phase 12.2 Final Governance Resolution)  
-**Phase:** 12.2 — Final Governance Resolution & Evidence Reconciliation  
+**Version:** 3.0.0 (Phase 12.2 Stakeholder Approval Baseline)  
+**Phase:** 12.2 — Final Governance Resolution & Stakeholder Approval  
 **Author:** Technical Program Manager, Principal Software Architect & Clinical Safety Reviewer  
-**Status:** Awaiting Explicit Stakeholder Selection  
-**Date:** November 2026  
+**Status:** Approved by Stakeholder — Milestone 01 Formally Authorized  
+**Date:** 23 November 2026  
 
 ---
 
@@ -107,8 +107,13 @@ This document articulates the **five strategic governance decisions** that requi
 
 ---
 
-## 3. Action Required from Stakeholder
+## 3. Stakeholder Decision Record & Implementation Authorization
 
-Please review these five questions and indicate your choices (e.g., *"Approve Recommendations: 1A, 2A, 3A, 4A, 5A"* or specify custom preferences). 
-
-**Antigravity will pause and wait for your selection before Milestone 01 is authorized.**
+- **Selection Date:** 23 November 2026.
+- **Stakeholder Decision:** Approved all recommended options:
+  1. **DEC-001 (Hosting):** Option A (Tier A Minimal VPS, ~$25–$55/mo).
+  2. **DEC-002 (Clinical Governance):** Option A (Multi-Track Phased Governance).
+  3. **DEC-003 (Cardiovascular Prediction):** Option A (Task A MVP Only).
+  4. **DEC-004 (Localization Scope):** Option A (Adapter Extensibility Goal).
+  5. **DEC-005 (Data Classification):** Option A (Category C Strictly Prohibited in MVP).
+- **Milestone 01 Authorization:** **Granted.** Commencement of Milestone 01 (Repository & Development Environment Foundation) is authorized.
