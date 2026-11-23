@@ -9,11 +9,7 @@ from sqlalchemy.orm import sessionmaker
 
 from app.core.database import Base
 from app.core.security import hash_password
-from app.models.user import User, PatientProfile
-from app.models.assessment import Assessment, InferenceResult, ShapExplanation, CounterfactualProfile
-from app.models.consent import DoctorGrant, ClinicalNote
-from app.models.directory import Doctor, Hospital, InsurancePolicy, EducationalResource
-from app.models.audit import AuditLog, ModelRegistry
+from app.models.user import User
 
 # In-memory SQLite database dedicated to unit testing
 TEST_DATABASE_URL = "sqlite:///:memory:"

@@ -3,15 +3,21 @@
 Verifies table creation, CRUD operations, foreign key cascades, and unique constraints.
 """
 
-from datetime import datetime, timedelta, timezone, date
+from datetime import UTC, date, datetime, timedelta
+
 import pytest
 from sqlalchemy.exc import IntegrityError
 
-from app.models.user import User, PatientProfile
-from app.models.assessment import Assessment, InferenceResult, ShapExplanation, CounterfactualProfile
-from app.models.consent import DoctorGrant, ClinicalNote
-from app.models.directory import Doctor, Hospital, InsurancePolicy, EducationalResource
+from app.models.assessment import (
+    Assessment,
+    CounterfactualProfile,
+    InferenceResult,
+    ShapExplanation,
+)
 from app.models.audit import AuditLog, ModelRegistry
+from app.models.consent import ClinicalNote, DoctorGrant
+from app.models.directory import Doctor, EducationalResource, Hospital, InsurancePolicy
+from app.models.user import PatientProfile, User
 
 
 def test_user_creation_and_unique_email(db_session, sample_patient):
@@ -145,8 +151,19 @@ def test_cascading_deletion(db_session, sample_patient):
     assessment = Assessment(
         patient_id=sample_patient.id,
         status="COMPLETED",
-        age=54, sex=1, cp=0, trestbps=130, chol=200, fbs=0,
-        restecg=0, thalach=150, exang=0, oldpeak=0.0, slope=0, ca=0, thal=1,
+        age=54,
+        sex=1,
+        cp=0,
+        trestbps=130,
+        chol=200,
+        fbs=0,
+        restecg=0,
+        thalach=150,
+        exang=0,
+        oldpeak=0.0,
+        slope=0,
+        ca=0,
+        thal=1,
     )
     db_session.add(assessment)
     db_session.commit()
@@ -195,7 +212,7 @@ def test_cascading_deletion(db_session, sample_patient):
 
 def test_doctor_grant_and_clinical_notes(db_session, sample_patient, sample_doctor):
     """Verify time-bounded doctor authorization grant and clinical notes."""
-    expires_at = datetime.now(timezone.utc) + timedelta(days=14)
+    expires_at = datetime.now(UTC) + timedelta(days=14)
     grant = DoctorGrant(
         patient_id=sample_patient.id,
         doctor_id=sample_doctor.id,
@@ -214,8 +231,19 @@ def test_doctor_grant_and_clinical_notes(db_session, sample_patient, sample_doct
     assessment = Assessment(
         patient_id=sample_patient.id,
         status="COMPLETED",
-        age=54, sex=1, cp=1, trestbps=140, chol=210, fbs=0,
-        restecg=0, thalach=160, exang=0, oldpeak=0.5, slope=0, ca=0, thal=1,
+        age=54,
+        sex=1,
+        cp=1,
+        trestbps=140,
+        chol=210,
+        fbs=0,
+        restecg=0,
+        thalach=160,
+        exang=0,
+        oldpeak=0.5,
+        slope=0,
+        ca=0,
+        thal=1,
     )
     db_session.add(assessment)
     db_session.commit()
@@ -225,7 +253,7 @@ def test_doctor_grant_and_clinical_notes(db_session, sample_patient, sample_doct
         author_id=sample_doctor.id,
         note_content="Patient advised on 30 min daily aerobic walking and low sodium intake.",
         signoff_status="FINAL_SIGNOFF",
-        signed_at=datetime.now(timezone.utc),
+        signed_at=datetime.now(UTC),
     )
     db_session.add(note)
     db_session.commit()

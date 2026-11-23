@@ -1,6 +1,7 @@
 """HeartXAI 2.0 - Audit Trail & Model Registry Database Models."""
 
-from sqlalchemy import Column, String, Integer, Float, DateTime, Index
+from sqlalchemy import Column, DateTime, Float, Index, Integer, String
+
 from app.core.database import Base
 from app.models.base import generate_uuid, utc_now
 
@@ -14,7 +15,9 @@ class AuditLog(Base):
     timestamp = Column(DateTime(timezone=True), default=utc_now, nullable=False, index=True)
     user_id = Column(String(36), nullable=True, index=True)
     role = Column(String(32), default="ANONYMOUS", nullable=False)
-    action_type = Column(String(64), nullable=False, index=True)  # LOGIN, ASSESSMENT_SUBMITTED, RECORD_VIEWED, etc.
+    action_type = Column(
+        String(64), nullable=False, index=True
+    )  # LOGIN, ASSESSMENT_SUBMITTED, RECORD_VIEWED, etc.
     resource_id = Column(String(64), nullable=True)
     endpoint = Column(String(255), nullable=False)
     method = Column(String(16), nullable=False)

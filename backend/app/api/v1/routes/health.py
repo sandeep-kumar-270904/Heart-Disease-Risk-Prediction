@@ -1,6 +1,7 @@
 """HeartXAI 2.0 - Synthetic Health & Readiness Probes."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -19,7 +20,7 @@ def liveness_probe():
         "service": settings.PROJECT_NAME,
         "version": settings.VERSION,
         "environment": settings.ENVIRONMENT,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
     }
 
 
@@ -33,10 +34,10 @@ def readiness_probe(db: Session = Depends(get_db)):
             "service": settings.PROJECT_NAME,
             "version": settings.VERSION,
             "database": "connected",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         }
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Database connectivity check failed: {str(exc)}"
-        )
+            detail=f"Database connectivity check failed: {str(exc)}",
+        ) from exc

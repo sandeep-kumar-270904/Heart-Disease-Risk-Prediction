@@ -1,3 +1,7 @@
+# ==============================================================================
+# HeartXAI 2.0 — Comprehensive Git Ignore
+# ==============================================================================
+
 # Python & Virtual Environments
 __pycache__/
 *.py[cod]
@@ -23,8 +27,10 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+pip-log.txt
+pip-delete-this-directory.txt
 
-# Testing & Coverage
+# Testing, Quality & Coverage
 .pytest_cache/
 .coverage
 htmlcov/
@@ -32,13 +38,27 @@ htmlcov/
 .nox/
 coverage.xml
 *.cover
+.hypothesis/
+.mypy_cache/
+.ruff_cache/
 
-# Database
+# Frontend Testing (Vitest, Playwright, Cypress)
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+coverage/
+
+# Database & Persistent Stores
 *.db
 *.sqlite
 *.sqlite3
+*.sql.gz
+*.dump
+data/postgres/
+data/redis/
 
-# Node & Frontend
+# Node & Frontend Ecosystem
 node_modules/
 .pnp
 .pnp.js
@@ -46,25 +66,42 @@ node_modules/
 dist/
 dist-ssr/
 *.local
+.turbo/
+.next/
+.nuxt/
 
 # Environment Variables & Secrets
 .env
 .env.*
 !.env.example
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+secrets.json
 
-# IDE & Editor
-.vscode/
+# IDE & Editor Artifacts
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
 .idea/
 *.swp
 *.swo
 *~
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Logs
+# Logging & Monitoring
 logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+# Machine Learning & Large Artifact Temporary Caches
+*.joblib.tmp
+.cache/

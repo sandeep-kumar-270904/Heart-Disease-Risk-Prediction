@@ -3,7 +3,8 @@
 Implements the Review-II UML classes: DoctorConsultation, HealthInsurance, and MedicalAssistance.
 """
 
-from sqlalchemy import Column, String, Integer, Float, Text, Boolean, Index
+from sqlalchemy import Boolean, Column, Float, Index, Integer, String, Text
+
 from app.core.database import Base
 from app.models.base import TimestampMixin, generate_uuid
 
@@ -15,7 +16,9 @@ class Doctor(Base, TimestampMixin):
 
     id = Column(String(36), primary_key=True, default=generate_uuid)
     doctor_name = Column(String(255), nullable=False)
-    specialization = Column(String(128), nullable=False)  # General Cardiology, Interventional, Preventative, etc.
+    specialization = Column(
+        String(128), nullable=False
+    )  # General Cardiology, Interventional, Preventative, etc.
     hospital_name = Column(String(255), nullable=False)
     contact_number = Column(String(64), nullable=False)
     location = Column(String(255), nullable=False)  # City, State, or Address
@@ -23,9 +26,7 @@ class Doctor(Base, TimestampMixin):
     telehealth_available = Column(Boolean, default=True, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
 
-    __table_args__ = (
-        Index("ix_doctors_spec_loc", "specialization", "location"),
-    )
+    __table_args__ = (Index("ix_doctors_spec_loc", "specialization", "location"),)
 
 
 class Hospital(Base, TimestampMixin):
@@ -35,18 +36,20 @@ class Hospital(Base, TimestampMixin):
 
     id = Column(String(36), primary_key=True, default=generate_uuid)
     hospital_name = Column(String(255), nullable=False)
-    facility_type = Column(String(128), nullable=False)  # Comprehensive Cardiac Center, STEMI Center, General Hospital
+    facility_type = Column(
+        String(128), nullable=False
+    )  # Comprehensive Cardiac Center, STEMI Center, General Hospital
     emergency_phone = Column(String(64), nullable=False)
     address = Column(String(255), nullable=False)
     city = Column(String(128), nullable=False)
     state = Column(String(64), nullable=False)
-    accreditation_details = Column(String(255), nullable=False)  # e.g. "ACC Accredited Chest Pain Center"
+    accreditation_details = Column(
+        String(255), nullable=False
+    )  # e.g. "ACC Accredited Chest Pain Center"
     has_247_cath_lab = Column(Boolean, default=True, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
 
-    __table_args__ = (
-        Index("ix_hospitals_city_type", "city", "facility_type"),
-    )
+    __table_args__ = (Index("ix_hospitals_city_type", "city", "facility_type"),)
 
 
 class InsurancePolicy(Base, TimestampMixin):
@@ -71,9 +74,13 @@ class EducationalResource(Base, TimestampMixin):
 
     id = Column(String(36), primary_key=True, default=generate_uuid)
     title = Column(String(255), nullable=False)
-    biomarker_code = Column(String(32), nullable=False, index=True)  # e.g. "trestbps", "chol", "general"
+    biomarker_code = Column(
+        String(32), nullable=False, index=True
+    )  # e.g. "trestbps", "chol", "general"
     summary = Column(String(512), nullable=False)
-    guideline_source = Column(String(255), nullable=False)  # e.g. "2019 ACC/AHA Primary Prevention Guideline"
+    guideline_source = Column(
+        String(255), nullable=False
+    )  # e.g. "2019 ACC/AHA Primary Prevention Guideline"
     diet_plan_summary = Column(Text, nullable=False)
     exercise_tips_summary = Column(Text, nullable=False)
     lifestyle_guidance = Column(Text, nullable=False)

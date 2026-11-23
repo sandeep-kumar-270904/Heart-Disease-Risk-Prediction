@@ -1,12 +1,12 @@
 """HeartXAI 2.0 - Security & Cryptographic Primitives Unit Tests."""
 
 from datetime import timedelta
-import pytest
+
 from app.core.security import (
-    hash_password,
-    verify_password,
     create_access_token,
     decode_access_token,
+    hash_password,
+    verify_password,
 )
 
 
@@ -47,7 +47,7 @@ def test_expired_jwt_token():
     token = create_access_token(
         subject=user_id,
         role="PATIENT",
-        expires_delta=timedelta(seconds=-1)  # Expired 1 second ago
+        expires_delta=timedelta(seconds=-1),  # Expired 1 second ago
     )
 
     payload = decode_access_token(token)

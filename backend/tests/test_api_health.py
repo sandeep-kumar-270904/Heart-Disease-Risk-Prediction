@@ -1,7 +1,7 @@
 """HeartXAI 2.0 - API Boot & Health Endpoint Integration Tests."""
 
-from app.main import app, root
 from app.api.v1.routes.health import liveness_probe, readiness_probe
+from app.main import app, root
 
 
 def test_root_endpoint():
@@ -36,4 +36,3 @@ def test_openapi_schema_generated():
     assert schema["info"]["version"] == "2.0.0"
     assert "/health/live" in schema["paths"]
     assert "/health/ready" in schema["paths"]
-

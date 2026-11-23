@@ -5,14 +5,16 @@ Revises: None
 Create Date: 2026-11-15 18:30:00.000000
 """
 
-from typing import Sequence, Union
-from alembic import op
+from collections.abc import Sequence
+
 import sqlalchemy as sa
 
+from alembic import op
+
 revision: str = "001_initial_schema"
-down_revision: Union[str, None] = None
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = None
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
@@ -37,7 +39,13 @@ def upgrade() -> None:
     op.create_table(
         "patient_profiles",
         sa.Column("id", sa.String(36), primary_key=True),
-        sa.Column("patient_id", sa.String(36), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True),
+        sa.Column(
+            "patient_id",
+            sa.String(36),
+            sa.ForeignKey("users.id", ondelete="CASCADE"),
+            nullable=False,
+            unique=True,
+        ),
         sa.Column("date_of_birth", sa.Date(), nullable=True),
         sa.Column("biological_sex", sa.String(16), nullable=True),
         sa.Column("preferred_units", sa.String(16), nullable=False, server_default="US_STANDARD"),
@@ -52,8 +60,18 @@ def upgrade() -> None:
     op.create_table(
         "assessments",
         sa.Column("id", sa.String(36), primary_key=True),
-        sa.Column("patient_id", sa.String(36), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
-        sa.Column("clinician_id", sa.String(36), sa.ForeignKey("users.id", ondelete="SET NULL"), nullable=True),
+        sa.Column(
+            "patient_id",
+            sa.String(36),
+            sa.ForeignKey("users.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
+        sa.Column(
+            "clinician_id",
+            sa.String(36),
+            sa.ForeignKey("users.id", ondelete="SET NULL"),
+            nullable=True,
+        ),
         sa.Column("status", sa.String(32), nullable=False, server_default="COMPLETED"),
         sa.Column("age", sa.Integer(), nullable=False),
         sa.Column("sex", sa.Integer(), nullable=False),
@@ -79,7 +97,13 @@ def upgrade() -> None:
     op.create_table(
         "inference_results",
         sa.Column("id", sa.String(36), primary_key=True),
-        sa.Column("assessment_id", sa.String(36), sa.ForeignKey("assessments.id", ondelete="CASCADE"), nullable=False, unique=True),
+        sa.Column(
+            "assessment_id",
+            sa.String(36),
+            sa.ForeignKey("assessments.id", ondelete="CASCADE"),
+            nullable=False,
+            unique=True,
+        ),
         sa.Column("model_version", sa.String(32), nullable=False),
         sa.Column("cad_probability", sa.Float(), nullable=False),
         sa.Column("cad_risk_tier", sa.String(32), nullable=False),
@@ -89,7 +113,9 @@ def upgrade() -> None:
         sa.Column("ascvd_risk_tier", sa.String(32), nullable=False),
         sa.Column("base_expected_value", sa.Float(), nullable=False),
         sa.Column("raw_decision_margin", sa.Float(), nullable=False),
-        sa.Column("is_out_of_distribution", sa.Boolean(), nullable=False, server_default=sa.false()),
+        sa.Column(
+            "is_out_of_distribution", sa.Boolean(), nullable=False, server_default=sa.false()
+        ),
         sa.Column("computed_at", sa.DateTime(timezone=True), nullable=False),
     )
     op.create_index("ix_inference_results_assessment_id", "inference_results", ["assessment_id"])
@@ -98,7 +124,12 @@ def upgrade() -> None:
     op.create_table(
         "shap_explanations",
         sa.Column("id", sa.String(36), primary_key=True),
-        sa.Column("inference_id", sa.String(36), sa.ForeignKey("inference_results.id", ondelete="CASCADE"), nullable=False),
+        sa.Column(
+            "inference_id",
+            sa.String(36),
+            sa.ForeignKey("inference_results.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
         sa.Column("feature_name", sa.String(32), nullable=False),
         sa.Column("feature_value", sa.Float(), nullable=False),
         sa.Column("shap_value", sa.Float(), nullable=False),
@@ -107,13 +138,20 @@ def upgrade() -> None:
         sa.Column("clinical_interpretation", sa.String(512), nullable=False),
     )
     op.create_index("ix_shap_inference_id", "shap_explanations", ["inference_id"])
-    op.create_index("ix_shap_inference_rank", "shap_explanations", ["inference_id", "rank_importance"])
+    op.create_index(
+        "ix_shap_inference_rank", "shap_explanations", ["inference_id", "rank_importance"]
+    )
 
     # 6. counterfactual_profiles table
     op.create_table(
         "counterfactual_profiles",
         sa.Column("id", sa.String(36), primary_key=True),
-        sa.Column("inference_id", sa.String(36), sa.ForeignKey("inference_results.id", ondelete="CASCADE"), nullable=False),
+        sa.Column(
+            "inference_id",
+            sa.String(36),
+            sa.ForeignKey("inference_results.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
         sa.Column("target_risk_threshold", sa.Float(), nullable=False),
         sa.Column("achieved_risk_probability", sa.Float(), nullable=False),
         sa.Column("modified_biomarkers", sa.JSON(), nullable=False),
@@ -128,8 +166,18 @@ def upgrade() -> None:
     op.create_table(
         "patient_doctor_grants",
         sa.Column("id", sa.String(36), primary_key=True),
-        sa.Column("patient_id", sa.String(36), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
-        sa.Column("doctor_id", sa.String(36), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
+        sa.Column(
+            "patient_id",
+            sa.String(36),
+            sa.ForeignKey("users.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
+        sa.Column(
+            "doctor_id",
+            sa.String(36),
+            sa.ForeignKey("users.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
         sa.Column("access_code", sa.String(64), nullable=True),
         sa.Column("status", sa.String(32), nullable=False, server_default="ACTIVE"),
         sa.Column("granted_at", sa.DateTime(timezone=True), nullable=False),
@@ -140,14 +188,28 @@ def upgrade() -> None:
     )
     op.create_index("ix_grants_patient_id", "patient_doctor_grants", ["patient_id"])
     op.create_index("ix_grants_doctor_id", "patient_doctor_grants", ["doctor_id"])
-    op.create_index("ix_grants_patient_doctor_status", "patient_doctor_grants", ["patient_id", "doctor_id", "status"])
+    op.create_index(
+        "ix_grants_patient_doctor_status",
+        "patient_doctor_grants",
+        ["patient_id", "doctor_id", "status"],
+    )
 
     # 8. clinical_notes table
     op.create_table(
         "clinical_notes",
         sa.Column("id", sa.String(36), primary_key=True),
-        sa.Column("assessment_id", sa.String(36), sa.ForeignKey("assessments.id", ondelete="CASCADE"), nullable=False),
-        sa.Column("author_id", sa.String(36), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
+        sa.Column(
+            "assessment_id",
+            sa.String(36),
+            sa.ForeignKey("assessments.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
+        sa.Column(
+            "author_id",
+            sa.String(36),
+            sa.ForeignKey("users.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
         sa.Column("note_content", sa.Text(), nullable=False),
         sa.Column("signoff_status", sa.String(32), nullable=False, server_default="DRAFT"),
         sa.Column("signed_at", sa.DateTime(timezone=True), nullable=True),
