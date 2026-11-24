@@ -1,9 +1,9 @@
 """HeartXAI 2.0 - Authentication & User Profile Schemas."""
 
-from datetime import date, datetime
+from datetime import datetime
 from typing import Literal
 
-from pydantic import EmailStr, Field
+from pydantic import EmailStr, Field, field_validator
 
 from app.schemas.base import BaseSchema
 
@@ -12,13 +12,15 @@ ClinicianStatus = Literal["N/A", "PENDING", "VERIFIED", "REJECTED"]
 UnitSystem = Literal["metric", "us_customary"]
 BiologicalSex = Literal["female", "male", "other"]
 
+ALLOWED_SYNTHETIC_DOMAINS = frozenset({"example.com", "example.org", "example.net"})
+
 
 class RegisterRequest(BaseSchema):
-    """Payload for new user registration with explicit educational consent."""
+    """Payload for controlled synthetic-demo persona registration (Category C prohibited)."""
 
-    email: EmailStr = Field(..., description="Unique email identifier")
+    email: EmailStr = Field(..., description="Synthetic demo email identifier")
     password: str = Field(..., min_length=12, max_length=128, description="Account passphrase")
-    full_name: str = Field(..., min_length=2, max_length=100, description="Display name")
+    full_name: str = Field(..., min_length=2, max_length=100, description="Synthetic persona label")
     country_code: str = Field(
         ...,
         min_length=2,
@@ -30,6 +32,21 @@ class RegisterRequest(BaseSchema):
         ...,
         description="Must explicitly consent to non-diagnostic educational terms",
     )
+    synthetic_persona_acknowledged: Literal[True] = Field(
+        ...,
+        description="Explicit server-verified attestation that account is strictly synthetic (DEC-005)",
+    )
+
+    @field_validator("email")
+    @classmethod
+    def enforce_synthetic_email_domain(cls, value: EmailStr) -> EmailStr:
+        domain = str(value).rsplit("@", 1)[-1].lower()
+        if domain not in ALLOWED_SYNTHETIC_DOMAINS:
+            raise ValueError(
+                "Synthetic-only MVP boundary: email must use an authorized RFC 2606 synthetic domain "
+                "(@example.com, @example.org, or @example.net)."
+            )
+        return value
 
 
 class LoginRequest(BaseSchema):
@@ -62,16 +79,9 @@ class UserProfileResponse(BaseSchema):
 
 
 class PatientProfileUpdateDto(BaseSchema):
-    """Mutable baseline profile preferences for a patient account."""
+    """Minimized synthetic profile preferences (real PII DOB/emergency contacts removed in MVP)."""
 
     preferred_units: UnitSystem = Field(default="metric", description="Preferred biomarker units")
-    date_of_birth: date | None = Field(default=None, description="Optional birth date")
     biological_sex: BiologicalSex | None = Field(
         default=None, description="Optional baseline biological sex"
-    )
-    emergency_contact_name: str | None = Field(
-        default=None, max_length=100, description="Optional emergency contact name"
-    )
-    emergency_contact_phone: str | None = Field(
-        default=None, max_length=20, description="Optional emergency contact phone"
     )

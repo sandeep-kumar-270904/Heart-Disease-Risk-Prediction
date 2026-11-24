@@ -2,7 +2,7 @@
 // Operates strictly on Category B synthetic personas (zero real PHI).
 import { test, expect } from '@playwright/test';
 
-const SYNTHETIC_EMAIL = `synthetic.uat.${Date.now()}@synthetic.heartxai.local`;
+const SYNTHETIC_EMAIL = `synthetic.uat.${Date.now()}@example.com`;
 const SYNTHETIC_PASS = 'SyntheticUatPass!2026';
 
 test.describe('Synthetic Patient UAT Journey (DEC-005 Safe)', () => {
@@ -34,7 +34,7 @@ test.describe('Synthetic Patient UAT Journey (DEC-005 Safe)', () => {
 
     await expect(page).toHaveURL(/\/assessments\//);
     await expect(page.getByText(/Task A Cardiovascular Assessment Results/i)).toBeVisible();
-    await expect(page.getByText(/No prospective 10-year cardiovascular risk/i)).toBeVisible();
+    await expect(page.getByText(/prospective 10-year cardiovascular risk prediction/i)).toBeVisible();
 
     // Verify SHAP Accessible Table fallback
     await page.getByRole('button', { name: /Accessible Data Table/i }).click();
@@ -42,6 +42,6 @@ test.describe('Synthetic Patient UAT Journey (DEC-005 Safe)', () => {
 
     // Run Counterfactual Scenario Simulation
     await page.getByRole('button', { name: /Run Scenario Simulation/i }).click();
-    await expect(page.getByText(/Simulated Task A Association/i)).toBeVisible();
+    await expect(page.getByText(/Hypothetical Simulated Model Score/i)).toBeVisible();
   });
 });

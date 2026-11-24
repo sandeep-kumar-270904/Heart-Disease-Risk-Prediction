@@ -55,10 +55,11 @@ export const CounterfactualSimulator: React.FC<CounterfactualSimulatorProps> = (
   return (
     <Card>
       <CardHeader>
-        <CardTitle as="h2">Constrained What-If Scenario Simulator</CardTitle>
+        <CardTitle as="h2">Hypothetical What-If Model Input Simulator</CardTitle>
         <CardDescription>
-          Exploratory mathematical simulation keeping Age ({assessment.age}), Sex, and Clinical
-          History strictly locked. Not a medical prescription.
+          Exploratory mathematical perturbation of model inputs keeping Age ({assessment.age}), Sex,
+          and Clinical History locked. Hypothetical model scenarios only — NEVER treatment advice or
+          clinical prescriptions.
         </CardDescription>
       </CardHeader>
 
@@ -163,10 +164,10 @@ export const CounterfactualSimulator: React.FC<CounterfactualSimulatorProps> = (
           >
             <div className="space-y-1 text-sm">
               <p className="font-semibold text-slate-900">
-                Simulated Task A Association: {result.simulated_likelihood_percent.toFixed(1)}%
+                Hypothetical Simulated Model Score: {result.simulated_likelihood_percent.toFixed(1)}%
               </p>
               <p className="text-xs text-slate-700">
-                Delta from baseline ({result.baseline_likelihood_percent.toFixed(1)}%):{' '}
+                Model delta from baseline ({result.baseline_likelihood_percent.toFixed(1)}%):{' '}
                 <span className="font-mono font-semibold">
                   {result.delta_percent >= 0 ? '+' : ''}
                   {result.delta_percent.toFixed(2)}%

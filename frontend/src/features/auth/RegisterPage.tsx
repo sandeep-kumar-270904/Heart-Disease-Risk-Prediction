@@ -41,6 +41,7 @@ export const RegisterPage: React.FC = () => {
           password,
           country_code: countryCode,
           consent_given: true,
+          synthetic_persona_acknowledged: true,
         }),
       });
       navigate('/login');
@@ -68,10 +69,12 @@ export const RegisterPage: React.FC = () => {
               onChange={(e) => setFullName(e.target.value)}
             />
             <Input
-              label="Email Address"
+              label="Synthetic Demo Email Address"
               type="email"
               required
               autoComplete="username"
+              placeholder="persona@example.com"
+              helperText="Restricted to RFC 2606 synthetic domains (@example.com, @example.org, @example.net)."
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />

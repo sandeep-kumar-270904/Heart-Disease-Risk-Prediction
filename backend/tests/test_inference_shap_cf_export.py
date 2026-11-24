@@ -17,6 +17,7 @@ from tests.test_auth import InMemoryTokenStore
 
 def _sample_dto(resting_bp: float = 158.0) -> AssessmentCreateDto:
     return AssessmentCreateDto(
+        synthetic_fixture_confirmed=True,
         age=57.0,
         sex=1,
         chest_pain_type=3,
@@ -116,7 +117,11 @@ def test_end_to_end_assessment_shap_cf_and_pdf_export_api(db_session, sample_pat
         detail = create_resp.json()
         assessment_id = detail["id"]
         assert detail["ten_year_population_risk_percent"] is None  # DEC-003 Option A
-        assert detail["emergency_warning_active"] is True
+        assert detail["emergency_warning_active"] is False  # Pending DEC-002 clinical review
+        assert detail["risk_strata"] == "unstratified"
+        assert "confidence_interval" not in detail
+        assert detail["fasting_blood_sugar"] == 135.0
+        assert detail["fasting_blood_sugar_gt_120"] is True
         assert 0.0 <= detail["cad_likelihood_percent"] <= 100.0
 
         # 2. GET /api/v1/assessments/{id}/shap

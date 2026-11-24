@@ -89,6 +89,12 @@ def test_alembic_upgrade_downgrade_upgrade_cycle(tmp_path: Path, monkeypatch) ->
     inf_cols = {col["name"]: col for col in inspector.get_columns("inference_results")}
     assert inf_cols["ascvd_10yr_risk"]["nullable"] is True
     assert inf_cols["ascvd_risk_tier"]["nullable"] is True
+    assert inf_cols["confidence_interval_low"]["nullable"] is True
+    assert inf_cols["confidence_interval_high"]["nullable"] is True
+
+    assess_cols = {col["name"]: col for col in inspector.get_columns("assessments")}
+    assert "fasting_blood_sugar_mgdl" in assess_cols
+    assert assess_cols["fasting_blood_sugar_mgdl"]["nullable"] is True
 
     # 2. Downgrade back to base
     command.downgrade(alembic_cfg, "base")

@@ -68,7 +68,7 @@ export const LoginPage: React.FC = () => {
               type="email"
               required
               autoComplete="username"
-              placeholder="patient.demo@synthetic.heartxai.local"
+              placeholder="patient.demo@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />

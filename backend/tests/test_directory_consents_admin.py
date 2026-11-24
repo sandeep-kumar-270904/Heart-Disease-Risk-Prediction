@@ -141,7 +141,7 @@ def test_consent_lifecycle_expiry_and_revocation_403(
         assert grant_resp.status_code == 201
         grant_id = grant_resp.json()["id"]
 
-        # Clinician can now list shared assessment and append clinical note
+        # Clinician can now list shared assessment; arbitrary free-text clinical notes disabled (DEC-005)
         shared = client.get("/api/v1/consents/doctor/shared", headers=doctor_headers)
         assert shared.status_code == 200
         assert len(shared.json()) == 1
@@ -151,7 +151,7 @@ def test_consent_lifecycle_expiry_and_revocation_403(
             json={"note_content": "Recommend repeating fasting lipid panel in 3 months."},
             headers=doctor_headers,
         )
-        assert note_resp.status_code == 201
+        assert note_resp.status_code == 422
 
         # Patient revokes grant -> clinician IMMEDIATELY receives 403
         rev_resp = client.post(f"/api/v1/consents/{grant_id}/revoke", headers=patient_headers)

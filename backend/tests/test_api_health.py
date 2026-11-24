@@ -31,6 +31,7 @@ def test_health_ready_endpoint(db_session) -> None:
     data = readiness_probe(db=db_session)
     assert data["status"] == "ready"
     assert data["database"] == "connected"
+    assert "model_version" in data
     assert "timestamp" in data
 
 

@@ -3,6 +3,7 @@ import { cholesterolMmolLToMgDl, glucoseMmolLToMgDl } from '@/lib/unitConverter'
 
 export const intakeFormSchema = z
   .object({
+    synthetic_fixture_confirmed: z.literal(true),
     age: z.coerce
       .number()
       .min(18, 'Age must be at least 18 years.')
@@ -64,24 +65,12 @@ export const intakeFormSchema = z
 
 export type IntakeFormValues = z.infer<typeof intakeFormSchema>;
 
-export function detectEmergencyRedFlags(values: {
+export function detectEmergencyRedFlags(_values: {
   readonly resting_bp: number;
   readonly chest_pain_type: number;
   readonly exercise_angina: number;
-}): { readonly active: boolean; readonly message: string | null } {
-  if (values.resting_bp > 180) {
-    return {
-      active: true,
-      message:
-        'Hypertensive Crisis Range (Resting Systolic BP > 180 mmHg): Seek urgent medical evaluation or call emergency services immediately.',
-    };
-  }
-  if (values.chest_pain_type === 0 && values.exercise_angina === 1) {
-    return {
-      active: true,
-      message:
-        'Typical Angina with Exercise Symptoms Reported: Contact a qualified physician or emergency care promptly if symptoms are acute.',
-    };
-  }
+}): { readonly active: false; readonly message: null } {
+  // Unreviewed automated emergency/red-flag triage thresholds (e.g., resting_bp > 180 or angina heuristics)
+  // are intentionally disabled pending DEC-002 Physician Advisory Review & sign-off.
   return { active: false, message: null };
 }

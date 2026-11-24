@@ -15,6 +15,7 @@ const MOCK_ASSESSMENT: AssessmentDetailResponse = {
   resting_bp: 158,
   serum_cholesterol: 268,
   fasting_blood_sugar: 135,
+  fasting_blood_sugar_gt_120: true,
   resting_ecg: 2,
   max_heart_rate: 138,
   exercise_angina: 1,
@@ -23,12 +24,12 @@ const MOCK_ASSESSMENT: AssessmentDetailResponse = {
   major_vessels: 2,
   thallium_stress: 3,
   cad_likelihood_percent: 78.4,
-  confidence_interval: [71.9, 84.9],
-  risk_strata: 'elevated',
+  risk_strata: 'unstratified',
   ten_year_population_risk_percent: null,
   model_version: 'v2.0.0',
   cohort_name: 'UCI Cleveland Retrospective Benchmark (N=303)',
-  plain_language_summary: 'Educational Task A Benchmark Association: 78.4% (non-diagnostic).',
+  data_provenance: 'Category B — Verified Synthetic Persona Record',
+  plain_language_summary: 'Experimental Retrospective Task A Model Score: 78.4% (non-diagnostic).',
   emergency_warning_active: false,
   created_at: '2026-11-25T00:00:00Z',
 };
@@ -78,7 +79,9 @@ describe('Milestone 12-14: Results Dashboard, SHAP Waterfall & Counterfactual Si
     );
 
     expect(screen.getByText('78.4%')).toBeInTheDocument();
-    expect(screen.getByText(/No prospective 10-year cardiovascular risk/i)).toBeInTheDocument();
+    expect(screen.getByText(/prospective 10-year cardiovascular risk prediction/i)).toBeInTheDocument();
+    expect(screen.getByText(/UNSTRATIFIED RESEARCH SCORE/i)).toBeInTheDocument();
+    expect(screen.queryByText(/95% Interval/i)).not.toBeInTheDocument();
 
     const tableToggle = await screen.findByRole('button', { name: /Accessible Data Table/i });
     await userEvent.click(tableToggle);

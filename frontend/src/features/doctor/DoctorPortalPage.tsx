@@ -150,6 +150,10 @@ export const DoctorPortalPage: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle as="h2">Consented Patient Assessments ({sharedAssessments.length})</CardTitle>
+            <CardDescription>
+              Read-only synthetic review view. Arbitrary free-text clinician notes are disabled in
+              the synthetic-only MVP (DEC-005).
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {sharedAssessments.length === 0 ? (

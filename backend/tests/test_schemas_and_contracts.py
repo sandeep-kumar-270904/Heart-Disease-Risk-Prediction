@@ -58,7 +58,10 @@ def test_shared_data_dictionary_covers_all_biomarkers() -> None:
     assert len(biomarkers) == 13
 
     expected_fields = {item["schema_field"] for item in biomarkers}
-    schema_fields = set(AssessmentCreateDto.model_fields.keys()) - {"unit_system"}
+    schema_fields = set(AssessmentCreateDto.model_fields.keys()) - {
+        "unit_system",
+        "synthetic_fixture_confirmed",
+    }
     assert expected_fields == schema_fields
 
 
@@ -96,6 +99,7 @@ def test_frontend_backend_schema_parity() -> None:
 def test_assessment_dto_unit_normalization_and_strictness() -> None:
     """Verify metric mmol/L conversion to mg/dL and extra='forbid' enforcement."""
     dto = AssessmentCreateDto(
+        synthetic_fixture_confirmed=True,
         age=55,
         sex=1,
         chest_pain_type=2,
@@ -117,6 +121,7 @@ def test_assessment_dto_unit_normalization_and_strictness() -> None:
     # Extra unknown fields must be rejected
     with pytest.raises(ValidationError):
         AssessmentCreateDto(
+            synthetic_fixture_confirmed=True,
             age=55,
             sex=1,
             chest_pain_type=2,

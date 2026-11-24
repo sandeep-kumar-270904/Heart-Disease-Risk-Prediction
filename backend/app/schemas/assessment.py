@@ -8,7 +8,7 @@ from pydantic import Field, ValidationInfo, field_validator
 from app.schemas.auth import UnitSystem
 from app.schemas.base import BaseSchema
 
-RiskStrata = Literal["low", "moderate", "elevated"]
+RiskStrata = Literal["unstratified"]
 ShapDirection = Literal["increases_likelihood", "decreases_likelihood"]
 
 CHOLESTEROL_MMOL_TO_MGDL = 38.67
@@ -16,7 +16,12 @@ GLUCOSE_MMOL_TO_MGDL = 18.016
 
 
 class AssessmentCreateDto(BaseSchema):
-    """Validated clinical intake payload covering the 13 UCI Cleveland biomarkers."""
+    """Validated synthetic clinical intake payload covering the 13 UCI Cleveland biomarkers."""
+
+    synthetic_fixture_confirmed: Literal[True] = Field(
+        ...,
+        description="Explicit confirmation that submission uses Category B synthetic values only (DEC-005)",
+    )
 
     # Demographics
     age: float = Field(..., ge=18.0, le=100.0, description="Age in years")
@@ -114,7 +119,14 @@ class AssessmentDetailResponse(BaseSchema):
     chest_pain_type: int
     resting_bp: float
     serum_cholesterol: float
-    fasting_blood_sugar: float
+    fasting_blood_sugar: float | None = Field(
+        default=None,
+        description="Preserved numeric glucose input (mg/dL); null for legacy binary-only records",
+    )
+    fasting_blood_sugar_gt_120: bool = Field(
+        ...,
+        description="UCI binary fasting blood sugar (>120 mg/dL) feature derived in preprocessing",
+    )
     resting_ecg: int
     max_heart_rate: float
     exercise_angina: int
@@ -123,16 +135,19 @@ class AssessmentDetailResponse(BaseSchema):
     major_vessels: int | None = None
     thallium_stress: int | None = None
 
-    # Task A Model Inferences (DEC-003 Option A: Retrospective CAD classification only)
+    # Task A Model Outputs (DEC-003 Option A: Retrospective UCI CAD classification only)
     cad_likelihood_percent: float = Field(..., ge=0.0, le=100.0)
-    confidence_interval: list[float] = Field(..., min_length=2, max_length=2)
-    risk_strata: RiskStrata
+    risk_strata: RiskStrata = Field(
+        default="unstratified",
+        description="Unstratified pending clinical validation & physician review (DEC-002)",
+    )
     ten_year_population_risk_percent: float | None = Field(
         default=None,
         description="Reserved for future research; strictly None in MVP per DEC-003 Option A",
     )
     model_version: str
     cohort_name: str
+    data_provenance: str
     plain_language_summary: str
     emergency_warning_active: bool
     created_at: datetime

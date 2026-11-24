@@ -51,20 +51,24 @@ def generate_assessment_pdf_bytes(
     )
     story.append(Spacer(1, 14))
 
+    fbs_display = (
+        f"{detail.fasting_blood_sugar:g} mg/dL "
+        f"(UCI binary >120 mg/dL: {'Yes' if detail.fasting_blood_sugar_gt_120 else 'No'})"
+        if detail.fasting_blood_sugar is not None
+        else f"Not recorded numerically (legacy binary >120 mg/dL: {'Yes' if detail.fasting_blood_sugar_gt_120 else 'No'})"
+    )
     summary_rows = [
         ["Assessment ID", detail.id],
-        ["Patient ID (Synthetic)", detail.patient_id],
+        ["Persona ID (Synthetic)", detail.patient_id],
+        ["Data Provenance", detail.data_provenance],
         ["Model Version", detail.model_version],
         ["Cohort Reference", detail.cohort_name],
         [
-            "Task A Association Score",
-            f"{detail.cad_likelihood_percent:.2f}% ({detail.risk_strata})",
+            "Experimental Task A Score",
+            f"{detail.cad_likelihood_percent:.2f}% (Unstratified Research Score)",
         ],
-        [
-            "95% Confidence Interval",
-            f"[{detail.confidence_interval[0]}%, {detail.confidence_interval[1]}%]",
-        ],
-        ["Emergency Red-Flag Status", "ACTIVE" if detail.emergency_warning_active else "Inactive"],
+        ["Fasting Blood Sugar", fbs_display],
+        ["Clinical Review Note", "Non-diagnostic synthetic demonstration; no automated triage"],
         ["Created UTC", detail.created_at.isoformat()],
     ]
     summary_table = Table(summary_rows, colWidths=[180, 320])

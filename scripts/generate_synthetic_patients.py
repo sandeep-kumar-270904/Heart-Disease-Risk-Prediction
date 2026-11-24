@@ -102,8 +102,12 @@ def generate_synthetic_cohort(
             high=biomarkers["age"]["max"],
             decimals=0,
         )
-        sex = _sample_categorical(rng, biomarkers["sex"]["empirical_stats"]["proportions"])
-        cp = _sample_categorical(rng, biomarkers["cp"]["empirical_stats"]["proportions"])
+        sex = _sample_categorical(
+            rng, biomarkers["sex"]["empirical_stats"]["proportions"]
+        )
+        cp = _sample_categorical(
+            rng, biomarkers["cp"]["empirical_stats"]["proportions"]
+        )
         trestbps = _sample_bounded_normal(
             rng,
             mean=biomarkers["trestbps"]["empirical_stats"]["mean"],
@@ -150,7 +154,9 @@ def generate_synthetic_cohort(
             chol_input = chol_mgdl
             fbs_input = fbs_mgdl
 
-        restecg = _sample_categorical(rng, biomarkers["restecg"]["empirical_stats"]["proportions"])
+        restecg = _sample_categorical(
+            rng, biomarkers["restecg"]["empirical_stats"]["proportions"]
+        )
         thalach = _sample_bounded_normal(
             rng,
             mean=biomarkers["thalach"]["empirical_stats"]["mean"],
@@ -159,7 +165,9 @@ def generate_synthetic_cohort(
             high=biomarkers["thalach"]["max"],
             decimals=0,
         )
-        exang = _sample_categorical(rng, biomarkers["exang"]["empirical_stats"]["proportions"])
+        exang = _sample_categorical(
+            rng, biomarkers["exang"]["empirical_stats"]["proportions"]
+        )
         oldpeak = _sample_bounded_normal(
             rng,
             mean=biomarkers["oldpeak"]["empirical_stats"]["mean"],
@@ -168,21 +176,28 @@ def generate_synthetic_cohort(
             high=biomarkers["oldpeak"]["max"],
             decimals=1,
         )
-        slope = _sample_categorical(rng, biomarkers["slope"]["empirical_stats"]["proportions"])
+        slope = _sample_categorical(
+            rng, biomarkers["slope"]["empirical_stats"]["proportions"]
+        )
 
         # Simulate realistic optional missingness for imaging attributes (~2% missingness)
         ca: int | None = (
             None
             if rng.random() < 0.02
-            else _sample_categorical(rng, biomarkers["ca"]["empirical_stats"]["proportions"])
+            else _sample_categorical(
+                rng, biomarkers["ca"]["empirical_stats"]["proportions"]
+            )
         )
         thal: int | None = (
             None
             if rng.random() < 0.02
-            else _sample_categorical(rng, biomarkers["thal"]["empirical_stats"]["proportions"])
+            else _sample_categorical(
+                rng, biomarkers["thal"]["empirical_stats"]["proportions"]
+            )
         )
 
         intake = AssessmentCreateDto(
+            synthetic_fixture_confirmed=True,
             age=age,
             sex=sex,
             chest_pain_type=cp,
@@ -217,7 +232,9 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Generate Category B synthetic patient application fixtures (zero real PHI)."
     )
-    parser.add_argument("--count", type=int, default=50, help="Number of records to generate")
+    parser.add_argument(
+        "--count", type=int, default=50, help="Number of records to generate"
+    )
     parser.add_argument("--seed", type=int, default=42, help="Deterministic PRNG seed")
     parser.add_argument(
         "--unit-system",

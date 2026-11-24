@@ -37,7 +37,9 @@ from app.models.directory import (  # noqa: E402
 from app.models.user import PatientProfile, User  # noqa: E402
 
 
-def seed_database(session: Session, assessment_count: int = 10, seed: int = 42) -> dict[str, int]:
+def seed_database(
+    session: Session, assessment_count: int = 10, seed: int = 42
+) -> dict[str, int]:
     """Idempotently seed synthetic users, Category B assessments, and demo directories."""
     if not settings.SYNTHETIC_DATA_ONLY:
         raise RuntimeError(
@@ -56,7 +58,7 @@ def seed_database(session: Session, assessment_count: int = 10, seed: int = 42) 
     # 1. Seed Synthetic Demo Actors
     demo_users = [
         {
-            "email": "patient.demo@synthetic.heartxai.local",
+            "email": "patient.demo@example.com",
             "password": "SyntheticPatient!2026",
             "full_name": "Synthetic Patient Alpha",
             "role": "PATIENT",
@@ -64,7 +66,7 @@ def seed_database(session: Session, assessment_count: int = 10, seed: int = 42) 
             "clinician_status": "N/A",
         },
         {
-            "email": "clinician.demo@synthetic.heartxai.local",
+            "email": "clinician.demo@example.com",
             "password": "SyntheticDoctor!2026",
             "full_name": "Dr. Synthetic Cardio (Demo)",
             "role": "CLINICIAN",
@@ -72,7 +74,7 @@ def seed_database(session: Session, assessment_count: int = 10, seed: int = 42) 
             "clinician_status": "VERIFIED",
         },
         {
-            "email": "admin.demo@synthetic.heartxai.local",
+            "email": "admin.demo@example.com",
             "password": "SyntheticAdmin!2026",
             "full_name": "Synthetic System Auditor",
             "role": "ADMIN",
@@ -132,13 +134,18 @@ def seed_database(session: Session, assessment_count: int = 10, seed: int = 42) 
                     trestbps=int(round(intake.resting_bp)),
                     chol=int(round(intake.serum_cholesterol)),
                     fbs=1 if intake.fasting_blood_sugar > 120.0 else 0,
+                    fasting_blood_sugar_mgdl=round(
+                        float(intake.fasting_blood_sugar), 2
+                    ),
                     restecg=intake.resting_ecg,
                     thalach=int(round(intake.max_heart_rate)),
                     exang=intake.exercise_angina,
                     oldpeak=float(intake.st_depression),
                     slope=intake.st_slope,
                     ca=intake.major_vessels if intake.major_vessels is not None else 0,
-                    thal=intake.thallium_stress if intake.thallium_stress is not None else 1,
+                    thal=intake.thallium_stress
+                    if intake.thallium_stress is not None
+                    else 1,
                 )
                 session.add(assessment)
                 counts["assessments_created"] += 1
@@ -172,7 +179,9 @@ def seed_database(session: Session, assessment_count: int = 10, seed: int = 42) 
     ]
     for doc_data in demo_doctors:
         if (
-            session.scalar(select(Doctor).where(Doctor.doctor_name == doc_data["doctor_name"]))
+            session.scalar(
+                select(Doctor).where(Doctor.doctor_name == doc_data["doctor_name"])
+            )
             is None
         ):
             session.add(Doctor(**doc_data))
@@ -213,7 +222,9 @@ def seed_database(session: Session, assessment_count: int = 10, seed: int = 42) 
     for hosp_data in demo_hospitals:
         if (
             session.scalar(
-                select(Hospital).where(Hospital.hospital_name == hosp_data["hospital_name"])
+                select(Hospital).where(
+                    Hospital.hospital_name == hosp_data["hospital_name"]
+                )
             )
             is None
         ):
@@ -271,7 +282,9 @@ def seed_database(session: Session, assessment_count: int = 10, seed: int = 42) 
     for res_data in demo_resources:
         if (
             session.scalar(
-                select(EducationalResource).where(EducationalResource.title == res_data["title"])
+                select(EducationalResource).where(
+                    EducationalResource.title == res_data["title"]
+                )
             )
             is None
         ):
@@ -284,13 +297,19 @@ def seed_database(session: Session, assessment_count: int = 10, seed: int = 42) 
 
 def main() -> int:
     """CLI entrypoint for seeding the configured database with synthetic fixtures."""
-    parser = argparse.ArgumentParser(description="Seed database with Category B synthetic data.")
-    parser.add_argument("--assessments", type=int, default=10, help="Assessments to generate")
+    parser = argparse.ArgumentParser(
+        description="Seed database with Category B synthetic data."
+    )
+    parser.add_argument(
+        "--assessments", type=int, default=10, help="Assessments to generate"
+    )
     parser.add_argument("--seed", type=int, default=42, help="Deterministic RNG seed")
     args = parser.parse_args()
 
     with SessionLocal() as session:
-        summary = seed_database(session, assessment_count=args.assessments, seed=args.seed)
+        summary = seed_database(
+            session, assessment_count=args.assessments, seed=args.seed
+        )
     print(f"Synthetic database seed complete: {summary}")
     return 0
 

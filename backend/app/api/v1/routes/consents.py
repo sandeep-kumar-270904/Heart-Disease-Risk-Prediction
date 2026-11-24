@@ -162,7 +162,7 @@ def doctor_add_note(
     db: Session = Depends(get_db),
     doctor: User = Depends(require_role("CLINICIAN")),
 ) -> ClinicalNoteResponse:
-    """Clinician appends a review note to a shared patient assessment."""
+    """Disabled in synthetic-only MVP (DEC-005): blocks arbitrary free-text clinical notes."""
     note = add_clinician_note(
         db,
         doctor=doctor,

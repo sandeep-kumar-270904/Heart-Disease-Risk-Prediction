@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Alert,
@@ -21,11 +21,10 @@ import {
 } from '@/lib/unitConverter';
 import { apiFetch, ApiClientError } from '@/services/apiClient';
 import type { AssessmentDetailResponse } from '@/types';
-import { detectEmergencyRedFlags, intakeFormSchema, type IntakeFormValues } from './intakeSchema';
-
-const DRAFT_STORAGE_KEY = 'heartxai_synthetic_intake_draft_v1';
+import { intakeFormSchema, type IntakeFormValues } from './intakeSchema';
 
 const DEFAULT_VALUES: IntakeFormValues = {
+  synthetic_fixture_confirmed: true,
   age: 54,
   sex: 1,
   chest_pain_type: 2,
@@ -53,30 +52,10 @@ const STEPS = [
 export const IntakeWizardPage: React.FC = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState<number>(0);
-  const [values, setValues] = useState<IntakeFormValues>(() => {
-    try {
-      const saved = localStorage.getItem(DRAFT_STORAGE_KEY);
-      if (saved) {
-        return { ...DEFAULT_VALUES, ...(JSON.parse(saved) as Partial<IntakeFormValues>) };
-      }
-    } catch {
-      // Ignore corrupt draft
-    }
-    return DEFAULT_VALUES;
-  });
+  const [values, setValues] = useState<IntakeFormValues>(DEFAULT_VALUES);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(values));
-    } catch {
-      // Storage quota fallback
-    }
-  }, [values]);
-
-  const emergency = detectEmergencyRedFlags(values);
 
   const handleToggleUnitSystem = (targetSystem: 'us_customary' | 'metric'): void => {
     if (targetSystem === values.unit_system) return;
@@ -115,7 +94,6 @@ export const IntakeWizardPage: React.FC = () => {
         method: 'POST',
         body: JSON.stringify(parsed.data),
       });
-      localStorage.removeItem(DRAFT_STORAGE_KEY);
       navigate(`/assessments/${created.id}`, { state: { assessment: created } });
     } catch (err) {
       setSubmitError(
@@ -141,13 +119,11 @@ export const IntakeWizardPage: React.FC = () => {
         </Badge>
       </div>
 
-      {emergency.active && emergency.message && (
-        <Alert
-          severity="emergency"
-          title="Acute Red-Flag Symptom / Vital Detected"
-          description={emergency.message}
-        />
-      )}
+      <Alert
+        severity="info"
+        title="Synthetic Input Demonstration Notice (DEC-005)"
+        description="Automated clinical red-flag triage is disabled pending physician advisory review. Do not submit real patient data or rely on this tool during acute symptoms."
+      />
 
       {submitError && (
         <Alert severity="warning" title="Validation Notice" description={submitError} />
@@ -160,7 +136,7 @@ export const IntakeWizardPage: React.FC = () => {
       <Card elevated>
         <CardHeader>
           <CardTitle as="h2">{STEPS[step]}</CardTitle>
-          <CardDescription>Draft automatically saved locally to prevent redundant entry.</CardDescription>
+          <CardDescription>Synthetic values remain in memory only until submitted.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
           {step === 0 && (
@@ -198,7 +174,7 @@ export const IntakeWizardPage: React.FC = () => {
                 value={String(values.resting_bp)}
                 onChange={(e) => setValues({ ...values, resting_bp: Number(e.target.value) })}
                 error={fieldErrors.resting_bp}
-                helperText="Valid range: 70–240 mmHg (>180 triggers alert)"
+                helperText="Valid range: 70–240 mmHg (synthetic model input)"
               />
               <Select
                 label="Chest Pain Presentation"

@@ -88,6 +88,7 @@ def test_register_login_refresh_replay_detection_and_logout(db_session) -> None:
                 "full_name": "Alice Synthetic",
                 "country_code": "US",
                 "consent_given": True,
+                "synthetic_persona_acknowledged": True,
             },
         )
         assert reg_resp.status_code == 201
@@ -102,6 +103,7 @@ def test_register_login_refresh_replay_detection_and_logout(db_session) -> None:
                 "full_name": "Alice Synthetic",
                 "country_code": "US",
                 "consent_given": True,
+                "synthetic_persona_acknowledged": True,
             },
         )
         assert dup_resp.status_code == 409

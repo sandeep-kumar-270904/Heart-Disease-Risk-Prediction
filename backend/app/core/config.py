@@ -1,10 +1,20 @@
-"""HeartXAI 2.0 - Core Application Configuration.
+"""HeartXAI 2.0 - Core Application Configuration & Fail-Closed Secret Validation."""
 
-Loads environment variables with Pydantic Settings, providing strict typing,
-default development values, and production overrides.
-"""
+from __future__ import annotations
 
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+LOCAL_DEV_SECRET_KEY = "hxai-local-dev-only-key-not-for-staging-or-production-0000000000"
+_INSECURE_SECRET_MARKERS = (
+    "hxai-insecure",
+    "hxai-local-dev-only",
+    "change-in-production",
+    "change-this",
+    "replace_with",
+    "dev-key",
+    "secret",
+)
 
 
 class Settings(BaseSettings):
@@ -24,7 +34,7 @@ class Settings(BaseSettings):
     SYNTHETIC_DATA_ONLY: bool = True
 
     # Security & JWT Credentials
-    SECRET_KEY: str = "hxai-insecure-dev-key-change-in-production-0123456789abcdef0123456789"
+    SECRET_KEY: str = LOCAL_DEV_SECRET_KEY
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
@@ -46,6 +56,30 @@ class Settings(BaseSettings):
     # Clinical Machine Learning Artifacts
     MODEL_DIR: str = "app/ml/artifacts"
     ACTIVE_MODEL_VERSION: str = "v2.0.0"
+
+    @model_validator(mode="after")
+    def validate_staging_production_security(self) -> Settings:
+        """Fail closed when staging/production runs without strong external secrets or safety."""
+        env_normalized = self.ENVIRONMENT.strip().lower()
+        is_non_local = env_normalized not in {"development", "dev", "test", "local"}
+        if is_non_local:
+            key = self.SECRET_KEY.strip()
+            lowered = key.lower()
+            if not key or len(key) < 32:
+                raise ValueError(
+                    "SECURITY CONFIG ERROR: SECRET_KEY must be >= 32 characters in "
+                    f"ENVIRONMENT='{self.ENVIRONMENT}'."
+                )
+            if any(marker in lowered for marker in _INSECURE_SECRET_MARKERS):
+                raise ValueError(
+                    "SECURITY CONFIG ERROR: Placeholder or development default SECRET_KEY "
+                    f"is prohibited in ENVIRONMENT='{self.ENVIRONMENT}'."
+                )
+            if self.DEBUG:
+                raise ValueError(
+                    "SECURITY CONFIG ERROR: DEBUG must be False in staging/production."
+                )
+        return self
 
     model_config = SettingsConfigDict(
         env_file=".env",

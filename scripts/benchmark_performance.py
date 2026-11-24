@@ -49,6 +49,7 @@ def _summarize(values_ms: list[float]) -> dict[str, float]:
 def run_benchmarks() -> dict[str, object]:
     """Execute empirical performance benchmarks and return structured scorecard."""
     dto = AssessmentCreateDto(
+        synthetic_fixture_confirmed=True,
         age=57.0,
         sex=1,
         chest_pain_type=3,
@@ -106,6 +107,7 @@ def run_benchmarks() -> dict[str, object]:
         resting_bp=dto.resting_bp,
         serum_cholesterol=dto.serum_cholesterol,
         fasting_blood_sugar=dto.fasting_blood_sugar,
+        fasting_blood_sugar_gt_120=dto.fasting_blood_sugar > 120.0,
         resting_ecg=dto.resting_ecg,
         max_heart_rate=dto.max_heart_rate,
         exercise_angina=dto.exercise_angina,
@@ -114,11 +116,11 @@ def run_benchmarks() -> dict[str, object]:
         major_vessels=dto.major_vessels,
         thallium_stress=dto.thallium_stress,
         cad_likelihood_percent=inf_out.likelihood_percent,
-        confidence_interval=inf_out.confidence_interval,
         risk_strata=inf_out.risk_strata,
         ten_year_population_risk_percent=None,
         model_version=inf_out.model_version,
         cohort_name="UCI Cleveland Benchmark (N=303)",
+        data_provenance="Category B — Benchmark Synthetic Fixture",
         plain_language_summary=inf_out.plain_language_summary,
         emergency_warning_active=inf_out.emergency_warning_active,
         created_at=datetime.now(UTC),

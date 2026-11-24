@@ -102,6 +102,7 @@ class CounterfactualService:
                 )
 
         updated_data = baseline.model_dump()
+        updated_data["synthetic_fixture_confirmed"] = True
         updated_data["unit_system"] = "us_customary"
         for field_name, val in modified_features.items():
             updated_data[field_name] = float(val)
@@ -147,6 +148,7 @@ class CounterfactualService:
             for chol in chol_candidates:
                 for fbs in fbs_candidates:
                     updated = baseline.model_dump()
+                    updated["synthetic_fixture_confirmed"] = True
                     updated["unit_system"] = "us_customary"
                     updated["resting_bp"] = bp
                     updated["serum_cholesterol"] = chol

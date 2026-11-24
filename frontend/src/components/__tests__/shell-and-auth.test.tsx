@@ -28,7 +28,7 @@ describe('Milestone 07: Frontend Core Shell, Routing & Silent Auth Refresh', () 
   it('renders authenticated shell navigation, skip link, and emergency banner cleanly', async () => {
     useAuthStore.getState().setSession('mock-jwt', {
       id: 'usr-1',
-      email: 'patient.demo@synthetic.heartxai.local',
+      email: 'patient.demo@example.com',
       full_name: 'Synthetic Patient Alpha',
       role: 'PATIENT',
       country_code: 'US',
@@ -46,7 +46,7 @@ describe('Milestone 07: Frontend Core Shell, Routing & Silent Auth Refresh', () 
       screen.getByRole('heading', { name: /Cardiovascular Health Workspace/i })
     ).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Skip to main content/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Emergency: 911/i })).toBeInTheDocument();
+    expect(screen.getByText(/Medical Emergency\? Call Local EMS/i)).toBeInTheDocument();
 
     const results = await axe(container);
     expect(results).toHaveNoViolations();

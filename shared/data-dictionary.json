@@ -17,7 +17,7 @@
     "UserRole": ["PATIENT", "CLINICIAN", "ADMINISTRATOR"],
     "ClinicianStatus": ["N/A", "PENDING", "VERIFIED", "REJECTED"],
     "UnitSystem": ["metric", "us_customary"],
-    "RiskStrata": ["low", "moderate", "elevated"],
+    "RiskStrata": ["unstratified"],
     "ShapDirection": ["increases_likelihood", "decreases_likelihood"],
     "BiologicalSex": ["female", "male", "other"],
     "ErrorType": [

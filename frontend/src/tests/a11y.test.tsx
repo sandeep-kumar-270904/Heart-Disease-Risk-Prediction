@@ -29,7 +29,7 @@ describe('Milestone 19: Whole-Application WCAG 2.2 AA Route Accessibility Audit'
     } else {
       useAuthStore.getState().setSession('mock-jwt', {
         id: 'usr-a11y',
-        email: 'a11y.demo@synthetic.heartxai.local',
+        email: 'a11y.demo@example.com',
         full_name: 'A11y Audit User',
         role: route === '/admin' ? 'ADMINISTRATOR' : route === '/doctor' ? 'CLINICIAN' : 'PATIENT',
         country_code: 'US',

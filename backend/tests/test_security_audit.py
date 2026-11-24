@@ -13,7 +13,7 @@ from tests.test_auth import InMemoryTokenStore
 def test_anti_idor_cross_tenant_isolation(db_session, sample_patient, sample_doctor) -> None:
     """Verify Patient B cannot access, simulate, export, or revoke Patient A's records."""
     patient_b = User(
-        email="patient.intruder@synthetic.heartxai.local",
+        email="patient.intruder@example.com",
         hashed_password=hash_password("IntruderPass!2026"),
         full_name="Patient B",
         role="PATIENT",
@@ -38,6 +38,7 @@ def test_anti_idor_cross_tenant_isolation(db_session, sample_patient, sample_doc
         assess_resp = client.post(
             "/api/v1/assessments",
             json={
+                "synthetic_fixture_confirmed": True,
                 "age": 54,
                 "sex": 1,
                 "chest_pain_type": 2,

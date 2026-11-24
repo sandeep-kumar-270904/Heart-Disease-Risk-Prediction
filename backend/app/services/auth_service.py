@@ -8,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.errors import AuthenticationError, ConflictError
+from app.core.errors import AuthenticationError, ClinicalBoundaryError, ConflictError
 from app.core.redis_client import TokenStoreBackend
 from app.core.security import (
     create_access_token,
@@ -19,7 +19,7 @@ from app.core.security import (
 )
 from app.models.base import generate_uuidv7
 from app.models.user import PatientProfile, User
-from app.schemas.auth import RegisterRequest
+from app.schemas.auth import ALLOWED_SYNTHETIC_DOMAINS, RegisterRequest
 
 
 def _normalize_schema_role(db_role: str) -> str:
@@ -29,20 +29,33 @@ def _normalize_schema_role(db_role: str) -> str:
 
 
 def register_user(db: Session, payload: RegisterRequest) -> User:
-    """Register a new synthetic-only patient account with Argon2id password hash."""
-    existing = db.scalar(select(User).where(User.email == payload.email.lower()))
+    """Register a controlled synthetic-demo persona account with server-enforced boundaries."""
+    if not settings.SYNTHETIC_DATA_ONLY:
+        raise ClinicalBoundaryError(
+            "Platform is disabled: SYNTHETIC_DATA_ONLY must be true in MVP (DEC-005)."
+        )
+
+    normalized_email = payload.email.lower()
+    domain = normalized_email.rsplit("@", 1)[-1]
+    if domain not in ALLOWED_SYNTHETIC_DOMAINS:
+        raise ClinicalBoundaryError(
+            "Registration restricted to authorized RFC 2606 synthetic domains "
+            "(@example.com, @example.org, @example.net)."
+        )
+
+    existing = db.scalar(select(User).where(User.email == normalized_email))
     if existing is not None:
         raise ConflictError("An account with this email address already exists.")
 
     user = User(
-        email=payload.email.lower(),
+        email=normalized_email,
         hashed_password=hash_password(payload.password),
         full_name=payload.full_name.strip(),
         role="PATIENT",
         country_code=payload.country_code,
         clinician_status="N/A",
         is_active=True,
-        is_synthetic=settings.SYNTHETIC_DATA_ONLY,
+        is_synthetic=True,
     )
     db.add(user)
     db.flush()

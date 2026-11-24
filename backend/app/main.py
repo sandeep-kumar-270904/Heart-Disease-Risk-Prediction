@@ -14,6 +14,7 @@ from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.api import api_router
+from app.api.v1.routes.health import router as health_router
 from app.core.config import settings
 from app.core.errors import register_exception_handlers
 from app.core.logging import logger, request_id_ctx, setup_logging
@@ -70,16 +71,16 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-Request-ID"],
 )
 
 # Register global RFC 7807 Problem Details handlers
 register_exception_handlers(app)
 
-# Mount API v1 router and root-level health probes
+# Mount canonical versioned API (/api/v1/*) and root health probes ONLY (no duplicate unversioned API)
 app.include_router(api_router, prefix=settings.API_V1_STR)
-app.include_router(api_router)
+app.include_router(health_router)
 
 
 @app.get("/", tags=["Root"])

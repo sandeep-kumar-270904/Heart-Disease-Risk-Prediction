@@ -5,11 +5,12 @@
 
 import type { UnitSystem } from './auth';
 
-export type RiskStrata = 'low' | 'moderate' | 'elevated';
+export type RiskStrata = 'unstratified';
 
 export type ShapDirection = 'increases_likelihood' | 'decreases_likelihood';
 
 export interface AssessmentCreateDto {
+  readonly synthetic_fixture_confirmed: true;
   readonly age: number;
   readonly sex: number;
   readonly chest_pain_type: number;
@@ -34,7 +35,8 @@ export interface AssessmentDetailResponse {
   readonly chest_pain_type: number;
   readonly resting_bp: number;
   readonly serum_cholesterol: number;
-  readonly fasting_blood_sugar: number;
+  readonly fasting_blood_sugar: number | null;
+  readonly fasting_blood_sugar_gt_120: boolean;
   readonly resting_ecg: number;
   readonly max_heart_rate: number;
   readonly exercise_angina: number;
@@ -43,12 +45,12 @@ export interface AssessmentDetailResponse {
   readonly major_vessels: number | null;
   readonly thallium_stress: number | null;
   readonly cad_likelihood_percent: number;
-  readonly confidence_interval: readonly [number, number];
   readonly risk_strata: RiskStrata;
   /** Reserved for post-MVP research; strictly null in MVP per DEC-003 Option A */
   readonly ten_year_population_risk_percent: number | null;
   readonly model_version: string;
   readonly cohort_name: string;
+  readonly data_provenance: string;
   readonly plain_language_summary: string;
   readonly emergency_warning_active: boolean;
   readonly created_at: string;

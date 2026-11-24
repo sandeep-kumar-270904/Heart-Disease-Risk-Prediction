@@ -61,13 +61,6 @@ export const AssessmentResultsPage: React.FC = () => {
     );
   }
 
-  const badgeVariant =
-    assessment.risk_strata === 'low'
-      ? 'low'
-      : assessment.risk_strata === 'moderate'
-        ? 'moderate'
-        : 'elevated';
-
   const handleDownloadPdf = async (): Promise<void> => {
     const resp = await fetch(`/api/v1/assessments/${assessment.id}/export-pdf`, {
       headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
@@ -85,18 +78,10 @@ export const AssessmentResultsPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {assessment.emergency_warning_active && (
-        <Alert
-          severity="emergency"
-          title="Emergency Medical Warning Triggered"
-          description="Input thresholds exceeded acute outpatient safety limits. Seek prompt clinical evaluation."
-        />
-      )}
-
       <Alert
         severity="info"
-        title="Educational Non-Diagnostic Model Notice (DEC-003 Option A)"
-        description="Task A outputs measure similarity to the historical N=303 UCI Cleveland research cohort. No prospective 10-year cardiovascular risk calculation is provided."
+        title="Experimental Non-Diagnostic Model Notice (DEC-003 Option A)"
+        description="Task A outputs represent an experimental retrospective UCI Cleveland (N=303) classification model score. This is NOT a medical diagnosis, validated clinical risk tier, or prospective 10-year cardiovascular risk prediction."
       />
 
       <Card elevated>
@@ -117,19 +102,19 @@ export const AssessmentResultsPage: React.FC = () => {
           <div className="flex flex-wrap items-center gap-6">
             <div>
               <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                Calibrated Task A Likelihood
+                Experimental Retrospective Task A Score
               </p>
               <p className="font-mono text-4xl font-bold tabular-clinical text-slate-900">
                 {assessment.cad_likelihood_percent.toFixed(1)}%
               </p>
             </div>
             <div className="space-y-1">
-              <Badge variant={badgeVariant}>
-                {assessment.risk_strata.toUpperCase()} TIER
-              </Badge>
+              <Badge variant="neutral">UNSTRATIFIED RESEARCH SCORE</Badge>
               <p className="text-xs text-slate-600">
-                95% Interval: [{assessment.confidence_interval[0]}%,{' '}
-                {assessment.confidence_interval[1]}%]
+                Provenance: {assessment.data_provenance} • FBS:{' '}
+                {assessment.fasting_blood_sugar !== null
+                  ? `${assessment.fasting_blood_sugar} mg/dL`
+                  : `>${assessment.fasting_blood_sugar_gt_120 ? '120' : '≤120'} mg/dL flag`}
               </p>
             </div>
           </div>

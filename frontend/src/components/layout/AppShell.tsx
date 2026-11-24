@@ -9,12 +9,6 @@ export interface AppShellProps {
   readonly children: React.ReactNode;
 }
 
-const EMERGENCY_NUMBERS: Record<'US' | 'IN' | 'GB', string> = {
-  US: '911',
-  IN: '112',
-  GB: '999',
-};
-
 export const AppShell: React.FC<AppShellProps> = ({ children }) => {
   const { user, isAuthenticated, countryCode, setCountryCode, clearSession } = useAuthStore();
   const navigate = useNavigate();
@@ -86,13 +80,13 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
             </div>
 
             <div className="flex items-center gap-3">
-              <a
-                href={`tel:${EMERGENCY_NUMBERS[countryCode]}`}
-                className="inline-flex min-h-[40px] items-center gap-1.5 rounded-md border border-crimson-600 bg-crimson-50 px-3 py-1.5 text-xs font-semibold text-crimson-700 hover:bg-crimson-100"
+              <div
+                role="note"
+                className="inline-flex min-h-[40px] items-center gap-1.5 rounded-md border border-crimson-600 bg-crimson-50 px-3 py-1.5 text-xs font-semibold text-crimson-700"
               >
                 <ShieldAlert className="h-4 w-4 shrink-0" aria-hidden="true" />
-                <span>Emergency: {EMERGENCY_NUMBERS[countryCode]}</span>
-              </a>
+                <span>Demo Only — Medical Emergency? Call Local EMS</span>
+              </div>
 
               <label htmlFor="global-country-select" className="sr-only">
                 Select Region

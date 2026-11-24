@@ -26,6 +26,7 @@ describe('Milestone 08: Clinical Intake Wizard, Unit Conversion & Emergency Trig
 
   it('rejects biologically implausible inputs via Zod intakeFormSchema', () => {
     const invalid = intakeFormSchema.safeParse({
+      synthetic_fixture_confirmed: true,
       age: 12,
       sex: 1,
       chest_pain_type: 0,
@@ -50,7 +51,7 @@ describe('Milestone 08: Clinical Intake Wizard, Unit Conversion & Emergency Trig
     }
   });
 
-  it('trips emergency alert immediately on crisis resting BP > 180 and passes axe audit', async () => {
+  it('displays non-diagnostic synthetic guardrail banner without automated crisis triage claims and passes axe', async () => {
     const { container } = render(
       <MemoryRouter>
         <IntakeWizardPage />
@@ -63,7 +64,10 @@ describe('Milestone 08: Clinical Intake Wizard, Unit Conversion & Emergency Trig
     await userEvent.clear(bpInput);
     await userEvent.type(bpInput, '195');
 
-    expect(screen.getByRole('alert')).toHaveTextContent(/Hypertensive Crisis Range/i);
+    expect(
+      screen.getByText(/Automated clinical red-flag triage is disabled pending physician advisory review/i)
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Hypertensive Crisis Range/i)).not.toBeInTheDocument();
 
     const results = await axe(container);
     expect(results).toHaveNoViolations();

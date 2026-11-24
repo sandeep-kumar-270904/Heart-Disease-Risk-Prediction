@@ -1,4 +1,4 @@
-"""HeartXAI 2.0 - Clinical Assessment Orchestration Service (Milestones 11–13)."""
+"""HeartXAI 2.0 - Clinical Assessment Orchestration Service (Remediation Round 01)."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.errors import AuthorizationError, ResourceNotFoundError
+from app.core.errors import AuthorizationError, ClinicalBoundaryError, ResourceNotFoundError
 from app.ml.counterfactual_service import get_counterfactual_service
 from app.ml.inference_service import get_inference_service
 from app.ml.shap_service import get_shap_service
@@ -19,27 +19,49 @@ from app.models.assessment import (
     InferenceResult,
     ShapExplanation,
 )
-from app.models.consent import DoctorGrant
 from app.models.user import User
 from app.schemas.assessment import (
     AssessmentCreateDto,
     AssessmentDetailResponse,
     FeatureImpactDto,
-    RiskStrata,
     ScenarioResultDto,
     ShapExplanationResponse,
 )
+from app.schemas.auth import ALLOWED_SYNTHETIC_DOMAINS
+from app.services.audit_service import record_audit_event
+from app.services.consent_service import authorize_clinician_grant
+
+
+def _verify_synthetic_provenance(actor: User) -> str:
+    """Verify server-side DEC-005 synthetic boundary (do not blindly trust config flag alone)."""
+    if not settings.SYNTHETIC_DATA_ONLY:
+        raise ClinicalBoundaryError(
+            "Assessment submission is disabled because SYNTHETIC_DATA_ONLY is false."
+        )
+    email_domain = str(actor.email).rsplit("@", 1)[-1].lower()
+    if not bool(actor.is_synthetic) or email_domain not in ALLOWED_SYNTHETIC_DOMAINS:
+        raise AuthorizationError(
+            "Account does not hold verified Category B synthetic persona provenance (DEC-005)."
+        )
+    return f"Category B — Controlled Synthetic Persona ({email_domain})"
 
 
 def _assessment_to_dto(record: Assessment) -> AssessmentCreateDto:
+    """Convert stored Assessment to AssessmentCreateDto without fabricating missing glucose."""
+    if record.fasting_blood_sugar_mgdl is None:
+        raise ClinicalBoundaryError(
+            "Legacy record lacks preserved numeric fasting_blood_sugar measurement; "
+            "numeric simulation cannot run without reconstructing placeholder values."
+        )
     return AssessmentCreateDto(
+        synthetic_fixture_confirmed=True,
         age=float(record.age),
         sex=int(record.sex),
         chest_pain_type=int(record.cp),
         unit_system="us_customary",
         resting_bp=float(record.trestbps),
         serum_cholesterol=float(record.chol),
-        fasting_blood_sugar=130.0 if int(record.fbs) == 1 else 95.0,
+        fasting_blood_sugar=float(record.fasting_blood_sugar_mgdl),
         resting_ecg=int(record.restecg),
         max_heart_rate=float(record.thalach),
         exercise_angina=int(record.exang),
@@ -55,14 +77,21 @@ def _inference_to_response(
     inf: InferenceResult,
 ) -> AssessmentDetailResponse:
     pct = round(float(inf.cad_probability) * 100.0, 2)
-    risk_strata: RiskStrata = "low" if pct < 30.0 else ("moderate" if pct < 70.0 else "elevated")
-    emergency = bool(
-        int(assessment.trestbps) > 180 or (int(assessment.cp) == 0 and int(assessment.exang) == 1)
+    fbs_numeric = (
+        round(float(assessment.fasting_blood_sugar_mgdl), 2)
+        if assessment.fasting_blood_sugar_mgdl is not None
+        else None
+    )
+    fbs_gt_120 = bool(int(assessment.fbs) == 1)
+    provenance = (
+        "Category B — Verified Synthetic Persona Record"
+        if bool(assessment.is_synthetic)
+        else "UNVERIFIED PROVENANCE — REJECTED FROM SYNTHETIC COHORT"
     )
     summary = (
-        f"Educational Task A Benchmark Association: {pct:.1f}% "
-        f"({risk_strata} tier, UCI Cleveland retrospective cohort similarity). "
-        "Informational model output only — NOT a medical diagnosis or 10-year risk forecast."
+        f"Experimental Retrospective Task A Model Score: {pct:.1f}% "
+        "(UCI Cleveland retrospective binary CAD classification model). "
+        "Informational model output only — NOT a medical diagnosis, risk tier, or 10-year risk forecast."
     )
     return AssessmentDetailResponse(
         id=str(assessment.id),
@@ -72,7 +101,8 @@ def _inference_to_response(
         chest_pain_type=int(assessment.cp),
         resting_bp=float(assessment.trestbps),
         serum_cholesterol=float(assessment.chol),
-        fasting_blood_sugar=130.0 if int(assessment.fbs) == 1 else 95.0,
+        fasting_blood_sugar=fbs_numeric,
+        fasting_blood_sugar_gt_120=fbs_gt_120,
         resting_ecg=int(assessment.restecg),
         max_heart_rate=float(assessment.thalach),
         exercise_angina=int(assessment.exang),
@@ -81,16 +111,13 @@ def _inference_to_response(
         major_vessels=int(assessment.ca),
         thallium_stress=int(assessment.thal),
         cad_likelihood_percent=pct,
-        confidence_interval=[
-            float(inf.confidence_interval_low),
-            float(inf.confidence_interval_high),
-        ],
-        risk_strata=risk_strata,
+        risk_strata="unstratified",
         ten_year_population_risk_percent=None,  # DEC-003 Option A: Task B excluded in MVP
         model_version=str(inf.model_version),
         cohort_name="UCI Cleveland Retrospective Benchmark (N=303)",
+        data_provenance=provenance,
         plain_language_summary=summary,
-        emergency_warning_active=emergency,
+        emergency_warning_active=False,  # Automated clinical red-flag triage pending clinical sign-off
         created_at=cast(datetime, assessment.created_at),
     )
 
@@ -100,7 +127,9 @@ def create_and_score_assessment(
     patient: User,
     dto: AssessmentCreateDto,
 ) -> AssessmentDetailResponse:
-    """Persist synthetic clinical intake, execute XGBoost + TreeSHAP + Counterfactuals."""
+    """Persist verified synthetic intake, run Task A inference + SHAP + CF, preserve numeric FBS."""
+    _verify_synthetic_provenance(patient)
+
     inference_svc = get_inference_service()
     shap_svc = get_shap_service()
     cf_svc = get_counterfactual_service()
@@ -109,23 +138,32 @@ def create_and_score_assessment(
     shap_out = shap_svc.explain(dto)
     cf_out = cf_svc.generate_optimal(dto)
 
+    imputers = inference_svc.artifact.get("training_fold_imputers", {})
+    ca_val = int(dto.major_vessels) if dto.major_vessels is not None else int(imputers.get("ca", 0))
+    thal_val = (
+        int(dto.thallium_stress)
+        if dto.thallium_stress is not None
+        else int(imputers.get("thal", 1))
+    )
+
     assessment = Assessment(
         patient_id=str(patient.id),
         status="COMPLETED",
-        is_synthetic=settings.SYNTHETIC_DATA_ONLY,
+        is_synthetic=True,
         age=int(round(dto.age)),
         sex=int(dto.sex),
         cp=int(dto.chest_pain_type),
         trestbps=int(round(dto.resting_bp)),
         chol=int(round(dto.serum_cholesterol)),
         fbs=1 if dto.fasting_blood_sugar > 120.0 else 0,
+        fasting_blood_sugar_mgdl=round(float(dto.fasting_blood_sugar), 2),
         restecg=int(dto.resting_ecg),
         thalach=int(round(dto.max_heart_rate)),
         exang=int(dto.exercise_angina),
         oldpeak=float(dto.st_depression),
         slope=int(dto.st_slope),
-        ca=int(dto.major_vessels if dto.major_vessels is not None else 0),
-        thal=int(dto.thallium_stress if dto.thallium_stress is not None else 1),
+        ca=ca_val,
+        thal=thal_val,
     )
     db.add(assessment)
     db.flush()
@@ -135,8 +173,8 @@ def create_and_score_assessment(
         model_version=pred.model_version,
         cad_probability=pred.probability,
         cad_risk_tier=pred.db_risk_tier,
-        confidence_interval_low=pred.confidence_interval[0],
-        confidence_interval_high=pred.confidence_interval[1],
+        confidence_interval_low=None,
+        confidence_interval_high=None,
         ascvd_10yr_risk=None,
         ascvd_risk_tier=None,
         base_expected_value=shap_out.base_value,
@@ -173,6 +211,15 @@ def create_and_score_assessment(
         )
     )
 
+    record_audit_event(
+        db,
+        actor=patient,
+        action_type="SYNTHETIC_ASSESSMENT_CREATED",
+        resource_id=str(assessment.id),
+        endpoint="/api/v1/assessments",
+        method="POST",
+        status_code=201,
+    )
     db.commit()
     db.refresh(assessment)
     db.refresh(inf_row)
@@ -183,33 +230,38 @@ def authorize_assessment_access(
     db: Session,
     assessment_id: str,
     actor: User,
+    *,
+    now: datetime | None = None,
 ) -> Assessment:
-    """Enforce strict Anti-IDOR ownership or active clinician consent grant verification."""
+    """Enforce owner-only or authoritative active/unrevoked/unexpired clinician consent."""
     assessment = db.scalar(select(Assessment).where(Assessment.id == assessment_id))
     if assessment is None:
         raise ResourceNotFoundError("Assessment record was not found.")
 
-    actor_role = str(actor.role)
-    if str(assessment.patient_id) == str(actor.id) or actor_role in {"ADMIN", "ADMINISTRATOR"}:
+    if str(assessment.patient_id) == str(actor.id):
         return assessment
 
-    if actor_role == "CLINICIAN":
-        grant = db.scalar(
-            select(DoctorGrant).where(
-                DoctorGrant.patient_id == assessment.patient_id,
-                DoctorGrant.doctor_id == actor.id,
-                DoctorGrant.status == "ACTIVE",
-            )
+    if str(actor.role) == "CLINICIAN":
+        authorize_clinician_grant(
+            db,
+            patient_id=str(assessment.patient_id),
+            doctor=actor,
+            now=now,
         )
-        if grant is not None:
-            return assessment
+        return assessment
 
     raise AuthorizationError("You are not authorized to access this assessment record.")
 
 
-def get_assessment_detail(db: Session, assessment_id: str, actor: User) -> AssessmentDetailResponse:
+def get_assessment_detail(
+    db: Session,
+    assessment_id: str,
+    actor: User,
+    *,
+    now: datetime | None = None,
+) -> AssessmentDetailResponse:
     """Retrieve a single authorized assessment with inference results."""
-    assessment = authorize_assessment_access(db, assessment_id, actor)
+    assessment = authorize_assessment_access(db, assessment_id, actor, now=now)
     if assessment.inference_result is None:
         raise ResourceNotFoundError("Inference output not found for assessment.")
     return _inference_to_response(assessment, assessment.inference_result)
@@ -229,9 +281,15 @@ def list_patient_assessments(db: Session, patient: User) -> list[AssessmentDetai
     ]
 
 
-def get_assessment_shap(db: Session, assessment_id: str, actor: User) -> ShapExplanationResponse:
+def get_assessment_shap(
+    db: Session,
+    assessment_id: str,
+    actor: User,
+    *,
+    now: datetime | None = None,
+) -> ShapExplanationResponse:
     """Retrieve persisted TreeSHAP local attributions for an authorized assessment."""
-    assessment = authorize_assessment_access(db, assessment_id, actor)
+    assessment = authorize_assessment_access(db, assessment_id, actor, now=now)
     inf = assessment.inference_result
     if inf is None:
         raise ResourceNotFoundError("Inference result not found.")
@@ -272,9 +330,11 @@ def simulate_assessment_scenario(
     assessment_id: str,
     actor: User,
     modified_features: dict[str, float],
+    *,
+    now: datetime | None = None,
 ) -> ScenarioResultDto:
-    """Simulate a constrained counterfactual lifestyle adjustment."""
-    assessment = authorize_assessment_access(db, assessment_id, actor)
+    """Simulate a constrained counterfactual hypothetical scenario."""
+    assessment = authorize_assessment_access(db, assessment_id, actor, now=now)
     baseline_dto = _assessment_to_dto(assessment)
     cf_svc = get_counterfactual_service()
     return cf_svc.simulate(

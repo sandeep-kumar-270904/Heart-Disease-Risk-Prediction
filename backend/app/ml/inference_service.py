@@ -38,7 +38,6 @@ class InferenceOutput:
     model_version: str
     probability: float
     likelihood_percent: float
-    confidence_interval: list[float]
     risk_strata: RiskStrata
     db_risk_tier: str
     raw_margin: float
@@ -49,11 +48,20 @@ class InferenceOutput:
     feature_vector: np.ndarray
 
 
-def dto_to_feature_vector(dto: AssessmentCreateDto) -> np.ndarray:
-    """Convert validated AssessmentCreateDto into ordered 13-feature NumPy row."""
+def dto_to_feature_vector(
+    dto: AssessmentCreateDto,
+    imputers: dict[str, float] | None = None,
+) -> np.ndarray:
+    """Convert validated AssessmentCreateDto into ordered 13-feature NumPy row.
+
+    Explicitly derives the binary UCI Cleveland fbs feature (> 120 mg/dL -> 1.0)
+    in the ML preprocessing layer while preserving exact numeric glucose separately.
+    """
+    ca_default = float((imputers or {}).get("ca", 0.0))
+    thal_default = float((imputers or {}).get("thal", 1.0))
     fbs_binary = 1.0 if dto.fasting_blood_sugar > 120.0 else 0.0
-    ca_val = float(dto.major_vessels if dto.major_vessels is not None else 0)
-    thal_val = float(dto.thallium_stress if dto.thallium_stress is not None else 1)
+    ca_val = float(dto.major_vessels) if dto.major_vessels is not None else ca_default
+    thal_val = float(dto.thallium_stress) if dto.thallium_stress is not None else thal_default
 
     return np.array(
         [
@@ -99,7 +107,8 @@ class InferenceService:
     def predict(self, dto: AssessmentCreateDto) -> InferenceOutput:
         """Execute sub-20ms calibrated Task A classification in-process."""
         art = self._ensure_loaded()
-        vec = dto_to_feature_vector(dto)
+        imputers = art.get("training_fold_imputers")
+        vec = dto_to_feature_vector(dto, imputers=imputers)
 
         xgb_model = art["xgb_estimator"]
         calibrator = art["platt_calibrator"]
@@ -111,18 +120,9 @@ class InferenceService:
         prob = min(max(prob, 0.0), 1.0)
         likelihood_pct = round(prob * 100.0, 2)
 
-        if likelihood_pct < 30.0:
-            risk_strata: RiskStrata = "low"
-            db_tier = "LOW"
-        elif likelihood_pct < 70.0:
-            risk_strata = "moderate"
-            db_tier = "BORDERLINE"
-        else:
-            risk_strata = "elevated"
-            db_tier = "ELEVATED"
-
-        ci_low = round(max(0.0, likelihood_pct - 6.5), 1)
-        ci_high = round(min(100.0, likelihood_pct + 6.5), 1)
+        # Unsupported 30%/70% clinical risk cutoffs disabled pending DEC-002 clinical review
+        risk_strata: RiskStrata = "unstratified"
+        db_tier = "UNSTRATIFIED"
 
         is_ood = any(
             float(vec[0, idx]) < bounds[col][0] or float(vec[0, idx]) > bounds[col][1]
@@ -130,21 +130,19 @@ class InferenceService:
             if col in bounds
         )
 
-        emergency_active = bool(
-            dto.resting_bp > 180.0 or (dto.chest_pain_type == 0 and dto.exercise_angina == 1)
-        )
+        # Unreviewed automated clinical red-flag triage disabled pending DEC-002 physician sign-off
+        emergency_active = False
 
         summary = (
-            f"Educational Task A Benchmark Association: {likelihood_pct:.1f}% "
-            f"({risk_strata} tier, UCI Cleveland retrospective cohort similarity). "
-            "Informational model output only — NOT a medical diagnosis or 10-year risk forecast."
+            f"Experimental Retrospective Task A Model Score: {likelihood_pct:.1f}% "
+            "(UCI Cleveland retrospective binary CAD classification model). "
+            "Informational model output only — NOT a medical diagnosis, risk tier, or future 10-year risk forecast."
         )
 
         return InferenceOutput(
             model_version=str(art["model_version"]),
             probability=prob,
             likelihood_percent=likelihood_pct,
-            confidence_interval=[ci_low, ci_high],
             risk_strata=risk_strata,
             db_risk_tier=db_tier,
             raw_margin=raw_margin,

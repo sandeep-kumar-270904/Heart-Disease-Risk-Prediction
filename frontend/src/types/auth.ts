@@ -17,6 +17,7 @@ export interface RegisterRequest {
   readonly full_name: string;
   readonly country_code: string;
   readonly consent_given: true;
+  readonly synthetic_persona_acknowledged: true;
 }
 
 export interface LoginRequest {
@@ -42,8 +43,5 @@ export interface UserProfileResponse {
 
 export interface PatientProfileUpdateDto {
   readonly preferred_units: UnitSystem;
-  readonly date_of_birth: string | null;
   readonly biological_sex: BiologicalSex | null;
-  readonly emergency_contact_name: string | null;
-  readonly emergency_contact_phone: string | null;
 }

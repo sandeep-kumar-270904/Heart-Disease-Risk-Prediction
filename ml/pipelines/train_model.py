@@ -18,7 +18,6 @@ from typing import Any
 import joblib
 import numpy as np
 import pandas as pd
-from sklearn.calibration import CalibratedClassifierCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import brier_score_loss, roc_auc_score
 from sklearn.model_selection import StratifiedKFold
@@ -139,13 +138,17 @@ def train_and_register_model(
     final_xgb = XGBClassifier(**xgb_params)
     final_xgb.fit(X_train, y_train)
 
-    # Also compute sklearn CalibratedClassifierCV benchmark for cross-check
-    cal_cv = CalibratedClassifierCV(XGBClassifier(**xgb_params), method="sigmoid", cv=5)
-    cal_cv.fit(X_train, y_train)
+    training_fold_imputers = {
+        "ca": float(train_df["ca"].dropna().median()),
+        "thal": float(train_df["thal"].dropna().mode().iloc[0]),
+    }
 
-    cohort_means = {col: round(float(train_df[col].mean()), 4) for col in FEATURE_COLUMNS}
+    cohort_means = {
+        col: round(float(train_df[col].mean()), 4) for col in FEATURE_COLUMNS
+    }
     feature_bounds = {
-        col: (float(train_df[col].min()), float(train_df[col].max())) for col in FEATURE_COLUMNS
+        col: (float(train_df[col].min()), float(train_df[col].max()))
+        for col in FEATURE_COLUMNS
     }
     background_sample = X_train[: min(100, len(X_train))].copy()
 
@@ -177,7 +180,9 @@ def train_and_register_model(
             subgroup_metrics[label] = {
                 "n": float(mask.sum()),
                 "auroc": round(float(roc_auc_score(y_test[mask], test_probs[mask])), 4),
-                "brier_score": round(float(brier_score_loss(y_test[mask], test_probs[mask])), 4),
+                "brier_score": round(
+                    float(brier_score_loss(y_test[mask], test_probs[mask])), 4
+                ),
             }
 
     # 4. Serialize model artifact dictionary (zero custom class pickle coupling) + SHA-256 hash
@@ -186,6 +191,7 @@ def train_and_register_model(
         "feature_columns": list(FEATURE_COLUMNS),
         "xgb_estimator": final_xgb,
         "platt_calibrator": platt_calibrator,
+        "training_fold_imputers": training_fold_imputers,
         "cohort_feature_means": cohort_means,
         "feature_bounds": feature_bounds,
         "background_sample": background_sample,

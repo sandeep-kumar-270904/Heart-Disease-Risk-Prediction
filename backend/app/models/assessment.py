@@ -41,6 +41,7 @@ class Assessment(Base, TimestampMixin):
     trestbps = Column(Integer, nullable=False)  # Resting blood pressure (mm Hg)
     chol = Column(Integer, nullable=False)  # Serum cholesterol (mg/dL)
     fbs = Column(Integer, nullable=False)  # Fasting blood sugar > 120 mg/dL: 0 = No, 1 = Yes
+    fasting_blood_sugar_mgdl = Column(Float, nullable=True)  # Exact numeric input (mg/dL)
     restecg = Column(
         Integer, nullable=False
     )  # Resting ECG: 0 = Normal, 1 = ST-T Abnormality, 2 = LV Hypertrophy
@@ -83,11 +84,11 @@ class InferenceResult(Base):
     )
     model_version = Column(String(32), nullable=False)  # e.g. "v2.0.0"
 
-    # Target 1: Calibrated Coronary Artery Disease (CAD) Presence (Stenosis >= 50%)
+    # Target 1: Retrospective Coronary Artery Disease (CAD) UCI Classification Score
     cad_probability = Column(Float, nullable=False)  # 0.0 - 1.0
-    cad_risk_tier = Column(String(32), nullable=False)  # LOW, BORDERLINE, ELEVATED
-    confidence_interval_low = Column(Float, nullable=False)
-    confidence_interval_high = Column(Float, nullable=False)
+    cad_risk_tier = Column(String(32), nullable=False)  # UNSTRATIFIED_PENDING_REVIEW
+    confidence_interval_low = Column(Float, nullable=True)  # Null unless statistically justified
+    confidence_interval_high = Column(Float, nullable=True)
 
     # Target 2: Prospective 10-Year ASCVD Risk (Reserved for future research; None in MVP per DEC-003)
     ascvd_10yr_risk = Column(Float, nullable=True)
