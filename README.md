@@ -34,7 +34,11 @@ The engineering roadmap follows 20 modular, test-driven milestones:
 | **M08** | **Clinical Intake Wizard & Input Validation** | **Completed** |
 | **M09** | **ML Data Verification & Stratification (Category A Data)** | **Completed** |
 | **M10** | **Task A Model Training & Probability Calibration** | **Completed** |
-| M11 | In-Process ML Model Serving Pipeline | Next |
+| **M11** | **In-Process ML Model Serving Pipeline** | **Completed** |
+| **M12** | **TreeSHAP Local Explanation Engine** | **Completed** |
+| **M13** | **Constrained Counterfactual Engine** | **Completed** |
+| **M14** | **Clinical Results & PDF Dossier Export (Task B Excluded)** | **Completed** |
+| M15 | Localized Healthcare Directory & Emergency Hotlines | Next |
 
 ---
 

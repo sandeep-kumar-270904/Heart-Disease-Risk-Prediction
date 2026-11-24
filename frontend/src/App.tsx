@@ -4,6 +4,7 @@ import { AppShell } from '@/components/layout/AppShell';
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui';
 import { LoginPage } from '@/features/auth/LoginPage';
 import { RegisterPage } from '@/features/auth/RegisterPage';
+import { AssessmentResultsPage } from '@/features/assessment/AssessmentResultsPage';
 import { IntakeWizardPage } from '@/features/intake/IntakeWizardPage';
 import { ProtectedRoute } from '@/routes/ProtectedRoute';
 
@@ -46,6 +47,14 @@ export const AppRoutes: React.FC = () => (
         element={
           <ProtectedRoute>
             <IntakeWizardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/assessments/:id"
+        element={
+          <ProtectedRoute>
+            <AssessmentResultsPage />
           </ProtectedRoute>
         }
       />

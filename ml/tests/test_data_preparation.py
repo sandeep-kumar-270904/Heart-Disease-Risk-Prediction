@@ -3,7 +3,6 @@
 from pathlib import Path
 
 import pandas as pd
-
 from ml.pipelines.prepare_data import (
     FEATURE_COLUMNS,
     apply_imputers,
@@ -15,7 +14,7 @@ from ml.pipelines.prepare_data import (
 def test_prepare_datasets_baseline_and_anti_leakage(tmp_path: Path) -> None:
     """Verify exact N=303 baseline, N=297 sensitivity, zero split overlap, and determinism."""
     report_a = prepare_datasets(output_dir=tmp_path / "run_a", seed=42)
-    report_b = prepare_datasets(output_dir=tmp_path / "run_b", seed=42)
+    prepare_datasets(output_dir=tmp_path / "run_b", seed=42)
 
     assert report_a["full_imputed_baseline"]["n_total"] == 303
     assert report_a["full_imputed_baseline"]["n_negative"] == 164
@@ -45,9 +44,7 @@ def test_prepare_datasets_baseline_and_anti_leakage(tmp_path: Path) -> None:
 
 def test_imputers_fit_strictly_on_training_partition() -> None:
     """Verify imputer statistics ignore validation/test rows."""
-    train_df = pd.DataFrame(
-        {"ca": [0.0, 0.0, 1.0, None], "thal": [1.0, 1.0, 3.0, None]}
-    )
+    train_df = pd.DataFrame({"ca": [0.0, 0.0, 1.0, None], "thal": [1.0, 1.0, 3.0, None]})
     test_df = pd.DataFrame({"ca": [3.0, 3.0, None], "thal": [3.0, 3.0, None]})
 
     imputers = fit_training_imputers(train_df)

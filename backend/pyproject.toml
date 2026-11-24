@@ -63,3 +63,7 @@ plugins = ["pydantic.mypy"]
 init_forbid_extra = true
 init_typed = true
 warn_required_dynamic_aliases = true
+
+[[tool.mypy.overrides]]
+module = ["joblib.*", "shap.*", "reportlab.*", "xgboost.*", "sklearn.*", "pandas.*"]
+ignore_missing_imports = true
