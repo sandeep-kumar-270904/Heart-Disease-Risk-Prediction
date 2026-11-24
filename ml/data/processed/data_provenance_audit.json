@@ -1,0 +1,36 @@
+{
+  "data_category": "Category A \u2014 Public Historical Human-Origin Research Data",
+  "dataset_name": "UCI Cleveland Clinic Foundation Heart Disease (processed.cleveland.data)",
+  "provenance_source": "https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/processed.cleveland.data",
+  "license_and_permitted_use": "UCI ML Repository public academic/research benchmark; non-commercial research & software evaluation only",
+  "privacy_assessment": {
+    "modern_hipaa_certification": false,
+    "gdpr_anonymization_verified": false,
+    "documented_limitations": "Historical 1988 clinical cohort; retains age, sex, and clinical measurements; zero runtime patient upload permitted (DEC-005)."
+  },
+  "raw_file_sha256": "a74b7efa387bc9d108d7d0115d831fe9b414b29ae7124f331b622b4efa0427c8",
+  "seed": 42,
+  "full_imputed_baseline": {
+    "n_total": 303,
+    "n_negative": 164,
+    "n_positive": 139,
+    "prevalence": 0.458746,
+    "null_model_brier_score": 0.248298,
+    "missing_ca": 4,
+    "missing_thal": 2,
+    "training_fold_imputers": {
+      "ca": 0.0,
+      "thal": 1.0
+    },
+    "n_train": 242,
+    "n_test": 61
+  },
+  "complete_case_sensitivity": {
+    "n_total": 297,
+    "n_negative": 160,
+    "n_positive": 137,
+    "prevalence": 0.461279,
+    "null_model_brier_score": 0.248501
+  },
+  "target_semantics": "Retrospective binary CAD classification (num == 0 -> 0; num >= 1 -> 1). Zero prospective risk claims."
+}

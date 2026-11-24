@@ -1,0 +1,117 @@
+{
+  "model_version": "v2.0.0",
+  "generated_at": "2026-11-24T20:28:16.481495+00:00",
+  "artifact_sha256": "5f7ef04726fd985109a44927f8718697a94e096dd0734473da3246e3d4372086",
+  "task_scope": "Task A \u2014 Experimental Retrospective UCI Cleveland Binary CAD Classifier (DEC-003 Option A)",
+  "non_diagnostic_disclaimer": "Experimental research model evaluated on N=303 retrospective data; not cleared for clinical diagnosis.",
+  "training_oof_metrics": {
+    "n_samples": 242,
+    "auroc": 0.8894,
+    "brier_score": 0.1303,
+    "ece": 0.0448
+  },
+  "holdout_test_metrics": {
+    "n_samples": 61,
+    "auroc": 0.9502,
+    "brier_score": 0.0927,
+    "ece": 0.112,
+    "provisional_targets_note": "Thresholds (Brier <= 0.12, ECE <= 0.05) are provisional small-N evaluation targets requiring prospective external validation (Phase 12.2.2)."
+  },
+  "subgroup_fairness_sex": {
+    "female": {
+      "n": 20.0,
+      "auroc": 0.989,
+      "brier_score": 0.0567
+    },
+    "male": {
+      "n": 41.0,
+      "auroc": 0.9381,
+      "brier_score": 0.1103
+    }
+  },
+  "reliability_bins": [
+    {
+      "bin_low": 0.0,
+      "bin_high": 0.1,
+      "count": 16.0,
+      "mean_predicted_prob": 0.0552,
+      "observed_frequency": 0.0
+    },
+    {
+      "bin_low": 0.1,
+      "bin_high": 0.2,
+      "count": 6.0,
+      "mean_predicted_prob": 0.1494,
+      "observed_frequency": 0.1667
+    },
+    {
+      "bin_low": 0.2,
+      "bin_high": 0.3,
+      "count": 3.0,
+      "mean_predicted_prob": 0.2472,
+      "observed_frequency": 0.3333
+    },
+    {
+      "bin_low": 0.3,
+      "bin_high": 0.4,
+      "count": 4.0,
+      "mean_predicted_prob": 0.3629,
+      "observed_frequency": 0.0
+    },
+    {
+      "bin_low": 0.4,
+      "bin_high": 0.5,
+      "count": 2.0,
+      "mean_predicted_prob": 0.4365,
+      "observed_frequency": 0.5
+    },
+    {
+      "bin_low": 0.5,
+      "bin_high": 0.6,
+      "count": 2.0,
+      "mean_predicted_prob": 0.5542,
+      "observed_frequency": 0.5
+    },
+    {
+      "bin_low": 0.6,
+      "bin_high": 0.7,
+      "count": 4.0,
+      "mean_predicted_prob": 0.6547,
+      "observed_frequency": 0.25
+    },
+    {
+      "bin_low": 0.7,
+      "bin_high": 0.8,
+      "count": 6.0,
+      "mean_predicted_prob": 0.7373,
+      "observed_frequency": 1.0
+    },
+    {
+      "bin_low": 0.8,
+      "bin_high": 0.9,
+      "count": 7.0,
+      "mean_predicted_prob": 0.8778,
+      "observed_frequency": 0.8571
+    },
+    {
+      "bin_low": 0.9,
+      "bin_high": 1.0,
+      "count": 11.0,
+      "mean_predicted_prob": 0.9493,
+      "observed_frequency": 1.0
+    }
+  ],
+  "hyperparameters": {
+    "n_estimators": 90,
+    "max_depth": 2,
+    "learning_rate": 0.05,
+    "subsample": 0.85,
+    "colsample_bytree": 0.85,
+    "min_child_weight": 3.0,
+    "reg_alpha": 0.75,
+    "reg_lambda": 3.0,
+    "eval_metric": "logloss",
+    "random_state": 42,
+    "n_jobs": 1
+  }
+}

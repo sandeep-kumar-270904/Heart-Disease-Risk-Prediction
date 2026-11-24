@@ -32,7 +32,9 @@ The engineering roadmap follows 20 modular, test-driven milestones:
 | **M06** | **Authentication, Sessions & RBAC (Argon2id, JWT, Redis)** | **Completed** |
 | **M07** | **Frontend Core Shell, Routing & Auth State** | **Completed** |
 | **M08** | **Clinical Intake Wizard & Input Validation** | **Completed** |
-| M09 | ML Data Verification & Stratification (Category A Data) | Next |
+| **M09** | **ML Data Verification & Stratification (Category A Data)** | **Completed** |
+| **M10** | **Task A Model Training & Probability Calibration** | **Completed** |
+| M11 | In-Process ML Model Serving Pipeline | Next |
 
 ---
 
