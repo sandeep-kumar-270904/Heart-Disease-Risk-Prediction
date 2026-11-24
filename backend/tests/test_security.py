@@ -11,13 +11,13 @@ from app.core.security import (
 
 
 def test_password_hashing_and_verification():
-    """Verify that bcrypt hashing generates secure, verifiable salted hashes."""
+    """Verify that Argon2id hashing generates secure, verifiable salted hashes."""
     password = "SuperSecretPassword123!"
     hashed = hash_password(password)
 
-    # Assert hash is not plaintext and has bcrypt prefix
+    # Assert hash is not plaintext and has RFC 9106 Argon2id prefix
     assert hashed != password
-    assert hashed.startswith("$2b$") or hashed.startswith("$2a$")
+    assert hashed.startswith("$argon2id$")
 
     # Assert correct verification
     assert verify_password(password, hashed) is True

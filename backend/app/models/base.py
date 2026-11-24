@@ -36,11 +36,11 @@ def generate_uuidv7() -> str:
             _LAST_RAND_A = (_LAST_RAND_A + 1) & 0x0FFF
             if _LAST_RAND_A == 0:
                 timestamp_ms += 1
-                _LAST_RAND_A = int.from_bytes(os.urandom(2), "big") & 0x0FFF
+                _LAST_RAND_A = int.from_bytes(os.urandom(2), "big") & 0x07FF
         else:
-            _LAST_TIMESTAMP_MS = timestamp_ms
-            _LAST_RAND_A = int.from_bytes(os.urandom(2), "big") & 0x0FFF
+            _LAST_RAND_A = int.from_bytes(os.urandom(2), "big") & 0x07FF
 
+        _LAST_TIMESTAMP_MS = timestamp_ms
         rand_a = _LAST_RAND_A
         rand_b = int.from_bytes(os.urandom(8), "big") & 0x3FFFFFFFFFFFFFFF
 

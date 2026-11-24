@@ -9,22 +9,22 @@ import os
 import pytest
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
+import app.models  # noqa: F401  # Ensure all models register on Base.metadata
 from app.core.database import Base
 from app.core.security import hash_password
 from app.models.user import User
 
 TEST_DATABASE_URL = os.environ.get("TEST_DATABASE_URL", "sqlite:///:memory:")
 
-_connect_args: dict[str, object] = {}
+_engine_kwargs: dict[str, object] = {"pool_pre_ping": True}
 if TEST_DATABASE_URL.startswith("sqlite"):
-    _connect_args["check_same_thread"] = False
+    _engine_kwargs["connect_args"] = {"check_same_thread": False}
+    if TEST_DATABASE_URL == "sqlite:///:memory:":
+        _engine_kwargs["poolclass"] = StaticPool
 
-engine = create_engine(
-    TEST_DATABASE_URL,
-    connect_args=_connect_args,
-    pool_pre_ping=True,
-)
+engine = create_engine(TEST_DATABASE_URL, **_engine_kwargs)
 
 if TEST_DATABASE_URL.startswith("sqlite"):
 
