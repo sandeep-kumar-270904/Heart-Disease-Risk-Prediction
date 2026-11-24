@@ -1,0 +1,50 @@
+{
+  "timestamp_utc": "2026-11-24T20:37:49.528991+00:00",
+  "environment": "local-windows-python-3.11",
+  "variables_measured": {
+    "in_process_xgboost_inference_ms": {
+      "n": 200.0,
+      "mean_ms": 0.748,
+      "p50_ms": 0.705,
+      "p95_ms": 1.074,
+      "max_ms": 1.573
+    },
+    "treeshap_attribution_ms": {
+      "n": 50.0,
+      "mean_ms": 1.425,
+      "p50_ms": 1.467,
+      "p95_ms": 1.681,
+      "max_ms": 1.777
+    },
+    "counterfactual_grid_search_ms": {
+      "n": 30.0,
+      "mean_ms": 7.859,
+      "p50_ms": 7.437,
+      "p95_ms": 10.198,
+      "max_ms": 10.551
+    },
+    "pdf_dossier_generation_ms": {
+      "n": 15.0,
+      "mean_ms": 8.489,
+      "p50_ms": 8.347,
+      "p95_ms": 9.82,
+      "max_ms": 11.285
+    },
+    "argon2id_hashing_ms": {
+      "n": 5.0,
+      "mean_ms": 90.657,
+      "p50_ms": 90.161,
+      "p95_ms": 92.268,
+      "max_ms": 92.268
+    },
+    "fastapi_health_probe_ms": {
+      "n": 100.0,
+      "mean_ms": 9.999,
+      "p50_ms": 9.425,
+      "p95_ms": 10.954,
+      "max_ms": 61.049
+    },
+    "fastapi_health_rps": 100.0,
+    "concurrent_4_workers_100_inferences_total_ms": 97.36
+  }
+}

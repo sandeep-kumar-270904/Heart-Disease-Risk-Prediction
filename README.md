@@ -41,7 +41,9 @@ The engineering roadmap follows 20 modular, test-driven milestones:
 | **M15** | **Localized Healthcare Directory & Emergency Hotlines** | **Completed** |
 | **M16** | **Clinician Portal & Consent Sharing Grants** | **Completed** |
 | **M17** | **Administrative Console & Immutable Audit Trail** | **Completed** |
-| M18 | Security Hardening & Penetration Testing | Next |
+| **M18** | **Security Hardening, Nginx CSP & Anti-IDOR Verification** | **Completed** |
+| **M19** | **Accessibility (WCAG 2.2 AA) & Empirical Performance Benchmarking** | **Completed** |
+| **M20** | **Deployment Packaging, Disaster Recovery & Synthetic E2E Verification** | **Completed** |
 
 ---
 
