@@ -29,7 +29,10 @@ The engineering roadmap follows 20 modular, test-driven milestones:
 | **M03** | **Design System & UI Component Library (WCAG 2.2 AA Target)** | **Completed** |
 | **M04** | **Database Engine, PostgreSQL Migrations & Seeding** | **Completed** |
 | **M05** | **Backend Core Services & API Framework (FastAPI, RFC 7807)** | **Completed** |
-| M06 | Authentication, Sessions & RBAC (Argon2id, JWT, Redis) | Next |
+| **M06** | **Authentication, Sessions & RBAC (Argon2id, JWT, Redis)** | **Completed** |
+| **M07** | **Frontend Core Shell, Routing & Auth State** | **Completed** |
+| **M08** | **Clinical Intake Wizard & Input Validation** | **Completed** |
+| M09 | ML Data Verification & Stratification (Category A Data) | Next |
 
 ---
 
