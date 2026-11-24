@@ -2,9 +2,12 @@ import React from 'react';
 import { BrowserRouter, Link, Navigate, Route, Routes } from 'react-router-dom';
 import { AppShell } from '@/components/layout/AppShell';
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui';
+import { AdminConsolePage } from '@/features/admin/AdminConsolePage';
 import { LoginPage } from '@/features/auth/LoginPage';
 import { RegisterPage } from '@/features/auth/RegisterPage';
 import { AssessmentResultsPage } from '@/features/assessment/AssessmentResultsPage';
+import { DirectoryPage } from '@/features/directory/DirectoryPage';
+import { DoctorPortalPage } from '@/features/doctor/DoctorPortalPage';
 import { IntakeWizardPage } from '@/features/intake/IntakeWizardPage';
 import { ProtectedRoute } from '@/routes/ProtectedRoute';
 
@@ -55,6 +58,30 @@ export const AppRoutes: React.FC = () => (
         element={
           <ProtectedRoute>
             <AssessmentResultsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/directory"
+        element={
+          <ProtectedRoute>
+            <DirectoryPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/doctor"
+        element={
+          <ProtectedRoute>
+            <DoctorPortalPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <AdminConsolePage />
           </ProtectedRoute>
         }
       />

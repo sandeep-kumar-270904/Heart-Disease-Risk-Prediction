@@ -38,7 +38,10 @@ The engineering roadmap follows 20 modular, test-driven milestones:
 | **M12** | **TreeSHAP Local Explanation Engine** | **Completed** |
 | **M13** | **Constrained Counterfactual Engine** | **Completed** |
 | **M14** | **Clinical Results & PDF Dossier Export (Task B Excluded)** | **Completed** |
-| M15 | Localized Healthcare Directory & Emergency Hotlines | Next |
+| **M15** | **Localized Healthcare Directory & Emergency Hotlines** | **Completed** |
+| **M16** | **Clinician Portal & Consent Sharing Grants** | **Completed** |
+| **M17** | **Administrative Console & Immutable Audit Trail** | **Completed** |
+| M18 | Security Hardening & Penetration Testing | Next |
 
 ---
 
