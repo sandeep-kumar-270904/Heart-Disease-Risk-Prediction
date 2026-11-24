@@ -42,10 +42,10 @@ jobs:
           ruff check . ../scripts/generate_synthetic_patients.py
 
   # ----------------------------------------------------------------------------
-  # Stage 1b: Frontend TypeScript Type Verification
+  # Stage 1b: Frontend Typecheck, Lint, Vitest + a11y & Build
   # ----------------------------------------------------------------------------
-  frontend-typecheck:
-    name: Frontend TypeScript Verification
+  frontend-quality:
+    name: Frontend Quality, A11y Tests & Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Source Code
@@ -67,6 +67,21 @@ jobs:
         run: |
           cd frontend
           npm run typecheck
+
+      - name: Run ESLint (a11y + TypeScript)
+        run: |
+          cd frontend
+          npm run lint
+
+      - name: Run Vitest & axe-core Accessibility Tests
+        run: |
+          cd frontend
+          npm test
+
+      - name: Verify Production Bundle Build
+        run: |
+          cd frontend
+          npm run build
 
   # ----------------------------------------------------------------------------
   # Stage 2: Security & Static Analysis (SAST)

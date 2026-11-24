@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================================
+ * HeartXAI 2.0 — Clinical Design Token System (HX2-DES-003)
+ * WCAG 2.2 Level AA Compliant Theme Variables & Focus Ergonomics
+ * ============================================================================ */
+
+:root {
+  /* Semantic Surfaces */
+  --surface-canvas: #f8fafc;
+  --surface-card: #ffffff;
+  --surface-card-subtle: #f1f5f9;
+  --surface-overlay: #ffffff;
+
+  /* Semantic Typography */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+
+  /* Borders */
+  --border-subtle: #e2e8f0;
+  --border-interactive: #cbd5e1;
+
+  /* Interactive Brand Colors */
+  --interactive-primary: #0284c7;
+  --interactive-hover: #0369a1;
+  --interactive-focus: #0284c7;
+
+  /* Clinical Feedback Tokens */
+  --status-error-bg: #fef2f2;
+  --status-error-text: #b91c1c;
+  --status-error-border: #dc2626;
+  --status-warn-bg: #fffbeb;
+  --status-warn-text: #b45309;
+  --status-warn-border: #d97706;
+  --status-success-bg: #ecfdf5;
+  --status-success-text: #047857;
+  --status-success-border: #059669;
+}
+
+.dark {
+  --surface-canvas: #0f172a;
+  --surface-card: #1e293b;
+  --surface-card-subtle: #334155;
+  --surface-overlay: #1e293b;
+
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #94a3b8;
+
+  --border-subtle: #334155;
+  --border-interactive: #475569;
+
+  --interactive-primary: #38bdf8;
+  --interactive-hover: #0284c7;
+  --interactive-focus: #38bdf8;
+
+  --status-error-bg: #7f1d1d;
+  --status-error-text: #fee2e2;
+  --status-error-border: #ef4444;
+  --status-warn-bg: #78350f;
+  --status-warn-text: #fef3c7;
+  --status-warn-border: #f59e0b;
+  --status-success-bg: #064e3b;
+  --status-success-text: #d1fae5;
+  --status-success-border: #10b981;
+}
+
+@layer base {
+  html {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--surface-canvas);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* WCAG 2.2 SC 2.4.11 / 2.4.13 High-Visibility Focus Indicator */
+  *:focus-visible {
+    outline: 2px solid var(--interactive-focus);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.2);
+  }
+
+  /* Respect user motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+.tabular-clinical {
+  font-variant-numeric: tabular-nums;
+}
