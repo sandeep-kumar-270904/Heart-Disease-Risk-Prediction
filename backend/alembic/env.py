@@ -17,20 +17,27 @@ from app.models import Base
 config = context.config
 
 # Interpret the config file for Python logging.
-# This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # Set target metadata for autogenerate support
 target_metadata = Base.metadata
 
-# Override sqlalchemy.url with runtime settings.DATABASE_URL
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+
+def resolve_database_url() -> str:
+    """Resolve database URL preferring explicit env override or programmatic Config."""
+    configured_url = config.get_main_option("sqlalchemy.url")
+    env_url = os.environ.get("DATABASE_URL")
+    if env_url:
+        return env_url
+    if configured_url and configured_url != "sqlite:///./heartxai_dev.db":
+        return configured_url
+    return settings.DATABASE_URL
 
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode."""
-    url = config.get_main_option("sqlalchemy.url")
+    url = resolve_database_url()
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -45,11 +52,12 @@ def run_migrations_offline() -> None:
 
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
-    configuration = config.get_section(config.config_ini_section)
-    configuration["sqlalchemy.url"] = settings.DATABASE_URL
+    url = resolve_database_url()
+    configuration = config.get_section(config.config_ini_section) or {}
+    configuration["sqlalchemy.url"] = url
 
-    connect_args = {}
-    if settings.DATABASE_URL.startswith("sqlite"):
+    connect_args: dict[str, object] = {}
+    if url.startswith("sqlite"):
         connect_args["check_same_thread"] = False
 
     connectable = engine_from_config(
@@ -63,7 +71,7 @@ def run_migrations_online() -> None:
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
-            render_as_batch=settings.DATABASE_URL.startswith("sqlite"),
+            render_as_batch=url.startswith("sqlite"),
         )
 
         with context.begin_transaction():

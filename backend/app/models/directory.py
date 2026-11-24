@@ -22,6 +22,7 @@ class Doctor(Base, TimestampMixin):
     hospital_name = Column(String(255), nullable=False)
     contact_number = Column(String(64), nullable=False)
     location = Column(String(255), nullable=False)  # City, State, or Address
+    country_code = Column(String(7), default="US", nullable=False, index=True)
     email = Column(String(255), nullable=True)
     telehealth_available = Column(Boolean, default=True, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
@@ -43,6 +44,7 @@ class Hospital(Base, TimestampMixin):
     address = Column(String(255), nullable=False)
     city = Column(String(128), nullable=False)
     state = Column(String(64), nullable=False)
+    country_code = Column(String(7), default="US", nullable=False, index=True)
     accreditation_details = Column(
         String(255), nullable=False
     )  # e.g. "ACC Accredited Chest Pain Center"
@@ -60,6 +62,7 @@ class InsurancePolicy(Base, TimestampMixin):
     id = Column(String(36), primary_key=True, default=generate_uuid)
     provider_name = Column(String(255), nullable=False)  # e.g. Blue Cross, Aetna, Medicare
     policy_name = Column(String(255), nullable=False)
+    country_code = Column(String(7), default="US", nullable=False, index=True)
     coverage_summary = Column(Text, nullable=False)  # Details on ACA § 2713 $0 preventative copay
     monthly_premium_est = Column(Float, nullable=True)  # Estimated monthly premium range
     waiting_period_days = Column(Integer, default=0, nullable=False)

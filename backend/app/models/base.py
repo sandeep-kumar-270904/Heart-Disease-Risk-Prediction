@@ -1,17 +1,62 @@
-"""HeartXAI 2.0 - Base Model Mixin.
+"""HeartXAI 2.0 - Base Model Mixin & RFC 9562 UUIDv7 Generator.
 
-Provides common fields: UUID primary keys, creation timestamps, and update timestamps.
+Provides common fields: time-ordered UUIDv7 primary keys, creation timestamps,
+and update timestamps.
 """
 
+import os
+import threading
+import time
 import uuid
 from datetime import UTC, datetime
 
 from sqlalchemy import Column, DateTime
 
+_UUID_LOCK = threading.Lock()
+_LAST_TIMESTAMP_MS = 0
+_LAST_RAND_A = 0
+
+
+def generate_uuidv7() -> str:
+    """Generate an RFC 9562 compliant, monotonically sortable UUIDv7 string.
+
+    Layout (128 bits):
+    - 48 bits: Unix timestamp in milliseconds (big-endian)
+    -  4 bits: Version (0b0111 = 7)
+    - 12 bits: Monotonic sub-millisecond counter / random_a
+    -  2 bits: Variant (0b10)
+    - 62 bits: Cryptographically random_b
+    """
+    global _LAST_TIMESTAMP_MS, _LAST_RAND_A
+
+    with _UUID_LOCK:
+        timestamp_ms = time.time_ns() // 1_000_000
+        if timestamp_ms <= _LAST_TIMESTAMP_MS:
+            timestamp_ms = _LAST_TIMESTAMP_MS
+            _LAST_RAND_A = (_LAST_RAND_A + 1) & 0x0FFF
+            if _LAST_RAND_A == 0:
+                timestamp_ms += 1
+                _LAST_RAND_A = int.from_bytes(os.urandom(2), "big") & 0x0FFF
+        else:
+            _LAST_TIMESTAMP_MS = timestamp_ms
+            _LAST_RAND_A = int.from_bytes(os.urandom(2), "big") & 0x0FFF
+
+        rand_a = _LAST_RAND_A
+        rand_b = int.from_bytes(os.urandom(8), "big") & 0x3FFFFFFFFFFFFFFF
+
+    uuid_int = (
+        ((timestamp_ms & 0xFFFFFFFFFFFF) << 80)
+        | (0x7 << 76)
+        | ((rand_a & 0x0FFF) << 64)
+        | (0x2 << 62)
+        | rand_b
+    )
+    return str(uuid.UUID(int=uuid_int))
+
 
 def generate_uuid() -> str:
-    """Generate RFC 4122 compliant UUIDv4 string."""
-    return str(uuid.uuid4())
+    """Primary key default factory returning RFC 9562 UUIDv7 strings."""
+    return generate_uuidv7()
 
 
 def utc_now() -> datetime:

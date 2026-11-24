@@ -17,10 +17,12 @@ class User(Base, TimestampMixin):
     hashed_password = Column(String(255), nullable=False)
     full_name = Column(String(255), nullable=False)
     role = Column(String(32), default="PATIENT", nullable=False)  # GUEST, PATIENT, CLINICIAN, ADMIN
+    country_code = Column(String(7), default="US", nullable=False)
     clinician_status = Column(
         String(32), default="N/A", nullable=False
     )  # N/A, PENDING_VERIFICATION, VERIFIED, REJECTED
     is_active = Column(Boolean, default=True, nullable=False)
+    is_synthetic = Column(Boolean, default=True, nullable=False)
     last_login_at = Column(DateTime(timezone=True), nullable=True)
 
     # Relationships

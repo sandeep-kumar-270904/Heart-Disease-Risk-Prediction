@@ -30,6 +30,7 @@ class Assessment(Base, TimestampMixin):
         String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True
     )
     status = Column(String(32), default="COMPLETED", nullable=False)  # DRAFT, COMPLETED, REVIEWED
+    is_synthetic = Column(Boolean, default=True, nullable=False)
 
     # The 13 Benchmark Clinical Biomarkers
     age = Column(Integer, nullable=False)  # 18 - 100
@@ -88,9 +89,9 @@ class InferenceResult(Base):
     confidence_interval_low = Column(Float, nullable=False)
     confidence_interval_high = Column(Float, nullable=False)
 
-    # Target 2: Prospective 10-Year ASCVD Risk (ACC/AHA Guidelines)
-    ascvd_10yr_risk = Column(Float, nullable=False)  # 0.0 - 100.0%
-    ascvd_risk_tier = Column(String(32), nullable=False)  # LOW, BORDERLINE, INTERMEDIATE, HIGH
+    # Target 2: Prospective 10-Year ASCVD Risk (Reserved for future research; None in MVP per DEC-003)
+    ascvd_10yr_risk = Column(Float, nullable=True)
+    ascvd_risk_tier = Column(String(32), nullable=True)
 
     # Mathematical Baseline & Uncertainty
     base_expected_value = Column(Float, nullable=False)  # E[f(x)]
