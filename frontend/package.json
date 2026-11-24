@@ -1,0 +1,14 @@
+{
+  "name": "heartxai-frontend",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "description": "HeartXAI 2.0 Explainable AI Cardiovascular Health Assessment Platform Client",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts,.tsx"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}

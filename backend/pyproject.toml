@@ -51,3 +51,15 @@ exclude_lines = [
     "raise NotImplementedError",
     "if __name__ == .__main__.:",
 ]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+explicit_package_bases = true
+mypy_path = "."
+plugins = ["pydantic.mypy"]
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
