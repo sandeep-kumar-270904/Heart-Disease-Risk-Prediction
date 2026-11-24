@@ -13,7 +13,8 @@ router = APIRouter(tags=["Health & Governance"])
 
 
 @router.get("/health/live", status_code=status.HTTP_200_OK)
-def liveness_probe():
+@router.get("/live", status_code=status.HTTP_200_OK, include_in_schema=False)
+def liveness_probe() -> dict[str, str]:
     """Liveness probe verifying that the FastAPI process is responsive."""
     return {
         "status": "healthy",
@@ -25,7 +26,8 @@ def liveness_probe():
 
 
 @router.get("/health/ready", status_code=status.HTTP_200_OK)
-def readiness_probe(db: Session = Depends(get_db)):
+@router.get("/ready", status_code=status.HTTP_200_OK, include_in_schema=False)
+def readiness_probe(db: Session = Depends(get_db)) -> dict[str, str]:
     """Readiness probe verifying operational database connectivity."""
     try:
         db.execute(text("SELECT 1"))

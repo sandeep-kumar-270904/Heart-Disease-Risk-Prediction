@@ -1,19 +1,25 @@
 """HeartXAI 2.0 - Application Entry Point & ASGI Server Factory.
 
 Production-grade FastAPI configuration with OpenAPI 3.1 documentation,
-CORS security middleware, structured logging, and health probes.
+CORS security middleware, correlation request_id middleware, structured JSON logging,
+RFC 7807 Problem Details exception handlers, and health probes.
 """
 
-from fastapi import FastAPI, Request, status
-from fastapi.exceptions import RequestValidationError
+from __future__ import annotations
+
+import time
+from collections.abc import Awaitable, Callable
+
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 
 from app.api.v1.api import api_router
 from app.core.config import settings
-from app.core.logging import setup_logging
+from app.core.errors import register_exception_handlers
+from app.core.logging import logger, request_id_ctx, setup_logging
+from app.models.base import generate_uuidv7
 
-# Initialize structured logging
+# Initialize structured JSON logging
 setup_logging()
 
 app = FastAPI(
@@ -25,6 +31,40 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
+
+@app.middleware("http")
+async def correlation_id_middleware(
+    request: Request,
+    call_next: Callable[[Request], Awaitable[Response]],
+) -> Response:
+    """Propagate or assign a unique correlation request_id and emit structured access logs."""
+    incoming_id = request.headers.get("X-Request-ID")
+    req_id = (
+        incoming_id.strip() if incoming_id and incoming_id.strip() else f"req_{generate_uuidv7()}"
+    )
+    request.state.request_id = req_id
+    token = request_id_ctx.set(req_id)
+    start_time = time.perf_counter()
+
+    try:
+        response = await call_next(request)
+    finally:
+        duration_ms = round((time.perf_counter() - start_time) * 1000.0, 2)
+        request_id_ctx.reset(token)
+
+    response.headers["X-Request-ID"] = req_id
+    logger.info(
+        "HTTP request completed",
+        extra={
+            "method": request.method,
+            "path": request.url.path,
+            "status_code": response.status_code,
+            "duration_ms": duration_ms,
+        },
+    )
+    return response
+
+
 # Cross-Origin Resource Sharing (CORS) Middleware
 app.add_middleware(
     CORSMiddleware,
@@ -34,44 +74,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Register global RFC 7807 Problem Details handlers
+register_exception_handlers(app)
 
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    """Format Pydantic validation errors adhering to Stripe structured error standard."""
-    errors = []
-    for err in exc.errors():
-        field = ".".join(str(loc) for loc in err["loc"] if loc != "body")
-        errors.append(
-            {
-                "param": field,
-                "code": err["type"],
-                "message": err["msg"],
-            }
-        )
-    return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content={
-            "error": {
-                "type": "validation_error",
-                "message": "Clinical input validation failed. Please check biomarker boundaries.",
-                "details": errors,
-            }
-        },
-    )
-
-
-# Mount API v1 router
+# Mount API v1 router and root-level health probes
 app.include_router(api_router, prefix=settings.API_V1_STR)
-# Mount health probes at root level as well
 app.include_router(api_router)
 
 
 @app.get("/", tags=["Root"])
-def root():
+def root() -> dict[str, str]:
     """Root platform entry point."""
     return {
         "service": settings.PROJECT_NAME,
         "version": settings.VERSION,
         "documentation": "/docs",
         "health": "/health/live",
+        "synthetic_data_only": str(settings.SYNTHETIC_DATA_ONLY).lower(),
     }

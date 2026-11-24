@@ -28,8 +28,8 @@ The engineering roadmap follows 20 modular, test-driven milestones:
 | **M02** | **Core Scaffolding, Canonical Types & Synthetic Data Generator** | **Completed** |
 | **M03** | **Design System & UI Component Library (WCAG 2.2 AA Target)** | **Completed** |
 | **M04** | **Database Engine, PostgreSQL Migrations & Seeding** | **Completed** |
-| M05 | Backend Core Services & API Framework (FastAPI, RFC 7807) | Next |
-| M06–M20 | Full-Stack Features, ML Serving, XAI, Security, and Staging UAT | Planned |
+| **M05** | **Backend Core Services & API Framework (FastAPI, RFC 7807)** | **Completed** |
+| M06 | Authentication, Sessions & RBAC (Argon2id, JWT, Redis) | Next |
 
 ---
 
