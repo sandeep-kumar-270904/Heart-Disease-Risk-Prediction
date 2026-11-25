@@ -1,137 +1,120 @@
-# HeartXAI 2.0 — Production-Grade Explainable AI Cardiovascular Platform
+# HeartXAI 2.0 — Explainable Cardiovascular Research & Synthetic Decision-Support Platform
 
-> **HeartXAI 2.0** is an enterprise-grade, clinical decision-support and cardiovascular health-awareness platform combining calibrated machine learning, exact TreeSHAP feature attributions, constrained counterfactual "what-if" simulations, and longitudinal risk tracking.
-
----
-
-## 1. Project Mission & Quality Philosophy
-
-HeartXAI 2.0 is built to professional engineering standards demonstrated by leading technology companies (Google, Apple, Meta, Amazon, Netflix, Microsoft, Stripe). It is explicitly designed to eliminate "black-box" clinical anxiety, prevent the conflation of diagnostic targets, and provide mathematically grounded, actionable lifestyle pathways.
-
-### Key Pillars
-- **Dual Clinical Targets:** Explicit separation of binary coronary artery disease (CAD) presence ($\ge 50\%$ stenosis) from prospective 10-year ASCVD risk (ACC/AHA pooled cohort equations).
-- **Exact Explainability (TreeSHAP):** Mathematically consistent local feature attributions ($\sum \phi_i = f(x) - \mathbb{E}[f(x)]$).
-- **Constrained Counterfactuals:** Plausible optimization locking immutable traits (Age, Sex, Anatomical fluoroscopy) while exploring modifiable lifestyle biomarkers (Blood Pressure, Cholesterol, Blood Sugar).
-- **Longitudinal Tracking:** Persistent PostgreSQL storage with trend analytics and checkup delta comparisons.
-- **Role-Based Access Control:** Dedicated workflows for Patients, Clinicians, and Compliance Auditors.
-- **Strict Data Governance (DEC-005):** Category C real patient health information is **strictly prohibited in MVP**. Operates strictly with `SYNTHETIC_DATA_ONLY=true`.
+> [!IMPORTANT]
+> **Investigational Prototype — Not Clinically Validated & Not Production Ready.**
+> HeartXAI 2.0 operates strictly on **Category B synthetic personas and fixtures** (`SYNTHETIC_DATA_ONLY=true`). Real patient health information (Category C) is prohibited across MVP registration, clinical intake, clinician sharing, and exports. Model outputs measure similarity to the historical retrospective UCI Cleveland dataset (`N=303`) and **never constitute a medical diagnosis, risk tier, treatment plan, or prospective 10-year ASCVD risk prediction**.
 
 ---
 
-## 2. Implementation Roadmap & Project Status
+## 1. Project Overview & Current Status
 
-The engineering roadmap follows 20 modular, test-driven milestones:
+HeartXAI 2.0 pairs a FastAPI backend, in-process calibrated XGBoost inference (`Task A` retrospective CAD binary classification), exact TreeSHAP log-odds feature attributions, constrained hypothetical "what-if" input exploration, and a React + TypeScript + Tailwind SPA.
 
-| Milestone | Scope | Status |
-| :---: | :--- | :---: |
-| **M01** | **Repository & Development Environment Foundation** | **Completed** |
-| **M02** | **Core Scaffolding, Canonical Types & Synthetic Data Generator** | **Completed** |
-| **M03** | **Design System & UI Component Library (WCAG 2.2 AA Target)** | **Completed** |
-| **M04** | **Database Engine, PostgreSQL Migrations & Seeding** | **Completed** |
-| **M05** | **Backend Core Services & API Framework (FastAPI, RFC 7807)** | **Completed** |
-| **M06** | **Authentication, Sessions & RBAC (Argon2id, JWT, Redis)** | **Completed** |
-| **M07** | **Frontend Core Shell, Routing & Auth State** | **Completed** |
-| **M08** | **Clinical Intake Wizard & Input Validation** | **Completed** |
-| **M09** | **ML Data Verification & Stratification (Category A Data)** | **Completed** |
-| **M10** | **Task A Model Training & Probability Calibration** | **Completed** |
-| **M11** | **In-Process ML Model Serving Pipeline** | **Completed** |
-| **M12** | **TreeSHAP Local Explanation Engine** | **Completed** |
-| **M13** | **Constrained Counterfactual Engine** | **Completed** |
-| **M14** | **Clinical Results & PDF Dossier Export (Task B Excluded)** | **Completed** |
-| **M15** | **Localized Healthcare Directory & Emergency Hotlines** | **Completed** |
-| **M16** | **Clinician Portal & Consent Sharing Grants** | **Completed** |
-| **M17** | **Administrative Console & Immutable Audit Trail** | **Completed** |
-| **M18** | **Security Hardening, Nginx CSP & Anti-IDOR Verification** | **Completed** |
-| **M19** | **Accessibility (WCAG 2.2 AA) & Empirical Performance Benchmarking** | **Completed** |
-| **M20** | **Deployment Packaging, Disaster Recovery & Synthetic E2E Verification** | **Completed** |
+- **Current Phase:** **Phase 13 — Repository Foundation & Development Environment Implementation** (following Milestone 01–20 scaffolding, Implementation Integrity Audit, Critical Remediation Round 01, Controlled Live PG 16 / Redis 7 Verification, and Frontend Healthcheck Remediation).
+- **Governance Baseline (`DEC-001`–`DEC-005` Option A):**
+  - `DEC-003`: Strictly **Task A** retrospective UCI Cleveland binary classification (`ten_year_population_risk_percent` is `null` in MVP).
+  - `DEC-004`: Configurable country adapter schema (`US`, `IN`, `GB`, `DEFAULT`) for units (`mg/dL` $\leftrightarrow$ `mmol/L`) and synthetic directory demos.
+  - `DEC-005`: Synthetic-only MVP enforced server-side (RFC 2606 domains `@example.com`/`@example.org`/`@example.net`, mandatory synthetic attestation flags, and disabled arbitrary clinician free-text notes).
+- **Clinical Review Gate (`DEC-002`):** Automated red-flag triage, `30%`/`70%` risk tiering, and country emergency `tel:` quick-dial remain disabled pending physician advisory review. No clinical validation or regulatory clearance is claimed.
 
 ---
 
-## 3. Quickstart & Local Development
+## 2. Technology Stack
 
-### Prerequisites
-- **Docker & Docker Compose:** Docker Engine 26+ / Compose v2.20+
-- **Python:** 3.11+
-- **Node.js:** 20+ (LTS)
+| Layer | Technologies Used |
+| :--- | :--- |
+| **Frontend** | React 18 (`^18.3.1`), TypeScript (`^5.4.5`), Vite (`^5.4.11`), Tailwind CSS (`^3.4.15`), Radix UI, Zustand, Zod, React Router v7, Lucide Icons |
+| **Backend** | Python 3.11, FastAPI (`0.111.0`), Pydantic v2 (`2.13.4`), SQLAlchemy 2.0 (`2.0.30`), Alembic (`1.17.2`), Argon2id (`argon2-cffi`), PyJWT, ReportLab |
+| **Data & Cache** | PostgreSQL 16 (`postgres:16-alpine`), Redis 7.2 (`redis:7.2-alpine`), SQLite fallback for local unit tests |
+| **ML & XAI** | Scikit-learn, XGBoost (`3.1.2`), SHAP (`TreeExplainer`), Pandas, NumPy, PyArrow, Joblib |
+| **Infrastructure & QA** | Docker, Docker Compose, Nginx (`1.26-alpine`), Pytest, Vitest, `vitest-axe`, Ruff, ESLint, Mypy (`--strict`), Bandit, GitHub Actions |
 
-### Step 1: Environment Configuration
-Copy the documented environment template:
-```bash
-cp .env.example .env
+---
+
+## 3. High-Level Architecture
+
+```text
+Browser SPA (React + Vite)
+   │  HTTPS / TLS (Nginx :443, :80 -> 301 HTTPS)
+   ▼
+FastAPI Monolith (/api/v1/* + /health/{live,ready})
+   ├── Auth & RBAC (Argon2id + 15m Memory JWT + 7d HttpOnly Refresh Cookie)
+   ├── Redis 7.2 TokenStore (Fail-Closed Family Rotation, Replay Wipe & Blacklist)
+   ├── In-Process Task A ML Engine (XGBoost + OOF Platt + TreeSHAP + Hypothetical CF)
+   ├── 72-Hour Consent Service (Strict UTC Expiry + Revocation Guard)
+   ├── ReportLab 2-Page PDF Dossier Export (SHA-256 Content Seal)
+   └── PostgreSQL 16 (UUIDv7 Keys, Numeric FBS + UCI fbs Flag, Append-Only Audit Logs)
 ```
-Ensure `SYNTHETIC_DATA_ONLY=true` is set.
 
-### Step 2: Start Containerized Infrastructure
-Start local PostgreSQL 16 and Redis 7.2 containers via Docker Compose:
+---
+
+## 4. Repository Structure
+
+A full directory breakdown is documented in [`docs/REPOSITORY_STRUCTURE.md`](./docs/REPOSITORY_STRUCTURE.md). Top-level layout:
+
+- `frontend/` — React SPA source, Radix UI primitives, Tailwind tokens, Vitest + `vitest-axe` tests, Vite build config
+- `backend/` — FastAPI routes, Pydantic schemas, SQLAlchemy 2.0 models, Alembic migrations (`001`–`003`), services, in-process ML runtime, Pytest suite
+- `ml/` — Category A UCI Cleveland raw data, leakage-free preparation, Task A training/calibration, evaluation scripts, model registry, ML tests
+- `shared/` — Canonical SSOT JSON definitions (`data-dictionary.json`, `country-profiles.json`)
+- `scripts/` — Synthetic fixture generator, DB seeder, empirical performance benchmark, AES-256-GCM AEAD backup utility
+- `infra/` — Multi-stage Dockerfiles, `infra/docker-compose.yml`, Nginx TLS reverse proxy config, encrypted backup/restore bash scripts, K6 script
+- `tests/` — Playwright synthetic patient E2E specification
+- `docs/` — Phase 13 operational setup/testing/contributing guides plus archived Phase 1–12 design & governance specifications
+
+---
+
+## 5. Quickstart & Standard Commands
+
+See [`docs/DEVELOPMENT_SETUP.md`](./docs/DEVELOPMENT_SETUP.md) for complete setup instructions (both containerized Postgres/Redis and local non-Docker Python development) and [`docs/ENVIRONMENT_CONFIGURATION.md`](./docs/ENVIRONMENT_CONFIGURATION.md) for variable details.
+
+### Frontend Commands (`cd frontend`)
 ```bash
-docker compose up -d
-```
-Verify container health:
-```bash
-docker compose ps
+npm ci                 # Install dependencies from package-lock.json
+npm run dev            # Start Vite dev server
+npm run typecheck      # tsc --noEmit
+npm run lint           # eslint --max-warnings 0 (includes jsx-a11y)
+npm test               # vitest run (unit + vitest-axe a11y checks)
+npm run build          # Production tsc --noEmit && vite build
 ```
 
-### Step 3: Backend Setup & Native Execution
-Create and activate a Python virtual environment:
+### Backend & ML Commands
 ```bash
 cd backend
 python -m venv .venv
-# On Windows:
-.venv\Scripts\activate
-# On Linux/macOS:
-source .venv/bin/activate
+# Windows PowerShell: .venv\Scripts\Activate.ps1
+# Linux/macOS:        source .venv/bin/activate
+pip install --upgrade pip && pip install -r requirements-dev.txt
 
-pip install --upgrade pip
-pip install -r requirements.txt
-```
-
-Run the backend API development server:
-```bash
+alembic upgrade head
 uvicorn app.main:app --reload --port 8000
 ```
-API Documentation is available at:
-- Swagger UI: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
-- Readiness Probe: `http://localhost:8000/health/ready`
 
-### Step 4: Testing & Code Hygiene
-Run unit and integration test suite:
+From repository root (`heartxai-2.0/`):
 ```bash
-cd backend
-pytest
-```
-Run Ruff linting and formatting verification:
-```bash
-cd backend
-ruff check .
-ruff format --check .
+ruff check backend/ ml/ scripts/
+ruff format --check backend/ ml/ scripts/
+cd backend && mypy --strict app/core app/schemas app/ml app/services app/api/v1/routes app/main.py
+cd .. && pytest backend/tests/ ml/tests/ -v
+bandit -r backend/app -ll -ii
 ```
 
 ---
 
-## 4. Architecture & Governance Documentation
+## 6. Documentation Index
 
-All 12 foundational engineering and governance audit phases are fully documented in [`docs/`](./docs/):
+### Phase 13 Foundation Guides
+- [`docs/DEVELOPMENT_SETUP.md`](./docs/DEVELOPMENT_SETUP.md) — Step-by-step prerequisites, installation, migrations, local vs Docker runs, and troubleshooting
+- [`docs/ENVIRONMENT_CONFIGURATION.md`](./docs/ENVIRONMENT_CONFIGURATION.md) — Environment variable reference, secret hygiene, and fail-closed validation
+- [`docs/REPOSITORY_STRUCTURE.md`](./docs/REPOSITORY_STRUCTURE.md) — Directory-by-directory responsibilities across frontend, backend, ML, and infra
+- [`docs/TESTING_GUIDE.md`](./docs/TESTING_GUIDE.md) — Unit, ML reproducibility, accessibility, static security, and live integration test procedures
+- [`docs/CONTRIBUTING.md`](./docs/CONTRIBUTING.md) — Branching, Conventional Commits, quality gates, and governance/PHI compliance rules
 
-- **Master Pre-Implementation Blueprints:** [`docs/phase-12-final/`](./docs/phase-12-final/)
-- **Approved Project Decision Register:** [`PROJECT_DECISION_REGISTER.md`](./docs/phase-12-final/PROJECT_DECISION_REGISTER.md)
-- **Master Implementation Roadmap:** [`MASTER_IMPLEMENTATION_ROADMAP.md`](./docs/phase-12-final/MASTER_IMPLEMENTATION_ROADMAP.md)
-- **Comprehensive Documentation Inventory:** [`DOCUMENTATION_INVENTORY.md`](./docs/phase-12-final/DOCUMENTATION_INVENTORY.md)
-- **Antigravity Execution Rules:** [`ANTIGRAVITY_EXECUTION_RULES.md`](./docs/phase-12-final/ANTIGRAVITY_EXECUTION_RULES.md)
+### Verification & Audit Reports (Root)
+- [`IMPLEMENTATION_INTEGRITY_AND_VALIDATION_AUDIT.md`](./IMPLEMENTATION_INTEGRITY_AND_VALIDATION_AUDIT.md)
+- [`CRITICAL_REMEDIATION_ROUND_01_REPORT.md`](./CRITICAL_REMEDIATION_ROUND_01_REPORT.md)
+- [`CONTROLLED_LIVE_INTEGRATION_VERIFICATION_REPORT.md`](./CONTROLLED_LIVE_INTEGRATION_VERIFICATION_REPORT.md)
+- [`FRONTEND_HEALTHCHECK_REMEDIATION_REPORT.md`](./FRONTEND_HEALTHCHECK_REMEDIATION_REPORT.md)
+- [`POST_FIX_LIVE_VERIFICATION_REPORT.md`](./POST_FIX_LIVE_VERIFICATION_REPORT.md)
 
----
-
-## 5. Technology Stack
-
-- **Frontend:** React 18/19, TypeScript, Vite, Tailwind CSS, Lucide Icons, Recharts.
-- **Backend:** Python 3.11+, FastAPI, Pydantic v2, SQLAlchemy 2.0, Alembic.
-- **Database & Cache:** PostgreSQL 16 (relational store), Redis 7.2 (token blacklisting & rate limiting).
-- **Machine Learning & XAI:** Scikit-learn, XGBoost, TreeSHAP (TreeExplainer).
-- **Code Hygiene & CI/CD:** Ruff, pre-commit, GitHub Actions, Docker Compose.
-
----
-
-## 6. Regulatory & Non-Diagnostic Disclaimer
-
-> [!IMPORTANT]
-> **HeartXAI 2.0 is an investigational clinical decision-support and cardiovascular health-literacy platform.** It does not provide medical diagnosis, prognosis, or prescriptive treatment plans. All algorithmic inferences and counterfactual projections must be reviewed by a licensed healthcare professional.
+### Phase 1–12 Historical Specifications
+- [`docs/phase-12-final/`](./docs/phase-12-final/) — Governance decisions (`PROJECT_DECISION_REGISTER.md`), roadmap (`MASTER_IMPLEMENTATION_ROADMAP.md`), and verification reports.

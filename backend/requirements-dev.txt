@@ -1,0 +1,12 @@
+# HeartXAI 2.0 Development, ML Research, Testing & CI Tooling Dependencies
+# Installs production runtime packages plus local QA/ML/SAST tools.
+-r requirements.txt
+
+# ML Research & Audit Utilities
+pandas>=2.0.0
+
+# Test Inspection, Linting, Type Checking & SAST
+pypdf>=4.0.0
+ruff>=0.15.0
+mypy>=1.10.0
+bandit[toml]>=1.7.9

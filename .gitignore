@@ -56,7 +56,10 @@ coverage/
 *.sqlite
 *.sqlite3
 *.sql.gz
+*.sql.gz.gcm
+*.gcm
 *.dump
+backups/
 data/postgres/
 data/redis/
 
